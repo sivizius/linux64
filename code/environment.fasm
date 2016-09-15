@@ -1,0 +1,147 @@
+environment:
+  ;rsp+
+  ;0x00
+  ;0x08 count
+  ;0x10 base  -> file
+  ;0x18       -> arg0
+  ;0x20       -> arg1
+  ;0x28       ...
+  ;0x30 null
+  ;0x38       -> env0
+  ;0x40       -> env1
+  ;0x48       ...
+  ;0x50 null
+  .init:
+    ;( if already initialized -> just refresh environment-variables )
+      mov                               rax,                                    qword [ .base ]
+      flags                             rax
+      jnz                               @f
+    ;( else )
+    ;{
+      mov                               rax,                                    qword [ rsp + 8 ]
+      mov                               qword [ .count ],                       rax
+      lea                               rax,                                    [ rsp + 16 ]
+      mov                               qword [ .next ],                        rax
+      mov                               qword [ .base ],                        rax
+    ;}
+    @@:
+    ;( get myself )
+      call                              .get
+      mov                               rsi,                                    r15
+      mov                               rdx,                                    rcx
+      call                              buffers.new
+      buffers_saveBuffer                .myself
+      onDebug
+      {
+        echo_put                        .msgMyself
+        buffers_echo                    qword [ .myself ]
+        echo_n
+      }
+    ;( skip parameters )
+      mov                               r15,                                    qword [ .base ]
+      mov                               rax,                                    qword [ .count ]
+      lea                               rax,                                    [ 8 * rax + r15 + 8 ]
+      mov                               qword [ .next ],                        rax
+    ;( parse environment-variables )
+      .init.loop:
+;        echo_put                        .msgEnvironment
+        ;( if get() = NULL -> next )
+          call                          .get
+          jz                            .init.next
+        ;( else )
+        ;{
+;          push                          rcx
+;            mov                         sys2arg,                                rcx
+;            mov                         sys1arg,                                r15
+;            mov                         sys0arg,                                STDOUT
+;            sys_call                    sys_write
+;            echo_n
+;          pop                           rcx
+          ;( select var )
+            mov                         rax,                                    qword [ r15 ]
+          ;{
+            ;( 'USER' )
+              .init.user:
+              and                       rax,                                    qword [ .mask1 ]
+              cmp                       rax,                                    qword [ .user ]
+              jne                       .init.home
+            ;{
+              add                       r15,                                    5
+              sub                       rcx,                                    5
+              mov                       rsi,                                    r15
+              mov                       rdx,                                    rcx
+              call                      buffers.new
+              buffers_saveBuffer        .username
+              onDebug
+              {
+                echo_put                .msgUser
+                buffers_echo            qword [ .username ]
+                echo_n
+              }
+              jmp                       .init.loop
+            ;}
+            ;( 'HOME' )
+              .init.home:
+              cmp                       rax,                                    qword [ .home ]
+              jne                       .init.pwd
+            ;{
+              add                       r15,                                    5
+              sub                       rcx,                                    5
+              mov                       rsi,                                    r15
+              mov                       rdx,                                    rcx
+              call                      buffers.new
+              buffers_saveBuffer        .dirHome
+              onDebug
+              {
+                echo_put                .msgHome
+                buffers_echo            qword [ .dirHome ]
+                echo_n
+              }
+              jmp                       .init.loop
+            ;}
+            ;( 'PWD' )
+              .init.pwd:
+              and                       rax,                                    qword [ .mask0 ]
+              cmp                       rax,                                    'PWD=' ;qword [ .pwd ]
+              jne                       .init.loop
+            ;{
+              add                       r15,                                    4
+              sub                       rcx,                                    4
+              mov                       rsi,                                    r15
+              mov                       rdx,                                    rcx
+              call                      buffers.new
+              buffers_saveBuffer        .dirCurrent
+              onDebug
+              {
+                echo_put                .msgCurrent
+                buffers_echo            qword [ .dirCurrent ]
+                echo_n
+              }
+              jmp                       .init.loop
+            ;}
+          ;}
+        ;}
+      .init.next:
+    ;( reset *next )
+      mov                               rax,                                    qword [ .base ]
+      mov                               qword [ .next ],                        rax
+    ret
+  .get:
+    mov                                 rax,                                    qword [ .next ]
+    mov                                 r15,                                    qword [ rax ]                           ;= *argument
+    add                                 rax,                                    8
+    mov                                 qword [ .next ],                        rax
+    ;( if *argument = NULL -> jump )
+      or                                r15,                                    r15
+      jz                                .return
+    mov                                 rdi,                                    r15                                     ;*string
+    mov                                 rcx,                                    ( 0 - 1 )                               ;max size
+    null                                rax                                                                             ;look for »\0«
+    repnz                               scasb                                                                           ;scan....
+    not                                 rcx                                                                             ;size =  - (( 0 - 1 ) - size ) - 1
+    dec                                 rcx
+    ret
+  .return:
+    null                                rcx
+    ret
+

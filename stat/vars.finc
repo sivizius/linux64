@@ -1,0 +1,110 @@
+macro var definition, [ etc ]
+{
+  ;display 'var.'
+  local lenght
+  local done
+  lenght                                =                                       0
+    done equ not
+    match =byte symbol==value, definition
+    \{
+      ;display 'b'
+      label                             symbol                                  byte
+        db                              value
+        lenght                          =                                       1
+        symbol.size                     =                                       1
+        done                            equ                                     ok
+    \}
+    match =word symbol==value, definition
+    \{
+      ;display 'w'
+      label                             symbol                                  word
+        dw                              value
+        lenght                          =                                       2
+        symbol.size                     =                                       2
+        done                            equ                                     ok
+    \}
+    match =dword symbol==value, definition
+    \{
+      ;display 'd'
+      label                             symbol                                  dword
+        dd                              value
+        lenght                          =                                       4
+        symbol.size                     =                                       4
+        done                            equ                                     ok
+    \}
+    match =qword symbol==value, definition
+    \{
+      ;display 'q'
+      label                             symbol                                  qword
+        dq                              value
+        lenght                          =                                       8
+        symbol.size                     =                                       8
+        done                            equ                                     ok
+    \}
+    match =string symbol==value, definition
+    \{
+      ;display 's'
+      virtual at 0
+        db                              value
+        match any, etc
+        \\{
+          db                            etc
+        \\}
+        lenght                          =                                       $
+      end virtual
+      dw                                lenght
+      label                             symbol
+        db                              value
+        match any, etc
+        \\{
+          db                            etc
+        \\}
+        done                            equ                                     done
+    \}
+    match =not,done
+    \{
+      match =byte symbol, definition
+      \\{
+        ;display 'B'
+        label symbol at _alloc_
+          _alloc_                       =                                       ( _alloc_ + 1 )
+          lenght                        =                                       1
+          symbol.size                   =                                       1
+      \\}
+      match =word symbol, definition
+      \\{
+        ;display 'W'
+        label symbol at _alloc_
+          _alloc_                       =                                       ( _alloc_ + 2 )
+          lenght                        =                                       2
+          symbol.size                   =                                       2
+      \\}
+      match =dword symbol, definition
+      \\{
+        ;display 'D'
+        label symbol at _alloc_
+          _alloc_                       =                                       ( _alloc_ + 4 )
+          lenght                        =                                       4
+          symbol.size                   =                                       4
+      \\}
+      match =qword symbol, definition
+      \\{
+        ;display 'Q'
+        label symbol at _alloc_
+          _alloc_                       =                                       ( _alloc_ + 8 )
+          lenght                        =                                       8
+          symbol.size                   =                                       8
+      \\}
+      match =dqword symbol, definition
+      \\{
+        ;display 'X'
+        label symbol at _alloc_
+          _alloc_                       =                                       ( _alloc_ + 16 )
+          lenght                        =                                       16
+          symbol.size                   =                                       16
+      \\}
+    \}
+    ;display ' lenght: 0x'
+    ;displayHex ( lenght )
+    ;display 10
+}

@@ -1,0 +1,9 @@
+machine.file                            aq                            1                                                 ;current input-file
+machine.pos                             aq                            1                                                 ;current offset in src
+machine.line                            aq                            1                                                 ;current line   in src
+machine.offs                            aq                            1                                                 ;current offset on line
+machine.char                            aq                            1                                                 ;current char   as internal type
+machine.utf8                            aq                            1                                                 ;current char   as printable utf8-string
+machine.size                            aq                            1                                                 ;size           of printable utf8-string
+
+

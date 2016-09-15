@@ -1,0 +1,9 @@
+environment.next                        aq                                      1
+environment.base                        aq                                      1
+environment.count                       aq                                      1
+environment.myself                      aq                                      1
+;environment.myself_size                 aw                                      1
+environment.dirHome                     aq                                      1
+environment.dirCurrent                  aq                                      1
+;environment.dirCurrent_size             aw                                      1
+environment.username                    aq                                      1

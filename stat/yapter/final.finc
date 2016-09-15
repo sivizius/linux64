@@ -1,0 +1,78 @@
+struc sbaFinal                          main
+{
+  .                                     =                                       _count_
+  .offs                                 =                                       ( 0 - 1 )
+  sbaFinal                              main
+}
+macro sbaFinal                          main
+{
+  ;( final yapter )
+  ;{
+  ;:  this is the final entry in the yapter-table
+  ;:  execution start at *(%main)
+  ;:  0x00  word                        <final>                                 <final>
+  ;:  0x02  cuid                        null                                    null
+  ;:  0x04  cuid                        null                                    null
+  ;:  0x06  cuid                        %main                                   null
+  ;:  0x0c  magic                       'ycontent'                              unused
+  ;}
+  local                                 type
+  if ( _head_ in <'<none>', '<final>'> )
+    display                             '[asm:sba] an error occured while processing yapter <final>: headless file!'
+    err
+  end if
+  yapter_tblYapter
+  _count_                               =                                       ( myCount )
+  dw                                    sbaYapter_tFinal
+  dw                                    null
+  dw                                    null
+  if ( main eq )
+    if ( myMain = 0 )
+      display                           '[asm:sba] an error occured while processing yapter <final>: no executable yapter was found!'
+      err
+    else
+      dw                                myMain
+      theMain                           equ                                     myMain
+    end if
+  else
+    if (( main > myCount ) or ( main < 1 ))
+      display                           '[asm:sba] an error occured while processing yapter <final>: main out of bounds!'
+      err
+    else
+      dw                                main
+      theMain                           equ                                     main
+    end if
+  end if
+  db                                    'ycontent'
+  display                               '[asm:sba] <final>        (2016-02-09) %'
+  displayHex2                           ( myCount )
+  display                               ' '
+  displayHex2                           sbaYapter_tFinal
+  display                               ' null null '
+  if ( main eq )
+    displayHex2                         myMain
+  else
+    displayHex2                         main
+  end if
+  display                               ' »ycontent«          =#= 0x'
+  displayHex                            myPointerOffset
+  display                               ' #0x'
+  displayHex2                           sizeHeader
+  display                               ' ( #0x'
+  displayHex2                           ( sizeHeader + sizeBody + ( myCount * 16 ))
+  display                               ' )', 10
+  postpone
+  \{
+    display 'stop base: *0x:'
+    displayHex myBase
+    display 10
+    herewego                            =                                       ( $ + sizeHeader )
+    yapter_tblPointer
+    display                             '[asm:sba] this file contains 0x'
+    displayHex2                         ( _count_ )
+    display                             ' yapters.', 10
+    display 'herewego: *0x'
+    displayHex ( herewego )
+    display 10
+  \}
+}

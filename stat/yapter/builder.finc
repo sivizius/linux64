@@ -1,0 +1,22 @@
+macro sbaBuilder                        filename,                               symbols
+{
+  local                                 name
+  local                                 length
+  if ( _head_ eq '<none>' )
+    display                             'headless file!'
+    err
+  end if
+  store word                            sbaChapter_tBuilder                     at vYapters:( oYapters + 0x00 )
+  store word                            symbols                                 at vYapters:( oYapters + 0x02 )         ;unknown, i should review my own code sometimes
+  store dword                           'make'                                  at vYapters:( oYapters + 0x04 )         ;magic
+  store qword                           name                                    at vYapters:( oYapters + 0x08 )         ;filename of builder
+  oYapters                              =                                       ( oYapters + 0x10 )
+  myCount                               =                                       ( myCount + 1 )
+  postpone
+  \{
+    dw                                  length
+    name:
+      db                                filename
+    length                              =                                       ( $ - name - 2 )
+  \}
+}

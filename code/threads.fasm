@@ -1,0 +1,25 @@
+threads:
+  .call:
+    null                                sys4arg
+    null                                sys3arg
+    null                                sys2arg
+    mov                                 sys0arg,                                CLONE_sChild + CLONE_fVM + CLONE_fFS + CLONE_fSigHand + CLONE_fThread
+    sys_call                            sys_clone
+    onError_put
+    onError_fail                        .failClone
+    flags                               sys0ret
+    jz                                  .call_it
+    clc
+    ret
+  .call_it:
+    call                                rbx
+    null                                sys0arg
+    sys_call                            sys_exit
+    hlt
+  .failClone:
+    onDebug
+    {
+      echo_put                          .msgFailClone
+    }
+    stc
+    ret

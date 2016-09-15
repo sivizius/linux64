@@ -1,0 +1,4 @@
+onDebug
+{
+  threads.msgFailClone                  str                                     '[threads] fail: could not call thread!', 10
+}

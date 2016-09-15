@@ -1,0 +1,642 @@
+;( file-structure )
+;{
+;: -0x0002                              .length                                 .size
+;:  0x0000                              .next                                   -> file                                 next file
+;:  0x0008                              .last                                   -> file                                 last file
+;:  0x0010                              .self                                   qword                                   handler of file
+;:  0x0018                              .name                                   -> string                               name of file
+;:  0x0020                              .buffer                                 -> page[?]                              buffer for file I/O
+;:  0x0028                              .position                               -> ?                                    offset in buffer
+;:  0x0030                              .offset                                 -> ?                                    offset in file
+;:  0x0038                              .return                                 -> ?                                    old offset in file
+;:  0x0040                              .base                                   -> ?                                    base
+;:  0x0048                              .stat                                   struc
+;:  {
+;:    0x0048                            .st_dev                                 qword                                   if of device containing file
+;:    0x0050                            .st_ino                                 qword                                   inode number
+;:    0x0058                            .st_nlink                               qword                                   number of hard-links
+;:    0x0060                            .st_mode                                dword                                   protection
+;:    0x0064                            .st_uid                                 dword                                   user-id of owner
+;:    0x0068                            .st_gid                                 dword                                   group-id of owner
+;:    0x006c                            .st_zero                                dword                                   NULL
+;:    0x006c                            .magic                                  dword                                   magic field
+;:    0x0070                            .st_rdev                                qword                                   device-id (special file)
+;:    0x0078                            .st_size                                qword                                   file-size
+;:    0x0080                            .st_blksize                             qword                                   block-size
+;:    0x0088                            .st_blocks                              qword                                   number of blocks
+;:    0x0090                            .st_atime                               qword                                   last access-time in seconds
+;:    0x0098                            .st_atime_nsec                          qword                                   last access-time in nanoseconds
+;:    0x00a0                            .st_mtime                               qword                                   last modification-time in seconds
+;:    0x00a8                            .st_mtime_nsec                          qword                                   last modification-time in nanoseconds
+;:    0x00b0                            .st_ctime                               qword                                   creation-time in seconds
+;:    0x00b8                            .st_ctime_nsec                          qword                                   creation-time in nanoseconds
+;:  }
+;:  0x00c0                              .yapters                                stat                                    valid if file is an sba-file
+;:  {
+;:    0x00c0                            .ytable                                 -> *ytable                              beginning/first column                    of yapter-table
+;:    0x00c8                            .ycolumn                                -> *ycolumn                             current column                            of yapter-table
+;:    0x00d0                            .yentry                                 -> *yentry                              current entry                             of yapter-table
+;:    0x00d8                            .ycontent                               -> *ycontent                            loaded content                            of yapters
+;:    0x00e0                            .ypages                                 qword                                   number or summed size of pages            of yapters
+;:    0x00e8                            .yip                                    -> *next_instruction                    instruction-pointer while execution       of yapters
+;:    0x00e8 (overlapping)              .ysymbols                               -> *interface.symbols                   some strings      =   symbols             of interface
+;:    0x00f0                            .ypointers                              -> *interface.pointers                  table of pointers ->  objects             of interface
+;:    0x00f8                            .ycount                                 word                                    number of entries in previous two tables  of interface
+;:    0x00fa                            .ycuid                                  cuid                                    current cuid                              of yapter-table
+;:    0x00fc                            .ysize                                  word                                    summed size                               of yapter-table
+;:    0x00fe                            .ystate                                 word(sbaYapter_m<state>)                current state                             of sba-file
+;:  }
+;}
+files:
+  .length                               =                                       ( 0x0000 )
+  .next                                 =                                       ( 0x0000 + 2 )
+  .last                                 =                                       ( 0x0008 + 2 )
+  .self                                 =                                       ( 0x0010 + 2 )
+  .name                                 =                                       ( 0x0018 + 2 )
+  .buffer                               =                                       ( 0x0020 + 2 )
+  .position                             =                                       ( 0x0028 + 2 )
+  .offset                               =                                       ( 0x0030 + 2 )
+  .return                               =                                       ( 0x0038 + 2 )
+  .base                                 =                                       ( 0x0040 + 2 )
+  ;( fstat )
+  ;{
+    .stat                               =                                       ( 0x0048 + 2 )
+    .st_dev                             =                                       ( 0x0048 + 2 )
+    .st_ino                             =                                       ( 0x0050 + 2 )
+    .st_nlink                           =                                       ( 0x0058 + 2 )
+    .st_mode                            =                                       ( 0x0060 + 2 )
+    .st_uid                             =                                       ( 0x0064 + 2 )
+    .st_gid                             =                                       ( 0x0068 + 2 )
+    .st_zero                            =                                       ( 0x006c + 2 )
+    .magic                              =                                       ( 0x006c + 2 )
+    .st_rdev                            =                                       ( 0x0070 + 2 )
+    .st_size                            =                                       ( 0x0078 + 2 )
+    .st_blksize                         =                                       ( 0x0080 + 2 )
+    .st_blocks                          =                                       ( 0x0088 + 2 )
+    .st_atime                           =                                       ( 0x0090 + 2 )
+    .st_atime_nsec                      =                                       ( 0x0098 + 2 )
+    .st_mtime                           =                                       ( 0x00a0 + 2 )
+    .st_mtime_nsec                      =                                       ( 0x00a8 + 2 )
+    .st_ctime                           =                                       ( 0x00b0 + 2 )
+    .st_ctime_nsec                      =                                       ( 0x00b8 + 2 )
+  ;}
+  ;( yapters )
+  ;{
+    .yapters                            =                                       ( 0x00c0 + 2 )
+    .ytable                             =                                       ( 0x00c0 + 2 )
+    .ycolumn                            =                                       ( 0x00c8 + 2 )
+    .yentry                             =                                       ( 0x00d0 + 2 )
+    .ycontent                           =                                       ( 0x00d8 + 2 )
+    .ypages                             =                                       ( 0x00e0 + 2 )
+    .yip                                =                                       ( 0x00e8 + 2 )
+    .ysymbols                           =                                       ( 0x00e8 + 2 )
+    .ypointers                          =                                       ( 0x00f0 + 2 )
+    .ycount                             =                                       ( 0x00f8 + 2 )
+    .ycuid                              =                                       ( 0x00fa + 2 )
+    .ysize                              =                                       ( 0x00fc + 2 )
+    .ystate                             =                                       ( 0x00fe + 2 )
+  ;}
+  .size                                 =                                       ( 0x0100 )
+  .close.null:
+    mov                                 qword [           .delBase    ],        sys0arg
+    jmp                                 .close.really
+  .close.setLast:
+    mov                                 qword [ rdx     + .last       ],        rax
+    jmp                                 .close.retLast
+  .close.setNext:
+    mov                                 qword [ rax     + .next       ],        rdx
+    jmp                                 .close.retNext
+  .close:
+    ;( I/O )
+    ;{
+    ;:  rdx                             ignored                                 unchanged
+    ;:  sys0arg/rdi                     *file                                   unknown
+    ;:  sys0ret/rax                     ignored                                 NULL/errno
+    ;}
+    ;( update chain )
+      push                              rdx
+      mov                               rax,                                    qword [ sys0arg + .next ]
+      mov                               rdx,                                    qword [ sys0arg + .last ]
+      flags                             rax
+      jnz                               .close.setNext
+      .close.retNext:
+      flags                             rdx
+      jnz                               .close.setLast
+      .close.retLast:
+    ;( add to del-chain )
+      mov                               rax,                                    qword [ .delBase ]
+      jz                                .close.null
+      mov                               qword [ rax     + .next       ],        sys0arg
+      mov                               qword [ sys0arg + .last       ],        rax
+      .close.really:
+    ;( close file )
+      mov                               sys0arg,                                qword [ sys0arg + .self ]
+      sys_call                          sys_close
+      pop                               rdx
+      onError_put
+      onError_fail                      .failInternal
+    ret
+  .setNext:
+    ;( while another<-next )
+      mov                               rdi,                                    qword [ rdx + .last ]
+      flags                             rdi
+    ;{
+      cmovnz                            rdx,                                    rdi
+      jnz                               .setNext
+    ;}
+    ;current->(another)*->next
+    mov                                 qword [ __file__ + .next ],             rdx
+    ;current<-(another)*<-next
+    mov                                 qword [ rdx      + .last ],              __file__
+    ret
+  .setLast:
+    ;( while last->another )
+      mov                               rdi,                                    qword [ rsi + .next ]
+      flags                             rdi
+    ;{
+      cmovnz                            rsi,                                    rdi
+      jnz                               .setLast
+    ;}
+    ;last<-(another)*<-current
+    mov                                 qword [ __file__ + .last ],             rsi
+    ;last->(another)*->current
+    mov                                 qword [ rsi      + .next ],              __file__
+    ret
+  .open.fine:
+    mov                                 rdx,                                    qword [ __file__ + .last ]
+    mov                                 qword [ .delBase ],                     rdx
+    jmp                                 .open.return
+  .open.clr_stats:
+    mov                                 qword [ __file__ + .stat + 0x00 ],      rax
+    mov                                 qword [ __file__ + .stat + 0x08 ],      rax
+    mov                                 qword [ __file__ + .stat + 0x10 ],      rax
+    mov                                 qword [ __file__ + .stat + 0x18 ],      rax
+    mov                                 qword [ __file__ + .stat + 0x20 ],      rax
+    mov                                 qword [ __file__ + .stat + 0x28 ],      rax
+    mov                                 qword [ __file__ + .stat + 0x30 ],      rax
+    mov                                 qword [ __file__ + .stat + 0x38 ],      rax
+    mov                                 qword [ __file__ + .stat + 0x40 ],      rax
+    mov                                 qword [ __file__ + .stat + 0x48 ],      rax
+    mov                                 qword [ __file__ + .stat + 0x50 ],      rax
+    mov                                 qword [ __file__ + .stat + 0x58 ],      rax
+    mov                                 qword [ __file__ + .stat + 0x60 ],      rax
+    mov                                 qword [ __file__ + .stat + 0x68 ],      rax
+    mov                                 qword [ __file__ + .stat + 0x70 ],      rax
+    jmp                                 .open.cleared
+  .open:
+    ;( I/O )
+    ;{
+    ;:  rax                             ignored                                 unchanged
+    ;:  rbx                             ignored                                 unchanged
+    ;:  rcx                             ignored                                 unchanged
+    ;:  r9    sys5arg                   *next-file                              *next-file (in chain, could be different!)
+    ;:  r8    sys4arg                   *last-file                              *last-file (in chain, could be different!)
+    ;:  r10   sys3arg                   rights                                  unknown
+    ;:  rdx   sys2arg                   flags                                   unknown
+    ;:  rsi   sys1arg                   pathfd                                  unknown
+    ;:  rdi   sys0arg                   file-name                               file-name\0
+    ;:        __file__                  unknown                                 *file
+    ;}
+    ;( push )
+      push                              rax
+      push                              rbx
+      push                              rcx
+      push                              sys0arg
+      push                              sys5arg
+      push                              sys4arg
+      null                              rax
+      flags                             sys0arg
+      cmovz                             sys0arg,                                sys1arg
+      jz                                .open.pseudo
+      push                              sys1arg
+      push                              sys2arg
+      push                              sys3arg
+    ;( put \0 at the end of file-name )
+      call                              buffers.putB
+      jc                                .failFileName
+    ;( open )
+      pop                               sys3arg
+      pop                               sys2arg
+      mov                               sys1arg,                                rbx
+      pop                               sys0arg
+      sys_call                          sys_openat
+    onError_put
+    onError_fail                        .failInternalPOP6
+    .open.pseudo:
+    ;( if removed-list not empty -> open.empty )
+      null                              rdx
+      mov                               __file__,                               qword [ .delBase ]
+      flags                             __file__
+      jnz                               .open.fine
+    ;( else )
+    ;{
+      ;( if buffers.new( length ) failed -> .failSave )
+        mov                             rcx,                                    .size
+        null                            rdi
+        call                            buffers.new
+        jc                              .failInternalPOP6
+    ;}
+    ;( save )
+      mov                               __file__,                               rdi
+      .open.return:
+      mov                               qword [ __file__ + .self ],             rax
+    ;( stat )
+      flags                             rax
+      jz                                .open.clr_stats
+      lea                               sys1arg,                                [ __file__ + .stat ]
+      mov                               sys0arg,                                rax
+      sys_call                          sys_fstat
+      .open.cleared:
+    ;( adjust file-structure )
+      pop                               rsi
+      flags                             rsi
+      jz                                .retLast
+        call                            .setLast
+      .retLast:
+      pop                               rdx
+      flags                             rdx
+      jz                                .retNext
+        call                            .setNext
+      .retNext:
+      pop                               rdi
+      mov                               qword [ __file__ + .name ],             rdi
+    ;( pop )
+      pop                               rcx
+      pop                               rbx
+      pop                               rax
+      ;mov                               rdi,                                    qword [ __file__ + .name ]
+      ;mov                               rsi,                                    qword [ __file__ + .last ]
+      ;mov                               rdx,                                    qword [ __file__ + .next ]
+      clc
+    ret
+  .debug:
+    ;( I/O )
+    ;{
+    ;:  rax                             ignored                                 NULL/error
+    ;:  rbx                             ignored                                 *file-name + 2
+    ;:  rcx                             ignored                                 file-name_size
+    ;:  rdx                             ignored                                 unchanged
+    ;:  rsi                             ignored                                 unchanged
+    ;:  rdi                             ignored                                 *file-name
+    ;:  r15                             *file                                   *file
+    ;:  CF                              ignored                                 set if failed
+    ;:  ZF                              ignored                                 set if bigfoo, clr if normal
+    ;}
+    ;{
+    ;:  r15                             *file                                   *file
+    ;}
+    onDebug
+    {
+      push                              rax
+      push                              sys0arg
+      push                              sys1arg
+      push                              sys2arg
+      push                              sys3arg
+      push                              sys4arg
+      push                              sys5arg
+      push                              r11
+      echo_put                          .msgFile
+      echo_hexRegister                  __file__
+      echo_n
+      echo_put                          .msgSelf
+      echo_hexValue                     __file__ + .self,                       8
+      echo_put                          .msgName
+      push                              __file__
+        mov                             rdi,                                    qword [ __file__ + .name ]
+        call                            buffers.echo0
+      pop                               __file__
+      jc                                .failFileName
+      echo_put                          .msgFileName
+      echo_hexValue                     __file__ + .name,                       8
+      echo_put                          .msgBuffer
+      echo_hexValue                     __file__ + .buffer,                     8
+      echo_put                          .msgPosition
+      echo_hexValue                     __file__ + .position,                   8
+      echo_put                          .msgOffset
+      echo_hexValue                     __file__ + .offset,                     8
+      echo_put                          .msgNext
+      echo_hexValue                     __file__ + .next,                       8
+      echo_put                          .msgLast
+      echo_hexValue                     __file__ + .last,                       8
+      echo_put                          .msgYtable
+      echo_hexValue                     __file__ + .ytable,                     8
+      echo_put                          .msgYcontent
+      echo_hexValue                     __file__ + .ycontent,                   8
+      echo_put                          .msgYfce_symbols
+      echo_hexValue                     __file__ + .ysymbols,                   8
+      echo_put                          .msgYfce_pointers
+      echo_hexValue                     __file__ + .ypointers,                  8
+      echo_put                          .msgYfce_count
+      echo_hexValue                     __file__ + .ycount,                     2
+      echo_put                          .msgYfce_cuid
+      echo_hexValue                     __file__ + .ycuid,                      2
+      echo_put                          .msgYfce_size
+      echo_hexValue                     __file__ + .ysize,                      2
+      echo_put                          .msgYfce_state
+      echo_hexValue                     __file__ + .ystate,                     2
+      echo_put                          .msgSize
+      echo_hexValue                     __file__ + .st_size,                    8
+      echo_put                          .msgATime
+      echo_hexValue                     __file__ + .st_atime,                   8
+      echo_put                          .msgNATime
+      echo_hexValue                     __file__ + .st_atime_nsec,              8
+      echo_put                          .msgMTime
+      echo_hexValue                     __file__ + .st_mtime,                   8
+      echo_put                          .msgNMTime
+      echo_hexValue                     __file__ + .st_mtime_nsec,              8
+      echo_put                          .msgCTime
+      echo_hexValue                     __file__ + .st_ctime,                   8
+      echo_put                          .msgNCTime
+      echo_hexValue                     __file__ + .st_ctime_nsec,              8
+      echo_n
+      pop                               r11
+      pop                               sys5arg
+      pop                               sys4arg
+      pop                               sys3arg
+      pop                               sys2arg
+      pop                               sys1arg
+      pop                               sys0arg
+      pop                               rax
+    }
+    ret
+  .getB:
+  .getByte:
+    mov                                 sys2arg,                                1
+    call                                .get
+    mov                                 al,                                     byte  [ .getBuffer ]
+    ret
+  .getC:
+  .getChar:
+    mov                                 sys2arg,                                1
+    call                                .get
+    movzx                               rax,                                    byte  [ .getBuffer ]
+    ret
+  .getW:
+  .getWord:
+    mov                                 sys2arg,                                2
+    call                                .get
+    mov                                 ax,                                     word  [ .getBuffer ]
+    ret
+  .getL:
+  .getLength:
+    mov                                 sys2arg,                                2
+    call                                .get
+    movzx                               rcx,                                    word  [ .getBuffer ]
+    ret
+  .getD:
+  .getDWord:
+    mov                                 sys2arg,                                4
+    call                                .get
+    mov                                 eax,                                    dword [ .getBuffer ]
+    ret
+  .getQ:
+  .getQWord:
+    mov                                 sys2arg,                                8
+    call                                .get
+    mov                                 rax,                                    qword [ .getBuffer ]
+    ret
+  .get:
+    lea                                 sys1arg,                                [ .getBuffer ]
+  .getTo:
+    add                                 qword [ __file__ + .offset ],           sys2arg
+    mov                                 sys0arg,                                qword [ __file__ + .self ]
+    push                                sys2arg
+    sys_call                            sys_read
+    onError_put
+    onError_fail                        .failInternalPOP1
+    pop                                 sys2arg
+    sub                                 sys2arg,                                sys0ret
+    jnz                                 .getTo.final
+    clc
+    ret
+  .getTo.final:
+    null                                rax
+    mov                                 rdi,                                    rsi
+    mov                                 rcx,                                    sys2arg
+    rep                                 stosb
+    stc
+    ret
+  .getO:
+  .getObject:
+    ;( I/O )
+    ;{
+    ;:  rdi                             ignored                                 *string
+    ;:  rcx                             ignored                                 size
+    ;:  r15                             *file                                   *file
+    ;:  CF                              ignored                                 set if failed
+    ;:  ZF                              ignored                                 set if bigfoo, clr if normal
+    ;}
+    mov                                 sys2arg,                                2
+    call                                .get
+    movzx                               rcx,                                    word  [ .getBuffer ]
+    ;( if buffer.size is invalid -> getFailReturn )
+      flags                             rcx
+      jz                                .getFailReturn
+      cmp                               rcx,                                    buffers.startInvalid
+      jae                               .getFailReturn
+  .getS:
+  .getString:
+    ;( I/O )
+    ;{
+    ;:  rax                             ignored                                 unchanged
+    ;:  rbx                             ignored                                 unchanged
+    ;:  rcx                             size                                    size
+    ;:  rdx                             ignored                                 unchanged
+    ;:  rdi                             ignored                                 *string
+    ;:  rsi                             ignored                                 unchanged
+    ;:  r15                             *file                                   *file
+    ;:  CF                              ignored                                 set if failed
+    ;:  ZF                              ignored                                 set if bigfoo, clr if normal
+    ;}
+    push                                rsi
+    push                                rdx
+    push                                rbx
+      push                              r15
+        null                            rdx
+        null                            rsi
+        call                            buffers.new
+      pop                               r15
+      jc                                .failInternalPOP3
+      push                              rdi
+      push                              rcx
+        add                             qword [ __file__ + .offset ],           rcx
+        mov                             sys2arg,                                rcx
+        mov                             sys1arg,                                rbx
+        mov                             sys0arg,                                qword [ __file__ + .self ]
+        sys_call                        sys_read
+      pop                               rcx
+      pop                               rdi
+    pop                                 rbx
+    pop                                 rdx
+    pop                                 rsi
+    clc
+    ret
+  .getUTF8:
+    mov                                 sys2arg,                                1
+    call                                .get
+    movzx                               rax,                                    byte  [ .getBuffer ]
+    ;( if ascii )
+      cmp                               rax,                                    0x80
+      jae                               @f
+    ;{
+      mov                               sys1ret,                                1
+      mov                               qword [ .getBuffer ],                   sys0ret
+      clc
+      lea                               rbx,                                    [ .getBuffer ]
+      ret
+    ;}
+    ;( else if invalid -> failChar )
+      @@:
+      mov                               rbx,                                    rax
+      lea                               sys1arg,                                [ .getBuffer + 1 ]
+      cmp                               rax,                                    0xc0
+      jb                                .failChar
+    ;( else if 2-bytes )
+      @@:
+      cmp                               rax,                                    0xe0
+      jae                               @f
+    ;{
+      mov                               sys2arg,                                1
+      call                              .getTo
+      movzx                             sys0ret,                                byte [ .getBuffer + 1 ]
+      and                               rbx,                                    0x1f
+      and                               sys0ret,                                0x3f
+      shl                               rbx,                                    6
+      mov                               sys1ret,                                2
+      or                                sys0ret,                                rbx
+      clc
+      lea                               rbx,                                    [ .getBuffer ]
+      ret
+    ;}
+    ;( else if 3-bytes )
+      @@:
+      cmp                               rax,                                    0xf0
+      jae                               @f
+    ;{
+      mov                               sys2arg,                                2
+      call                              .getTo
+      movzx                             sys0ret,                                byte [ .getBuffer + 2 ]
+      movzx                             sys0arg,                                byte [ .getBuffer + 1 ]
+      and                               sys0ret,                                0x3f
+      and                               sys0arg,                                0x3f
+      shl                               sys0ret,                                6
+      and                               rbx,                                    0x0f
+      or                                sys0ret,                                sys0arg
+      shl                               rbx,                                    12
+      mov                               sys1ret,                                3
+      or                                sys0ret,                                rbx
+      clc
+      lea                               rbx,                                    [ .getBuffer ]
+      ret
+    ;}
+    ;( else if 4-bytes )
+      @@:
+      cmp                               rax,                                    0xf8
+      jae                               .failChar
+    ;{
+      mov                               sys2arg,                                2
+      call                              .getTo
+      mov                               sys2arg,                                2
+      call                              .getTo
+      movzx                             sys0arg,                                byte [ .getBuffer + 1 ]
+      movzx                             sys1arg,                                byte [ .getBuffer + 2 ]
+      movzx                             sys0ret,                                byte [ .getBuffer + 3 ]
+      and                               sys0arg,                                0x3f
+      and                               sys1arg,                                0x3f
+      and                               sys0ret,                                0x3f
+      and                               rbx,                                    0x07
+      shl                               sys1arg,                                6
+      shl                               sys0ret,                                12
+      or                                sys0ret,                                sys0arg
+      shl                               rbx,                                    18
+      or                                sys0ret,                                sys1arg
+      mov                               sys1ret,                                4
+      or                                sys0ret,                                rbx
+      clc
+      lea                               rbx,                                    [ .getBuffer ]
+      ret
+    ;}
+    ;( else -> failChar )
+  .getFailReturn:
+    stc
+    ret
+  .seek:
+    ;( I/O )
+    ;{
+    ;:  rsi                             *offset                                 unknown
+    ;:  r15                             *file                                   *file
+    ;}
+    mov                                 rax,                                    qword [ __file__ + .offset ]
+    mov                                 qword [ __file__ + .return ],           rax
+    mov                                 qword [ __file__ + .offset ],           rsi
+    null                                sys2arg
+    mov                                 sys0arg,                                qword [ __file__ + .self ]
+    sys_call                            sys_lseek
+    clc
+    ret
+  .seekBase:
+    ;( I/O )
+    ;{
+    ;:  rsi                             *offset                                 unknown
+    ;:  r15                             *file                                   *file
+    ;}
+    mov                                 rax,                                    qword [ __file__ + .offset ]
+    mov                                 qword [ __file__ + .return ],           rax
+    add                                 rsi,                                    qword [ __file__ + .base ]
+    mov                                 qword [ __file__ + .offset ],           rsi
+    null                                sys2arg
+    mov                                 sys0arg,                                qword [ __file__ + .self ]
+    sys_call                            sys_lseek
+    clc
+    ret
+  .seekBack:
+    ;( I/O )
+    ;{
+    ;:  r15                             *file                                   *file
+    ;}
+    null                                sys2arg
+    mov                                 sys1arg,                                qword [ __file__ + .return ]
+    mov                                 qword [ __file__ + .offset ],           sys1arg
+    mov                                 qword [ __file__ + .return ],           sys2arg
+    mov                                 sys0arg,                                qword [ __file__ + .self ]
+    sys_call                            sys_lseek
+    clc
+    ret
+onDebug
+{
+  .failInternalPOP6:
+    add                                 rsp,                                    ( 3 * 8 )
+  .failInternalPOP3:
+    add                                 rsp,                                    ( 2 * 8 )
+  .failInternalPOP1:
+    add                                 rsp,                                    ( 1 * 8 )
+  .failInternal:
+    echo_msgLoad                        .msgFailInternal
+  .failReturn:
+    echo_put
+    null                                rax
+    stc
+    ret
+  .failChar:
+    echo_state
+    echo_msgLoad                        .msgFailChar
+    jmp                                 .failReturn
+  .failFileName:
+    echo_msgLoad                        .msgFailFileName
+    jmp                                 .failReturn
+}
+onAlone
+{
+  .failInternalPOP6:
+    add                                 rsp,                                    ( 3 * 8 )
+  .failInternalPOP3:
+    add                                 rsp,                                    ( 2 * 8 )
+  .failInternalPOP1:
+    add                                 rsp,                                    ( 1 * 8 )
+  .failInternal:
+  .failChar:
+  .failFileName:
+    null                                rax
+    stc
+    ret
+}

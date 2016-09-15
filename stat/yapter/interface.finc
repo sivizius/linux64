@@ -1,0 +1,107 @@
+struc sbaInterface
+{
+  .                                     =                                       _count_
+  .offs                                 =                                       ( 0 - 1 )
+  sbaInterface
+}
+macro sbaInterface
+{
+  ;( interface )
+  ;{
+  ;:  an sba-file can only contain one interface or none, so it its always the final yapter
+  ;:  this yapter can be used by a foreign file to include this as a module (symbols -> pointers)
+  ;:  or to find variables while debugging this file (pointers -> symbols)
+  ;:  this macro combine the definitions of the symbols- and pointers-yapter as well as the interface-yapter
+  ;:  this is just the structure of the interface-yapter itself
+  ;:  0x00  word                        <final>                                 <final>
+  ;:  0x02  cuid                        %symbols                                %symbols
+  ;:  0x04  cuid                        %pointers                               %pointers
+  ;:  0x06  word                        null                                    count
+  ;:  0x08  magic                       'ycontent'                              unused
+  ;}
+  local                                 myLoad                                  ;length  of yapter          in file
+  local                                 mySize                                  ;length  of yapter          in memory
+  local                                 _content_                               ;content of yapter
+  local                                 _base_                                  ;offset of  symbols-yapter  in memory
+  local                                 _size_                                  ;size   of  symbols-yapter  in memory
+  local                                 _file_                                  ;offset of  symbols-yapter  in file
+  local                                 _load_                                  ;size   of  symbols-yapter  in file
+  local                                 tPointers                               ;offset of  pointers-yapter in virtual
+  local                                 sPointers                               ;size   of  pointers-yapter in virtual
+  local                                 cSymbols                                ;cuid   of  symbol-yapter
+  local                                 cPointers                               ;cuid   of  pointer-yapter
+  if ( _head_ eq '<none>' )
+    display                             '[asm:sba] an error occured while processing yapter <interface>: headless file!'
+    err
+  end if
+  store word                            sbaYapter_tSymbols                      at vYapters:( oYapters + 0x00 )         ;<symbols>  count + 0
+  store word                            sPointers                               at vYapters:( oYapters + 0x02 )         ;count symbols  in  symbols-yapter  in file
+  store dword                           ( sPointers * 8 )                       at vYapters:( oYapters + 0x04 )         ;size           of  symbols-yapter  in mem (virtual), magic »symb«
+  store qword                           _file_                                  at vYapters:( oYapters + 0x08 )         ;offset         of  symbols-yapter  in file
+  store word                            sbaYapter_tPointers                     at vYapters:( oYapters + 0x10 )         ;<pointers> count + 1
+  store word                            sPointers                               at vYapters:( oYapters + 0x12 )         ;count pointers in  pointers-yapter in file
+  store dword                           ( sPointers * 8 )                       at vYapters:( oYapters + 0x14 )         ;size           of  pointers-yapter in file/mem (virtual), magic »*ptr«
+  store qword                           ( rPointers + ( tPointers * 8 ))        at vYapters:( oYapters + 0x18 )         ;offset         of  pointers-yapter in file (virtual)
+  cSymbols                              =                                       ( myCountPointers + myPointers + 0 )
+  cPointers                             =                                       ( myCountPointers + myPointers + 1 )
+  oYapters                              =                                       ( oYapters + 0x20 )
+  myPointers                            =                                       ( myPointers + 2 )
+  yapter_tblYapter
+  dw                                    sbaYapter_tFinal                                                                ;<interface> count + 2
+  dw                                    cSymbols                                                                        ;cuid   of  symbols-yapter
+  dw                                    cPointers                                                                       ;cuid   of pointers-yapter
+  dw                                    null                                                                            ;*start = null
+  db                                    'ycontent'                                                                      ;magic
+  display                               '[asm:sba] <interface>    (2016-02-09) %'
+  displayHex2                           myCount
+  display                               ' '
+  displayHex2                           sbaYapter_tFinal
+  display                               ' '
+  displayHex2                           cSymbols
+  display                               ' '
+  displayHex2                           cPointers
+  display                               ' null »ycontent«          =#= 0x'
+  displayHex                            myPointerOffset
+  display                               ' #0x'
+  displayHex2                           sizeHeader
+  display                               ' ( #0x'
+  displayHex2                           ( sizeHeader + sizeBody + ( myCount * 16 ))
+  display                               ' )', 10
+  _count_                               =                                       ( myCount )
+  myPointerOffset                       =                                       0
+  postpone
+  \{
+    myFile                              =                                       $
+    if ( myBase and ( page_size - 1 ) = 0 )
+    else
+      myBase                            =                                       (( myBase + page_size ) and ( 0 - page_size ))
+    end if
+    addr                                =                                       ( $ + myLoad )
+    org                                 myBase
+    assign                              fix                                     yapter_assign
+    tPointers                           =                                       aPointers
+    _content_                           sbaYapter_tFinal, _base_, _size_ , _file_, _load_
+    sPointers                           =                                       ( aPointers - tPointers )
+    myLoad                              =                                       ( $ - myBase )
+    mySize                              =                                       ( myLoad )
+    if ( mySize and 0x0000000000000fff )
+      mySize                            =                                       (( mySize + 4096 ) and 0xfffffffffffff000 )
+    end if
+    if ( mySize and 0xffffffff00000000 )
+      display                           '[asm:sba] an error occured while processing yapter <interface>: size too large!'
+      err
+    end if
+    _base_                              =                                       myBase
+    _file_                              =                                       myFile
+    _load_                              =                                       myLoad
+    _size_                              =                                       mySize
+    ;myBase                              =                                       ( myBase + mySize )
+    myFile                              =                                       ( myFile + myLoad )
+    org                                 myFile
+    yapter_tblPointer
+    display                             '[asm:sba] this file contains 0x'
+    displayHex                          ( _count_ )
+    display                             ' yapters.', 10
+  \}
+  macro _content_ yType, yBase, yResv, yFile, ySize
+}

@@ -1,0 +1,1130 @@
+page_size                               =                                       4096
+null                                    =                                       0
+false                                   =                                       0
+true                                    =                                       1
+__byte__                                =                                       1
+__word__                                =                                       2
+__dword__                               =                                       4
+__qword__                               =                                       8
+__pointer__                             =                                       __qword__
+
+;( functions parameter (when linked with external libraries) )
+;call @function()
+lib0arg                                 equ                                     rdi
+lib0arg_d                               equ                                     edi
+lib0arg_w                               equ                                     di
+lib0arg_b                               equ                                     dil
+lib1arg                                 equ                                     rsi
+lib1arg_d                               equ                                     esi
+lib1arg_w                               equ                                     si
+lib1arg_b                               equ                                     sil
+lib2arg                                 equ                                     rdx
+lib2arg_d                               equ                                     edx
+lib2arg_w                               equ                                     dx
+lib2arg_b                               equ                                     dl
+lib2arg_l                               equ                                     dl
+lib2arg_h                               equ                                     dh
+lib3arg                                 equ                                     rcx
+lib3arg_d                               equ                                     ecx
+lib3arg_w                               equ                                     cx
+lib3arg_b                               equ                                     cl
+lib3arg_l                               equ                                     cl
+lib3arg_h                               equ                                     ch
+lib4arg                                 equ                                     r8
+lib4arg_d                               equ                                     r8d
+lib4arg_w                               equ                                     r8w
+lib4arg_b                               equ                                     r8b
+lib5arg                                 equ                                     r9
+lib5arg_d                               equ                                     r9d
+lib5arg_w                               equ                                     r9w
+lib5arg_b                               equ                                     r9b
+lib0ret                                 equ                                     rax
+lib0ret_d                               equ                                     eax
+lib0ret_w                               equ                                     ax
+lib0ret_b                               equ                                     al
+lib0ret_l                               equ                                     al
+lib0ret_h                               equ                                     ah
+lib1ret                                 equ                                     rdx
+lib1ret_d                               equ                                     edx
+lib1ret_w                               equ                                     dx
+lib1ret_b                               equ                                     dl
+lib1ret_l                               equ                                     dl
+lib1ret_h                               equ                                     dh
+
+;( registers for syscalls )
+;{
+;:  rax                                 sysNumber                               sys0ret
+;:  rbx                                 ignored                                 preserved
+;:  rcx                                 ignored                                 return-adress
+;:  rdx                                 sys2arg                                 sys1ret
+;:  rdi                                 sys0arg                                 unknown
+;:  rsi                                 sys1arg                                 unknown
+;:  rbp                                 ignored                                 preserved
+;:  rsp                                 ignored                                 preserved
+;:  r8                                  sys4arg                                 unknown
+;:  r9                                  sys5arg                                 unknown
+;:  r10                                 sys3arg                                 unknown
+;:  r11                                 ignored                                 return-flags
+;:  r12                                 ignored                                 preserved
+;:  r13                                 ignored                                 preserved
+;:  r14                                 ignored                                 preserved
+;:  r15                                 ignored                                 preserved
+;}
+sysNumber                               equ                                     rax
+sys0arg                                 equ                                     rdi
+sys0arg_d                               equ                                     edi
+sys0arg_w                               equ                                     di
+sys0arg_b                               equ                                     dil
+sys1arg                                 equ                                     rsi
+sys1arg_d                               equ                                     esi
+sys1arg_w                               equ                                     si
+sys1arg_b                               equ                                     sil
+sys2arg                                 equ                                     rdx
+sys2arg_d                               equ                                     edx
+sys2arg_w                               equ                                     dx
+sys2arg_b                               equ                                     dl
+sys2arg_l                               equ                                     dl
+sys2arg_h                               equ                                     dh
+sys3arg                                 equ                                     r10
+sys3arg_d                               equ                                     r10d
+sys3arg_w                               equ                                     r10w
+sys3arg_b                               equ                                     r10b
+sys4arg                                 equ                                     r8
+sys4arg_d                               equ                                     r8d
+sys4arg_w                               equ                                     r8w
+sys4arg_b                               equ                                     r8b
+sys5arg                                 equ                                     r9
+sys5arg_d                               equ                                     r9d
+sys5arg_w                               equ                                     r9w
+sys5arg_b                               equ                                     r9b
+sys0ret                                 equ                                     rax
+sys0ret_d                               equ                                     eax
+sys0ret_w                               equ                                     ax
+sys0ret_b                               equ                                     al
+sys0ret_l                               equ                                     al
+sys0ret_h                               equ                                     ah
+sys1ret                                 equ                                     rdx
+sys1ret_d                               equ                                     edx
+sys1ret_w                               equ                                     dx
+sys1ret_b                               equ                                     dl
+sys1ret_l                               equ                                     dl
+sys1ret_h                               equ                                     dh
+
+STDIN                                   =                                       0x0000000000000000  ;standard input
+STDOUT                                  =                                       0x0000000000000001  ;standard output
+STDERR                                  =                                       0x0000000000000002  ;standard error-output
+
+CLONE_sChild                            =                                       0x0000000000000011  ;
+CLONE_fVM                               =                                       0x0000000000000100  ;tells the kernel to let the original process and the clone in the same memory space.
+CLONE_fFS                               =                                       0x0000000000000200  ;both get the same file system information.
+CLONE_fFiles                            =                                       0x0000000000000400  ;share file descriptors.
+CLONE_fSigHand                          =                                       0x0000000000000800  ;both processes share the same signal handlers.
+CLONE_fThread                           =                                       0x0000000000010000  ;this tells the kernel, that both processes would belong to the same thread group (be threads within the same process).
+
+MMAP_pNone                              =                                       0x00
+MMAP_pReadable                          =                                       0x01
+MMAP_pWriteable                         =                                       0x02
+MMAP_pExecutable                        =                                       0x04
+MMAP_pR                                 =                                       0x01
+MMAP_pW                                 =                                       0x02
+MMAP_pRW                                =                                       0x03
+MMAP_pX                                 =                                       0x04
+MMAP_pRX                                =                                       0x05
+MMAP_pWX                                =                                       0x06
+MMAP_pRWX                               =                                       0x07
+MMAP_fShared                            =                                       0x01
+MMAP_fPrivate                           =                                       0x02
+MMAP_fAnonymous                         =                                       0x20
+MREMAP_fMayMove                         =                                       0x01
+MREMAP_fFixed                           =                                       0x02
+MPROTECT_pNone                          =                                       0x00
+MPROTECT_pReadable                      =                                       0x01
+MPROTECT_pWriteable                     =                                       0x02
+MPROTECT_pExecutable                    =                                       0x04
+MPROTECT_pR                             =                                       0x01
+MPROTECT_pW                             =                                       0x02
+MPROTECT_pRW                            =                                       0x03
+MPROTECT_pX                             =                                       0x04
+MPROTECT_pRX                            =                                       0x05
+MPROTECT_pRX                            =                                       0x06
+MPROTECT_pRWX                           =                                       0x07
+
+
+macro sys_call                          doIt
+{
+  mov                                   rax,                                    doIt
+  syscall
+}
+macro exit                              status
+{
+  if ( status eq )
+    null                                sys0arg
+  else
+    mov                                 sys0arg,                                status
+  end if
+  sys_call                              sys_exit_group
+}
+macro nanosleep                         sec,                                    nsec
+{
+  if ( sec eq )
+    display                             '[asm] fail: seconds undefined in nanosleep!'
+    err
+  end if
+  mov                                   qword [ time.s ],                       sec
+  if ( nsec eq )
+    mov                                 qword [ time.n ],                       null
+  else
+    mov                                 qword [ time.n ],                       nsec
+  end if
+  null                                  sys1arg
+  lea                                   sys0arg,                                [ time.s ]
+  sys_call                              sys_nanosleep
+}
+macro clone                             func,                                   stck
+{
+  null                                  sys4arg
+  null                                  sys3arg
+  null                                  sys2arg
+  lea                                   sys1arg,                                [ stck ]
+  mov                                   sys0arg,                                CLONE_sChild + CLONE_fVM + CLONE_fFS + CLONE_fSigHand + CLONE_fThread
+  sys_call                              sys_clone
+  flags                                 sys0ret
+  jz                                    func
+}
+
+sys_read                                =                                       0
+sys_write                               =                                       1
+sys_open                                =                                       2
+sys_close                               =                                       3
+sys_stat                                =                                       4
+sys_fstat                               =                                       5
+sys_lstat                               =                                       6
+sys_poll                                =                                       7
+sys_lseek                               =                                       8
+sys_mmap                                =                                       9
+sys_mprotect                            =                                       10
+sys_munmap                              =                                       11
+sys_brk                                 =                                       12
+sys_rt_sigaction                        =                                       13
+sys_rt_sigprocmask                      =                                       14
+sys_rt_sigreturn                        =                                       15
+sys_ioctl                               =                                       16
+sys_pread64                             =                                       17
+sys_pwrite64                            =                                       18
+sys_readv                               =                                       19
+sys_writev                              =                                       20
+sys_access                              =                                       21
+sys_pipe                                =                                       22
+sys_select                              =                                       23
+sys_sched_yield                         =                                       24
+sys_mremap                              =                                       25
+sys_msync                               =                                       26
+sys_mincore                             =                                       27
+sys_madvise                             =                                       28
+sys_shmget                              =                                       29
+sys_shmat                               =                                       30
+sys_shmctl                              =                                       31
+sys_dup                                 =                                       32
+sys_dup2                                =                                       33
+sys_pause                               =                                       34
+sys_nanosleep                           =                                       35
+sys_getitimer                           =                                       36
+sys_alarm                               =                                       37
+sys_setitimer                           =                                       38
+sys_getpid                              =                                       39
+sys_sendfile                            =                                       40
+sys_socket                              =                                       41
+sys_connect                             =                                       42
+sys_accept                              =                                       43
+sys_sendto                              =                                       44
+sys_recvfrom                            =                                       45
+sys_sendmsg                             =                                       46
+sys_recvmsg                             =                                       47
+sys_shutdown                            =                                       48
+sys_bind                                =                                       49
+sys_listen                              =                                       50
+sys_getsockname                         =                                       51
+sys_getpeername                         =                                       52
+sys_socketpair                          =                                       53
+sys_setsockopt                          =                                       54
+sys_getsockopt                          =                                       55
+sys_clone                               =                                       56
+sys_fork                                =                                       57
+sys_vfork                               =                                       58
+sys_execve                              =                                       59
+sys_exit                                =                                       60
+sys_wait                                =                                       61
+sys_kill                                =                                       62
+sys_uname                               =                                       63
+sys_semget                              =                                       64
+sys_semop                               =                                       65
+sys_semctl                              =                                       66
+sys_shmdt                               =                                       67
+sys_msgget                              =                                       68
+sys_msgsnd                              =                                       69
+sys_msgrcv                              =                                       70
+sys_msgctl                              =                                       71
+sys_fcntl                               =                                       72
+sys_flock                               =                                       73
+sys_fsync                               =                                       74
+sys_fdatasync                           =                                       75
+sys_truncate                            =                                       76
+sys_ftruncate                           =                                       77
+sys_getdents                            =                                       78
+sys_getcwd                              =                                       79
+sys_chdir                               =                                       80
+sys_fchdir                              =                                       81
+sys_rename                              =                                       82
+sys_mkdir                               =                                       83
+sys_rmdir                               =                                       84
+sys_creat                               =                                       85
+sys_link                                =                                       86
+sys_unlink                              =                                       87
+sys_symlink                             =                                       88
+sys_readlink                            =                                       89
+sys_chmod                               =                                       90
+sys_fchmod                              =                                       91
+sys_chown                               =                                       92
+sys_fchown                              =                                       93
+sys_lchown                              =                                       94
+sys_umask                               =                                       95
+sys_gettimeofday                        =                                       96
+sys_getrlimit                           =                                       97
+sys_getrusage                           =                                       98
+sys_sysinfo                             =                                       99
+sys_times                               =                                       100
+sys_ptrace                              =                                       101
+sys_getuid                              =                                       102
+sys_syslog                              =                                       103
+sys_getgid                              =                                       104
+sys_setuid                              =                                       105
+sys_setgid                              =                                       106
+sys_geteuid                             =                                       107
+sys_getegid                             =                                       108
+sys_setpgid                             =                                       109
+sys_getppid                             =                                       110
+sys_getpgrp                             =                                       111
+sys_setsid                              =                                       112
+sys_setreuid                            =                                       113
+sys_setregid                            =                                       114
+sys_getgroups                           =                                       115
+sys_setgroups                           =                                       116
+sys_setresuid                           =                                       117
+sys_getresuid                           =                                       118
+sys_setresgid                           =                                       119
+sys_getresgid                           =                                       120
+sys_getpgid                             =                                       121
+sys_setfsuid                            =                                       122
+sys_setfsgid                            =                                       123
+sys_getsid                              =                                       124
+sys_capget                              =                                       125
+sys_capset                              =                                       126
+sys_rt_sigpending                       =                                       127
+sys_rt_sigtimedwait                     =                                       128
+sys_rt_sigqueueinfo                     =                                       129
+sys_rt_sigsuspend                       =                                       130
+sys_sigaltstack                         =                                       131
+sys_utime                               =                                       132
+sys_mknod                               =                                       133
+sys_uselib                              =                                       134
+sys_personality                         =                                       135
+sys_ustat                               =                                       136
+sys_statfs                              =                                       137
+sys_fstatfs                             =                                       138
+sys_sysfs                               =                                       139
+sys_getpriority                         =                                       140
+sys_setpriority                         =                                       141
+sys_sched_setparam                      =                                       142
+sys_sched_getparam                      =                                       143
+sys_sched_setscheduler                  =                                       144
+sys_sched_getscheduler                  =                                       145
+sys_sched_get_priority_max              =                                       146
+sys_sched_get_priority_min              =                                       147
+sys_sched_rr_get_interval               =                                       148
+sys_mlock                               =                                       149
+sys_munlock                             =                                       150
+sys_mlockall                            =                                       151
+sys_munlockall                          =                                       152
+sys_vhangup                             =                                       153
+sys_modify_ldt                          =                                       154
+sys_pivot_root                          =                                       155
+sys__sysctl                             =                                       156
+sys_prctl                               =                                       157
+sys_arch_prctl                          =                                       158
+sys_adjtimex                            =                                       159
+sys_setrlimit                           =                                       160
+sys_chroot                              =                                       161
+sys_sync                                =                                       162
+sys_acct                                =                                       163
+sys_settimeofday                        =                                       164
+sys_mount                               =                                       165
+sys_umount2                             =                                       166
+sys_swapon                              =                                       167
+sys_swapoff                             =                                       168
+sys_reboot                              =                                       169
+sys_sethostname                         =                                       170
+sys_setdomainname                       =                                       171
+sys_iopl                                =                                       172
+sys_ioperm                              =                                       173
+sys_create_module                       =                                       174
+sys_init_module                         =                                       175
+sys_delete_module                       =                                       176
+sys_get_kernel_syms                     =                                       177
+sys_query_module                        =                                       178
+sys_quotactl                            =                                       179
+sys_nfsservctl                          =                                       180
+sys_getpmsg                             =                                       181
+sys_putpmsg                             =                                       182
+sys_afs_syscall                         =                                       183
+sys_tuxcall                             =                                       184
+sys_security                            =                                       185
+sys_gettid                              =                                       186
+sys_readahead                           =                                       187
+sys_setxattr                            =                                       188
+sys_lsetxattr                           =                                       189
+sys_fsetxattr                           =                                       190
+sys_getxattr                            =                                       191
+sys_lgetxattr                           =                                       192
+sys_fgetxattr                           =                                       193
+sys_listxattr                           =                                       194
+sys_llistxattr                          =                                       195
+sys_flistxattr                          =                                       196
+sys_removexattr                         =                                       197
+sys_lremovexattr                        =                                       198
+sys_fremovexattr                        =                                       199
+sys_tkill                               =                                       200
+sys_time                                =                                       201
+sys_futex                               =                                       202
+sys_sched_setaffinity                   =                                       203
+sys_sched_getaffinity                   =                                       204
+sys_set_thread_area                     =                                       205
+sys_io_setup                            =                                       206
+sys_io_destroy                          =                                       207
+sys_io_getevents                        =                                       208
+sys_io_submit                           =                                       209
+sys_io_cancel                           =                                       210
+sys_get_thread_area                     =                                       211
+sys_lookup_dcookie                      =                                       212
+sys_epoll_create                        =                                       213
+sys_epoll_ctl_old                       =                                       214
+sys_epoll_wait_old                      =                                       215
+sys_remap_file_pages                    =                                       216
+sys_getdents64                          =                                       217
+sys_set_tid_address                     =                                       218
+sys_restart_syscall                     =                                       219
+sys_semtimedop                          =                                       220
+sys_fadvise64                           =                                       221
+sys_timer_create                        =                                       222
+sys_timer_settime                       =                                       223
+sys_timer_gettime                       =                                       224
+sys_timer_getoverrun                    =                                       225
+sys_timer_delete                        =                                       226
+sys_clock_settime                       =                                       227
+sys_clock_gettime                       =                                       228
+sys_clock_getres                        =                                       229
+sys_clock_nanosleep                     =                                       230
+sys_exit_group                          =                                       231
+sys_epoll_wait                          =                                       232
+sys_epoll_ctl                           =                                       233
+sys_tgkill                              =                                       234
+sys_utimes                              =                                       235
+sys_vserver                             =                                       236
+sys_vserver                             =                                       236
+sys_mbind                               =                                       237
+sys_set_mempolicy                       =                                       238
+sys_get_mempolicy                       =                                       239
+sys_mq_open                             =                                       240
+sys_mq_unlink                           =                                       241
+sys_mq_timedsend                        =                                       242
+sys_mq_timedreceive                     =                                       243
+sys_mq_notify                           =                                       244
+sys_mq_getsetattr                       =                                       245
+sys_kexec_load                          =                                       246
+sys_waitid                              =                                       247
+sys_add_key                             =                                       248
+sys_request_key                         =                                       249
+sys_keyctl                              =                                       250
+sys_ioprio_set                          =                                       251
+sys_ioprio_get                          =                                       252
+sys_inotify_init                        =                                       253
+sys_inotify_add_watch                   =                                       254
+sys_inotify_rm_watch                    =                                       255
+sys_migrate_pages                       =                                       256
+sys_openat                              =                                       257
+sys_mkdirat                             =                                       258
+sys_mknodat                             =                                       259
+sys_fchownat                            =                                       260
+sys_futimesat                           =                                       261
+sys_newfstatat                          =                                       262
+sys_unlinkat                            =                                       263
+sys_renameat                            =                                       264
+sys_linkat                              =                                       265
+sys_symlinkat                           =                                       266
+sys_readlinkat                          =                                       267
+sys_fchmodat                            =                                       268
+sys_faccessat                           =                                       269
+sys_pselect6                            =                                       270
+sys_ppoll                               =                                       271
+sys_unshare                             =                                       272
+sys_set_robust_list                     =                                       273
+sys_get_robust_list                     =                                       274
+sys_splice                              =                                       275
+sys_tee                                 =                                       276
+sys_sync_file_range                     =                                       277
+sys_vmsplice                            =                                       278
+sys_move_pages                          =                                       279
+sys_utimensat                           =                                       280
+sys_epoll_pwait                         =                                       281
+sys_signalfd                            =                                       282
+sys_timerfd_create                      =                                       283
+sys_eventfd                             =                                       284
+sys_fallocate                           =                                       285
+sys_timerfd_settime                     =                                       286
+sys_timerfd_gettime                     =                                       287
+sys_accept4                             =                                       288
+sys_signalfd4                           =                                       289
+sys_eventfd2                            =                                       290
+sys_epoll_create1                       =                                       291
+sys_dup3                                =                                       292
+sys_pipe2                               =                                       293
+sys_inotify_init1                       =                                       294
+sys_preadv                              =                                       295
+sys_pwritev                             =                                       296
+sys_rt_tgsigqueueinfo                   =                                       297
+sys_perf_event_open                     =                                       298
+sys_recvmmsg                            =                                       299
+sys_fanotify_init                       =                                       300
+sys_fanotify_mark                       =                                       301
+sys_prlimit64                           =                                       302
+sys_name_to_handle_at                   =                                       303
+sys_open_by_handle_at                   =                                       304
+sys_clock_adjtime                       =                                       305
+sys_syncfs                              =                                       306
+sys_sendmmsg                            =                                       307
+sys_setns                               =                                       308
+sys_getcpu                              =                                       309
+sys_process_vm_readv                    =                                       310
+sys_process_vm_writev                   =                                       311
+sys_kcmp                                =                                       312
+sys_finit_module                        =                                       313
+sys_sched_setattr                       =                                       314
+sys_sched_getattr                       =                                       315
+sys_renameat2                           =                                       316
+sys_seccomp                             =                                       317
+sys_getrandom                           =                                       318
+sys_memfd_create                        =                                       319
+sys_kexec_file_load                     =                                       320
+sys_bpf                                 =                                       321
+sys_syscall_max                         =                                       321
+
+;( errno )
+EPERM                                   =                                       0 -  1  ; Operation not permitted
+ENOENT                                  =                                       0 -  2  ; No such file or directory
+ESRCH                                   =                                       0 -  3  ; No such process
+EINTR                                   =                                       0 -  4  ; Interrupted system call
+EIO                                     =                                       0 -  5  ; I/O error
+ENXIO                                   =                                       0 -  6  ; No such device or address
+E2BIG                                   =                                       0 -  7  ; Argument list too long
+ENOEXEC                                 =                                       0 -  8  ; Exec format error
+EBADF                                   =                                       0 -  9  ; Bad file number
+ECHILD                                  =                                       0 -  10  ; No child processes
+EAGAIN                                  =                                       0 -  11  ; Try again
+ENOMEM                                  =                                       0 -  12  ; Out of memory
+EACCES                                  =                                       0 -  13  ; Permission denied
+EFAULT                                  =                                       0 -  14  ; Bad address
+ENOTBLK                                 =                                       0 -  15  ; Block device required
+EBUSY                                   =                                       0 -  16  ; Device or resource busy
+EEXIST                                  =                                       0 -  17  ; File exists
+EXDEV                                   =                                       0 -  18  ; Cross-device link
+ENODEV                                  =                                       0 -  19  ; No such device
+ENOTDIR                                 =                                       0 -  20  ; Not a directory
+EISDIR                                  =                                       0 -  21  ; Is a directory
+EINVAL                                  =                                       0 -  22  ; Invalid argument
+ENFILE                                  =                                       0 -  23  ; File table overflow
+EMFILE                                  =                                       0 -  24  ; Too many open files
+ENOTTY                                  =                                       0 -  25  ; Not a typewriter
+ETXTBSY                                 =                                       0 -  26  ; Text file busy
+EFBIG                                   =                                       0 -  27  ; File too large
+ENOSPC                                  =                                       0 -  28  ; No space left on device
+ESPIPE                                  =                                       0 -  29  ; Illegal seek
+EROFS                                   =                                       0 -  30  ; Read-only file system
+EMLINK                                  =                                       0 -  31  ; Too many links
+EPIPE                                   =                                       0 -  32  ; Broken pipe
+EDOM                                    =                                       0 -  33  ; Math argument out of domain of func
+ERANGE                                  =                                       0 -  34  ; Math result not representable
+EDEADLK                                 =                                       0 -  35  ; Resource deadlock would occur
+ENAMETOOLONG                            =                                       0 -  36  ; File name too long
+ENOLCK                                  =                                       0 -  37  ; No record locks available
+ENOSYS                                  =                                       0 -  38  ; Function not implemented
+ENOTEMPTY                               =                                       0 -  39  ; Directory not empty
+ELOOP                                   =                                       0 -  40  ; Too many symbolic links encountered
+EWOULDBLOCK                             =                                       0 -  EAGAIN  ; Operation would block
+ENOMSG                                  =                                       0 -  42  ; No message of desired type
+EIDRM                                   =                                       0 -  43  ; Identifier removed
+ECHRNG                                  =                                       0 -  44  ; Channel number out of range
+EL2NSYNC                                =                                       0 -  45  ; Level 2 not synchronized
+EL3HLT                                  =                                       0 -  46  ; Level 3 halted
+EL3RST                                  =                                       0 -  47  ; Level 3 reset
+ELNRNG                                  =                                       0 -  48  ; Link number out of range
+EUNATCH                                 =                                       0 -  49  ; Protocol driver not attached
+ENOCSI                                  =                                       0 -  50  ; No CSI structure available
+EL2HLT                                  =                                       0 -  51  ; Level 2 halted
+EBADE                                   =                                       0 -  52  ; Invalid exchange
+EBADR                                   =                                       0 -  53  ; Invalid request descriptor
+EXFULL                                  =                                       0 -  54  ; Exchange full
+ENOANO                                  =                                       0 -  55  ; No anode
+EBADRQC                                 =                                       0 -  56  ; Invalid request code
+EBADSLT                                 =                                       0 -  57  ; Invalid slot
+EDEADLOCK                               =                                       0 -  EDEADLK
+EBFONT                                  =                                       0 -  59  ; Bad font file format
+ENOSTR                                  =                                       0 -  60  ; Device not a stream
+ENODATA                                 =                                       0 -  61  ; No data available
+ETIME                                   =                                       0 -  62  ; Timer expired
+ENOSR                                   =                                       0 -  63  ; Out of streams resources
+ENONET                                  =                                       0 -  64  ; Machine is not on the network
+ENOPKG                                  =                                       0 -  65  ; Package not installed
+EREMOTE                                 =                                       0 -  66  ; Object is remote
+ENOLINK                                 =                                       0 -  67  ; Link has been severed
+EADV                                    =                                       0 -  68  ; Advertise error
+ESRMNT                                  =                                       0 -  69  ; Srmount error
+ECOMM                                   =                                       0 -  70  ; Communication error on send
+EPROTO                                  =                                       0 -  71  ; Protocol error
+EMULTIHOP                               =                                       0 -  72  ; Multihop attempted
+EDOTDOT                                 =                                       0 -  73  ; RFS specific error
+EBADMSG                                 =                                       0 -  74  ; Not a data message
+EOVERFLOW                               =                                       0 -  75  ; Value too large for defined data type
+ENOTUNIQ                                =                                       0 -  76  ; Name not unique on network
+EBADFD                                  =                                       0 -  77  ; File descriptor in bad state
+EREMCHG                                 =                                       0 -  78  ; Remote address changed
+ELIBACC                                 =                                       0 -  79  ; Can not access a needed shared library
+ELIBBAD                                 =                                       0 -  80  ; Accessing a corrupted shared library
+ELIBSCN                                 =                                       0 -  81  ; .lib section in a.out corrupted
+ELIBMAX                                 =                                       0 -  82  ; Attempting to link in too many shared libraries
+ELIBEXEC                                =                                       0 -  83  ; Cannot exec a shared library directly
+EILSEQ                                  =                                       0 -  84  ; Illegal byte sequence
+ERESTART                                =                                       0 -  85  ; Interrupted system call should be restarted
+ESTRPIPE                                =                                       0 -  86  ; Streams pipe error
+EUSERS                                  =                                       0 -  87  ; Too many users
+ENOTSOCK                                =                                       0 -  88  ; Socket operation on non-socket
+EDESTADDRREQ                            =                                       0 -  89  ; Destination address required
+EMSGSIZE                                =                                       0 -  90  ; Message too long
+EPROTOTYPE                              =                                       0 -  91  ; Protocol wrong type for socket
+ENOPROTOOPT                             =                                       0 -  92  ; Protocol not available
+EPROTONOSUPPORT                         =                                       0 -  93  ; Protocol not supported
+ESOCKTNOSUPPORT                         =                                       0 -  94  ; Socket type not supported
+EOPNOTSUPP                              =                                       0 -  95  ; Operation not supported on transport endpoint
+EPFNOSUPPORT                            =                                       0 -  96  ; Protocol family not supported
+EAFNOSUPPORT                            =                                       0 -  97  ; Address family not supported by protocol
+EADDRINUSE                              =                                       0 -  98  ; Address already in use
+EADDRNOTAVAIL                           =                                       0 -  99  ; Cannot assign requested address
+ENETDOWN                                =                                       0 -  100 ; Network is down
+ENETUNREACH                             =                                       0 -  101 ; Network is unreachable
+ENETRESET                               =                                       0 -  102 ; Network dropped connection because of reset
+ECONNABORTED                            =                                       0 -  103 ; Software caused connection abort
+ECONNRESET                              =                                       0 -  104 ; Connection reset by peer
+ENOBUFS                                 =                                       0 -  105 ; No buffer space available
+EISCONN                                 =                                       0 -  106 ; Transport endpoint is already connected
+ENOTCONN                                =                                       0 -  107 ; Transport endpoint is not connected
+ESHUTDOWN                               =                                       0 -  108 ; Cannot send after transport endpoint shutdown
+ETOOMANYREFS                            =                                       0 -  109 ; Too many references: cannot splice
+ETIMEDOUT                               =                                       0 -  110 ; Connection timed out
+ECONNREFUSED                            =                                       0 -  111 ; Connection refused
+EHOSTDOWN                               =                                       0 -  112 ; Host is down
+EHOSTUNREACH                            =                                       0 -  113 ; No route to host
+EALREADY                                =                                       0 -  114 ; Operation already in progress
+EINPROGRESS                             =                                       0 -  115 ; Operation now in progress
+ESTALE                                  =                                       0 -  116 ; Stale NFS file handle
+EUCLEAN                                 =                                       0 -  117 ; Structure needs cleaning
+ENOTNAM                                 =                                       0 -  118 ; Not a XENIX named type file
+ENAVAIL                                 =                                       0 -  119 ; No XENIX semaphores available
+EISNAM                                  =                                       0 -  120 ; Is a named type file
+EREMOTEIO                               =                                       0 -  121 ; Remote I/O error
+EDQUOT                                  =                                       0 -  122 ; Quota exceeded
+ENOMEDIUM                               =                                       0 -  123 ; No medium found
+EMEDIUMTYPE                             =                                       0 -  124 ; Wrong medium type
+ECANCELED                               =                                       0 -  125 ; Operation Canceled
+ENOKEY                                  =                                       0 -  126 ; Required key not available
+EKEYEXPIRED                             =                                       0 -  127 ; Key has expired
+EKEYREVOKED                             =                                       0 -  128 ; Key has been revoked
+EKEYREJECTED                            =                                       0 -  129 ; Key was rejected by service
+EOWNERDEAD                              =                                       0 -  130 ; Owner died
+ENOTRECOVERABLE                         =                                       0 -  131 ; State not recoverable
+EUSERDEFINED                            =                                       0 -  256 ; -> 1 - 2^63: User defined errors
+
+;( data macros )
+macro null                              [ register ]
+{
+  forward
+    xor                                 register,                               register
+}
+macro flags                             register
+{
+  or                                    register,                               register
+}
+
+dqVars fix
+ddVars fix
+dwVars fix
+dbVars fix
+strVars fix
+rqVars fix
+rdVars fix
+rwVars fix
+rbVars fix
+struc db                                [ data ]
+{
+  common
+  .                                     db                                      data
+  .self                                 =                                       .
+  .size                                 =                                       ( $ - . )
+}
+struc str                               [ string ]
+{
+  common
+  .len                                  dw                                      .size
+  .                                     db                                      string
+  if defined _cobj_
+    _cobj_                              =                                       ( _cobj_ + 1 )
+  end if
+}
+struc dw                                [ data ]
+{
+  common
+  .                                     dw                                      data
+  .self                                 =                                       .
+  .size                                 =                                       ( $ - . )
+}
+struc dd                                [ data ]
+{
+  common
+  .                                     dd                                      data
+  .self                                 =                                       .
+  .size                                 =                                       ( $ - . )
+}
+struc dq                                [ data ]
+{
+  common
+  .                                     dq                                      data
+  .self                                 =                                       .
+  .size                                 =                                       ( $ - . )
+}
+struc hb                                [ value ]
+{
+  common
+    local  size
+    size                                =                                       0
+    .                                   =                                       $
+    .self                               =                                       $
+  forward
+    repeat 2
+      char                              =                                       ( '0' + ((( value ) shr (  8 - ( % * 4 ))) and 0x0F ))
+      if ( char > '9' )
+        char                            =                                       ( char + 'a' - '9' - 1 )
+      end if
+      db                                char
+    end repeat
+    size                                =                                       size + 2
+  common
+    .size                               =                                       size
+}
+macro hb                                [ value ]
+{
+  forward
+    repeat 2
+      char                              =                                       ( '0' + ((( value ) shr (  8 - ( % * 4 ))) and 0x0F ))
+      if ( char > '9' )
+        char                            =                                       ( char + 'a' - '9' - 1 )
+      end if
+      db                                char
+    end repeat
+}
+struc hw                                [ value ]
+{
+  common
+    local  size
+    size                                =                                       0
+    .                                   =                                       $
+    .self                               =                                       $
+  forward
+    repeat 4
+      char                              =                                       ( '0' + ((( value ) shr ( 16 - ( % * 4 ))) and 0x0F ))
+      if ( char > '9' )
+        char                            =                                       ( char + 'a' - '9' - 1 )
+      end if
+      db                                char
+    end repeat
+    size                                =                                       size + 4
+  common
+    .size                               =                                       size
+}
+macro hw                                [ value ]
+{
+  forward
+    repeat 4
+      char                              =                                       ( '0' + ((( value ) shr ( 16 - ( % * 4 ))) and 0x0F ))
+      if ( char > '9' )
+        char                            =                                       ( char + 'a' - '9' - 1 )
+      end if
+      db                                char
+    end repeat
+}
+struc hd                                [ value ]
+{
+  common
+    local  size
+    size                                =                                       0
+    .                                   =                                       $
+    .self                               =                                       $
+  forward
+    repeat 8
+      char                              =                                       ( '0' + ((( value ) shr ( 32 - ( % * 4 ))) and 0x0F ))
+      if ( char > '9' )
+        char                            =                                       ( char + 'a' - '9' - 1 )
+      end if
+      db                                char
+    end repeat
+    size                                =                                       size + 8
+  common
+    .size                               =                                       size
+}
+macro hd                                [ value ]
+{
+  forward
+    repeat 8
+      char                              =                                       ( '0' + ((( value ) shr ( 32 - ( % * 4 ))) and 0x0F ))
+      if ( char > '9' )
+        char                            =                                       ( char + 'a' - '9' - 1 )
+      end if
+      db                                char
+    end repeat
+}
+struc hq                                [ value ]
+{
+  common
+    local  size
+    size                                =                                       0
+    .                                   =                                       $
+    .self                               =                                       $
+  forward
+    repeat 16
+      char                              =                                       ( '0' + ((( value ) shr ( 64 - ( % * 4 ))) and 0x0F ))
+      if ( char > '9' )
+        char                            =                                       ( char + 'a' - '9' - 1 )
+      end if
+      db                                char
+    end repeat
+    size                                =                                       size + 16
+  common
+    .size                               =                                       size
+}
+macro hq                                [ value ]
+{
+  forward
+    repeat 16
+      char                              =                                       ( '0' + ((( value ) shr ( 64 - ( % * 4 ))) and 0x0F ))
+      if ( char > '9' )
+        char                            =                                       ( char + 'a' - '9' - 1 )
+      end if
+      db                                char
+    end repeat
+}
+struc rb                                count
+{
+  .                                     rb                                      count
+  .self                                 =                                       .
+  .size                                 =                                       ( 1 * count )
+}
+struc rw                                count
+{
+  .                                     rw                                      count
+  .self                                 =                                       .
+  .size                                 =                                       ( 2 * count )
+}
+struc rd                                count
+{
+  .                                     rd                                      count
+  .self                                 =                                       .
+  .size                                 =                                       ( 4 * count )
+}
+struc rq                                count
+{
+  .                                     rq                                      count
+  .self                                 =                                       .
+  .size                                 =                                       ( 8 * count )
+}
+struc ab                                count
+{
+  .size                                 =                                       ( 1 * count )
+  .self                                 =                                       _alloc_
+  label . at _alloc_
+  _alloc_                               =                                       ( _alloc_ + ( 1 * count ))
+}
+struc aw                                count
+{
+  .size                                 =                                       ( 2 * count )
+  .self                                 =                                       _alloc_
+  label . at _alloc_
+  _alloc_                               =                                       ( _alloc_ + ( 2 * count ))
+}
+struc ad                                count
+{
+  .size                                 =                                       ( 4 * count )
+  .self                                 =                                       _alloc_
+  label . at _alloc_
+  _alloc_                               =                                       ( _alloc_ + ( 4 * count ))
+}
+struc aq                                count
+{
+  .size                                 =                                       ( 8 * count )
+  .self                                 =                                       _alloc_
+  label . at _alloc_
+  _alloc_                               =                                       ( _alloc_ + ( 8 * count ))
+}
+struc adq                               count
+{
+  .size                                 =                                       ( 16 * count )
+  .self                                 =                                       _alloc_
+  label . at _alloc_
+  _alloc_                               =                                       ( _alloc_ + ( 16 * count ))
+}
+
+;( special macros )
+virtual                                 at null
+  virtual@sbox_rijndael::
+  ;; 0x#0, 0x#1, 0x#2, 0x#3, 0x#4, 0x#5, 0x#6, 0x#7, 0x#8, 0x#9, 0x#a, 0x#b, 0x#c, 0x#d, 0x#e, 0x#f
+  db 0x63, 0x7C, 0x77, 0x7B, 0xF2, 0x6B, 0x6F, 0xC5, 0x30, 0x01, 0x67, 0x2B, 0xFE, 0xD7, 0xAB, 0x76 ;;0x0#
+  db 0xCA, 0x82, 0xC9, 0x7D, 0xFA, 0x59, 0x47, 0xF0, 0xAD, 0xD4, 0xA2, 0xAF, 0x9C, 0xA4, 0x72, 0xC0 ;;0x1#
+  db 0xB7, 0xFD, 0x93, 0x26, 0x36, 0x3F, 0xF7, 0xCC, 0x34, 0xA5, 0xE5, 0xF1, 0x71, 0xD8, 0x31, 0x15 ;;0x2#
+  db 0x04, 0xC7, 0x23, 0xC3, 0x18, 0x96, 0x05, 0x9A, 0x07, 0x12, 0x80, 0xE2, 0xEB, 0x27, 0xB2, 0x75 ;;0x3#
+  db 0x09, 0x83, 0x2C, 0x1A, 0x1B, 0x6E, 0x5A, 0xA0, 0x52, 0x3B, 0xD6, 0xB3, 0x29, 0xE3, 0x2F, 0x84 ;;0x4#
+  db 0x53, 0xD1, 0x00, 0xED, 0x20, 0xFC, 0xB1, 0x5B, 0x6A, 0xCB, 0xBE, 0x39, 0x4A, 0x4C, 0x58, 0xCF ;;0x5#
+  db 0xD0, 0xEF, 0xAA, 0xFB, 0x43, 0x4D, 0x33, 0x85, 0x45, 0xF9, 0x02, 0x7F, 0x50, 0x3C, 0x9F, 0xA8 ;;0x6#
+  db 0x51, 0xA3, 0x40, 0x8F, 0x92, 0x9D, 0x38, 0xF5, 0xBC, 0xB6, 0xDA, 0x21, 0x10, 0xFF, 0xF3, 0xD2 ;;0x7#
+  db 0xCD, 0x0C, 0x13, 0xEC, 0x5F, 0x97, 0x44, 0x17, 0xC4, 0xA7, 0x7E, 0x3D, 0x64, 0x5D, 0x19, 0x73 ;;0x8#
+  db 0x60, 0x81, 0x4F, 0xDC, 0x22, 0x2A, 0x90, 0x88, 0x46, 0xEE, 0xB8, 0x14, 0xDE, 0x5E, 0x0B, 0xDB ;;0x9#
+  db 0xE0, 0x32, 0x3A, 0x0A, 0x49, 0x06, 0x24, 0x5C, 0xC2, 0xD3, 0xAC, 0x62, 0x91, 0x95, 0xE4, 0x79 ;;0xa#
+  db 0xE7, 0xC8, 0x37, 0x6D, 0x8D, 0xD5, 0x4E, 0xA9, 0x6C, 0x56, 0xF4, 0xEA, 0x65, 0x7A, 0xAE, 0x08 ;;0xb#
+  db 0xBA, 0x78, 0x25, 0x2E, 0x1C, 0xA6, 0xB4, 0xC6, 0xE8, 0xDD, 0x74, 0x1F, 0x4B, 0xBD, 0x8B, 0x8A ;;0xc#
+  db 0x70, 0x3E, 0xB5, 0x66, 0x48, 0x03, 0xF6, 0x0E, 0x61, 0x35, 0x57, 0xB9, 0x86, 0xC1, 0x1D, 0x9E ;;0xd#
+  db 0xE1, 0xF8, 0x98, 0x11, 0x69, 0xD9, 0x8E, 0x94, 0x9B, 0x1E, 0x87, 0xE9, 0xCE, 0x55, 0x28, 0xDF ;;0xe#
+  db 0x8C, 0xA1, 0x89, 0x0D, 0xBF, 0xE6, 0x42, 0x68, 0x41, 0x99, 0x2D, 0x0F, 0xB0, 0x54, 0xBB, 0x16 ;;0xf#
+end virtual
+struc __hash_char__                     seed,                                   char
+{
+  local temp, hash
+  hash                                  =                                       ( seed xor char )
+  repeat                                7
+    load temp                           byte from                               virtual@sbox_rijndael:( hash and 0x00000000000000ff )
+    hash                                =                                       ((  hash             and 0xffffffffffffff00 ) or temp )
+    temp                                =                                       ((  hash             and 0xffff800000000000 ) shr ( 64 - 17 ))
+    hash                                =                                       ((( hash             and 0x00007fffffffffff ) shl  17 ) or temp )
+  end repeat
+  .                                     =                                       hash
+}
+struc __hash__                          seed,                                   string
+{
+  local chars, size, hash
+  virtual at 0
+    chars::
+      db string
+    size                                =                                       $
+  end virtual
+  hash                                  =                                       seed
+  repeat                                size
+    load char                           byte from                               chars:( % - 1 )
+    hash __hash_char__                  hash,                                   char
+  end repeat
+  .                                     =                                       hash
+}
+macro __save__                          save,                                   temp
+{
+  if ( save eq )
+    display                             '[asm] failed to save nothing in __save__!'
+    err
+  else if ( temp eq )
+    push                                save
+  else
+    if ( save eq temp )
+      push                              save
+    else
+      display                           '[asm] __save__: ', save ' != ', temp, 10
+    end if
+  end if
+}
+macro __load__                          save,                                   temp
+{
+  if ( save eq )
+    display                             '[asm] failed to load nothing in __load__!'
+    err
+  else if ( temp eq )
+    pop                                 save
+  else
+    if ( save eq temp )
+      pop                               save
+    else
+      display                           '[asm] __load__: ', save ' != ', temp, 10
+    end if
+  end if
+}
+macro displayValue                      string,                                 value
+{
+  display                               string
+  displayHex                            ( value )
+  display                               10
+}
+macro displayHex                        value
+{
+  local                                 char
+  repeat 16
+    char                                =                                       ( '0' + ((( value ) shr ( 64 - ( % * 4 ))) and 0x0F ))
+    if ( char > '9' )
+      char                              =                                       ( char + 'A' - '9' - 1 )
+    end if
+    display                             char
+  end repeat
+}
+macro displayHex4                       value
+{
+  local                                 char
+  repeat 8
+    char                                =                                       ( '0' + ((( value ) shr ( 32 - ( % * 4 ))) and 0x0F ))
+    if ( char > '9' )
+      char                              =                                       ( char + 'A' - '9' - 1 )
+    end if
+    display                             char
+  end repeat
+}
+macro displayHex2                       value
+{
+  local                                 char
+  repeat 4
+    char                                =                                       ( '0' + ((( value ) shr ( 16 - ( % * 4 ))) and 0x0F ))
+    if ( char > '9' )
+      char                              =                                       ( char + 'A' - '9' - 1 )
+    end if
+    display                             char
+  end repeat
+}
+macro displayHex1                       value
+{
+  local                                 char
+  repeat 2
+    char                                =                                       ( '0' + ((( value ) shr (  8 - ( % * 4 ))) and 0x0F ))
+    if ( char > '9' )
+      char                              =                                       ( char + 'A' - '9' - 1 )
+    end if
+    display                             char
+  end repeat
+}
+macro __value__                         this,                                   value
+{
+  match [addr], value
+  \{
+    this.type                           =                                       'addr'
+  \}
+  if ( value in <> )
+}
+macro __op__                            this,                                   op
+{
+  match =byte value, op
+  \{
+    this.size                           =                                       1
+    this.type                           =                                       'byte'
+  \}
+  match =word value, op
+  \{
+    this.size                           =                                       2
+    this.type                           =                                       'word'
+  \}
+  match =dword value, op
+  \{
+    this.size                           =                                       4
+    this.type                           =                                       'dword'
+  \}
+  match =pword value, op
+  \{
+    this.size                           =                                       6
+    this.type                           =                                       'pword'
+  \}
+  match =fword value, op
+  \{
+    this.size                           =                                       6
+    this.type                           =                                       'fword'
+  \}
+  match =qword value, op
+  \{
+    this.size                           =                                       8
+    this.type                           =                                       'qword'
+  \}
+  match =tbyte value, op
+  \{
+    this.size                           =                                       10
+    this.type                           =                                       'tbyte'
+  \}
+  match =tword value, op
+  \{
+    this.size                           =                                       10
+    this.type                           =                                       'tword'
+  \}
+  match =dqword value, op
+  \{
+    this.size                           =                                       16
+    this.type                           =                                       'dqword'
+  \}
+  match =xword value, op
+  \{
+    this.size                           =                                       16
+    this.type                           =                                       'xword'
+  \}
+  match =qqword value, op
+  \{
+    this.size                           =                                       32
+    this.type                           =                                       'qqword'
+  \}
+  match =yqword value, op
+  \{
+    this.size                           =                                       32
+    this.type                           =                                       'yword'
+  \}
+  match value, op
+  \{
+    this.size                           =                                       0
+    __value__                           this,                                   value
+  \}
+}
+;( other macros )
+macro sbaSignature                      off
+{
+  if ( off eq )
+  else
+    rb  off
+  end if
+  db  0x13, 0x37, 0x23, 0x42, 0x19, 0x96, 0x10, 0x03
+}
+macro pad                               segments
+{
+  if ( segments eq )
+    if (( $ and 0x0000000000000fff ) = 0 )
+    else
+      rb                                ( 4096 - ( $ and 0x0000000000000fff ))
+    end if
+  else
+    rb                                  (( 0x1000 * segments ) + ( _start and 0xfffffffffffff000 ) - $ )
+  end if
+}
+macro global [ ignore ]
+{
+  ;< empty >
+}
+macro remark ignore
+{
+  match +,-
+}
+macro rem ignore
+{
+  match +,-
+}
+macro do ignore
+{
+  match +,+
+}

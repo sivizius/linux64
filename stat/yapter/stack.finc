@@ -1,0 +1,57 @@
+struc sbaStack                          size
+{
+  .                                     =                                       myCount
+  match any,size
+  \{
+    sbaStack                            size
+  \}
+  match ,size
+  \{
+    sbaStack
+  \}
+}
+macro sbaStack                          size
+{
+  ;( stack )
+  ;{
+  ;:  allocate #resv bytes as stack
+  ;:  *stack points at the end of the associated page
+  ;:  0x00  word                        <stack>                                 <stack>
+  ;:  0x02  word                        resv                                    resv
+  ;:  0x04  magic                       'stck'                                  unused
+  ;:  0x08  magic/*byte[size]           23 42 1337 1996 10 03                   *stack
+  ;}
+  if ( _head_ eq '<none>' )
+    display                             '[asm:sba] an error occured while processing yapter <stack>:  headless file!'
+    err
+  end if
+  if ( size and 0x0000000000000fff )
+    size                                =                                       (( size + 4096 ) and 0xfffffffffffff000 )
+  end if
+  if ( size and 0xffffffff00000000 )
+    display                             '[asm:sba] an error occured while processing yapter <stack>: _size_ too large!'
+    err
+  end if
+  store word                            sbaYapter_tStack                        at vYapters:( oYapters + 0x00 )
+  store word                            size                                    at vYapters:( oYapters + 0x02 )         ;size
+  store dword                           'stck'                                  at vYapters:( oYapters + 0x04 )         ;magic
+  store qword                           0x0310961937132342                      at vYapters:( oYapters + 0x08 )         ;very magic
+  oYapters                              =                                       ( oYapters + 0x10 )
+  myCount                               =                                       ( myCount + 1 )
+  display                               '[asm:sba] <stack>        (2016-02-09) %'
+  displayHex2                           ( myCount + 0 )
+  display                               ' '
+  displayHex2                           sbaYapter_tStack
+  display                               ' '
+  displayHex2                           _load_
+  display                               ' '
+  display                               ' »st« »ck« *0x'
+  displayHex                            _file_
+  display                               ' -> *0x'
+  displayHex                            myOffset
+  display                               ' #0x'
+  displayHex2                           _size_
+  display                               ' ( #0x'
+  displayHex2                           _load_
+  display                               ' )', 10
+}

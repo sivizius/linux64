@@ -1,0 +1,892 @@
+machine_sFinal                          =                                       0x00000000
+machine_sNull                           =                                       0x00000000
+machine_sNUL                            =                                       0x00000000
+machine_sBell                           =                                       0x00000007
+machine_sBEL                            =                                       0x00000007
+machine_sBackspace                      =                                       0x00000008
+machine_sTabulator                      =                                       0x00000009
+machine_sTAB                            =                                       0x00000009
+machine_sNewline                        =                                       0x0000000a
+machine_sLineFeed                       =                                       0x0000000a
+machine_sLF                             =                                       0x0000000a
+machine_sVerticalTab                    =                                       0x0000000b
+machine_sVT                             =                                       0x0000000b
+machine_sFormFeed                       =                                       0x0000000c
+machine_sFF                             =                                       0x0000000c
+machine_sCarriageReturn                 =                                       0x0000000d
+machine_sCR                             =                                       0x0000000d
+machine_sWhitespace                     =                                       0x00000020
+machine_sQuotation                      =                                       0x00000022
+machine_sEscape                         =                                       0x0000005c
+machine_sDEL                            =                                       0x0000007f
+machine_fCaseMask                       =                                       0x00000020
+machine_fSpecial                        =                                       0x80000000
+machine_fCharMask                       =                                       0x001fffff
+machine_sUpper                          =                                       'A' + machine_fSpecial                  ;[A-Z]
+machine_sLower                          =                                       'B' + machine_fSpecial                  ;[a-z]
+machine_sAlpha                          =                                       'C' + machine_fSpecial                  ;[A-Za-z]       - A-Z->a-z
+machine_sAlphaSave                      =                                       'D' + machine_fSpecial                  ;[A-Za-z]
+machine_sAlphaNumeric                   =                                       'E' + machine_fSpecial                  ;[0-9A-Za-z]    - A-Z->a-z
+machine_sAlphaNumericSave               =                                       'F' + machine_fSpecial                  ;[0-9A-Za-z]
+machine_sOctal                          =                                       'G' + machine_fSpecial                  ;[0-7]
+machine_sDecimal                        =                                       'H' + machine_fSpecial                  ;[0-9]
+machine_sNoDecimal                      =                                       'I' + machine_fSpecial                  ;[^0-9]
+machine_sHexadecimal                    =                                       'J' + machine_fSpecial                  ;[0-9A-Fa-f]    - A-F->a-f
+machine_sHexadecimalSave                =                                       'K' + machine_fSpecial                  ;[0-9A-Fa-f]
+machine_sPunctuation                    =                                       'L' + machine_fSpecial                  ;[]
+machine_sBlank                          =                                       'M' + machine_fSpecial                  ;[\t\s]
+machine_sSpace                          =                                       'N' + machine_fSpecial                  ;[\t\n\v\f\r\s]
+machine_sNoSpace                        =                                       'O' + machine_fSpecial                  ;[^\s]
+machine_sControl                        =                                       'P' + machine_fSpecial                  ;[]
+machine_sGraphical                      =                                       'Q' + machine_fSpecial                  ;[]
+machine_sPrintable                      =                                       'R' + machine_fSpecial                  ;[]
+machine_sWord                           =                                       'S' + machine_fSpecial                  ;[0-9A-Za-z_]   - A-Z->a-z
+machine_sWordSave                       =                                       'T' + machine_fSpecial                  ;[0-9A-Za-z_]
+machine_sNoWord                         =                                       'U' + machine_fSpecial                  ;[^0-9A-Za-z_]  - A-Z->a-z
+machine_sNoWordSave                     =                                       'V' + machine_fSpecial                  ;[^0-9A-Za-z_]
+machine_sString                         =                                       'W' + machine_fSpecial                  ;["']
+machine_sMathematical                   =                                       'X' + machine_fSpecial                  ;[+-*/^%<=>|&!~]
+machine_sBrackets                       =                                       'Y' + machine_fSpecial                  ;[<{[()]}>]
+machine_sAny                            =                                       'Z' + machine_fSpecial                  ;[.]
+machine_sNoCaseA                        =                                       'a' + machine_fSpecial                  ;[Aa]
+machine_sNoCaseB                        =                                       'b' + machine_fSpecial                  ;[Bb]
+machine_sNoCaseC                        =                                       'c' + machine_fSpecial                  ;[Cc]
+machine_sNoCaseD                        =                                       'd' + machine_fSpecial                  ;[Dd]
+machine_sNoCaseE                        =                                       'e' + machine_fSpecial                  ;[Ee]
+machine_sNoCaseF                        =                                       'f' + machine_fSpecial                  ;[Ff]
+machine_sNoCaseG                        =                                       'g' + machine_fSpecial                  ;[Gg]
+machine_sNoCaseH                        =                                       'h' + machine_fSpecial                  ;[Hh]
+machine_sNoCaseI                        =                                       'i' + machine_fSpecial                  ;[Ii]
+machine_sNoCaseJ                        =                                       'j' + machine_fSpecial                  ;[Jj]
+machine_sNoCaseK                        =                                       'k' + machine_fSpecial                  ;[Kk]
+machine_sNoCaseL                        =                                       'l' + machine_fSpecial                  ;[Ll]
+machine_sNoCaseM                        =                                       'm' + machine_fSpecial                  ;[Mm]
+machine_sNoCaseN                        =                                       'n' + machine_fSpecial                  ;[Nn]
+machine_sNoCaseO                        =                                       'o' + machine_fSpecial                  ;[Oo]
+machine_sNoCaseP                        =                                       'p' + machine_fSpecial                  ;[Pp]
+machine_sNoCaseQ                        =                                       'q' + machine_fSpecial                  ;[Qq]
+machine_sNoCaseR                        =                                       'r' + machine_fSpecial                  ;[Rr]
+machine_sNoCaseS                        =                                       's' + machine_fSpecial                  ;[Ss]
+machine_sNoCaseT                        =                                       't' + machine_fSpecial                  ;[Tt]
+machine_sNoCaseU                        =                                       'u' + machine_fSpecial                  ;[Uu]
+machine_sNoCaseV                        =                                       'v' + machine_fSpecial                  ;[Vv]
+machine_sNoCaseW                        =                                       'w' + machine_fSpecial                  ;[Ww]
+machine_sNoCaseX                        =                                       'x' + machine_fSpecial                  ;[Xx]
+machine_sNoCaseY                        =                                       'y' + machine_fSpecial                  ;[Yy]
+machine_sNoCaseZ                        =                                       'z' + machine_fSpecial                  ;[Zz]
+machine_eNone                           =                                       0x00
+machine_eUnexspectedChar                =                                       0x01
+machine_eUnexspectedNull                =                                       0x02
+machine_eNotImplemented                 =                                       0x03
+
+macro machine_init            getChar
+{
+  __getChar__                 equ                           getChar
+}
+macro machine_newChar
+{
+  call                        __getChar__
+}
+macro machine_final           error
+{
+  match any, error
+  \{
+    mov                       rax,                          error
+  \}
+  match , error
+  \{
+    null                      rax
+  \}
+  call                        [ parser9
+}
+
+macro machine_ifTest          chr,                          true,               false
+{
+  machine_newChar
+  machine_orTest              chr,                          true,               false
+}
+macro machine_ifCase          chr,                          jump
+{
+  machine_newChar
+  machine_orCase              chr,                          jump
+}
+macro machine_ifFail          chr,                          jump
+{
+  machine_newChar
+  machine_orFail              chr,                          jump
+}
+macro machine_string          jump,                         [ chars ]
+{
+  forward
+    machine_ifFail            chars,                        jump
+}
+macro machine_orTest          chr,                          true,               false
+{
+  ;if chr in class
+  ;  jmp true
+  ;else
+  ;  jmp false
+  ;end if
+  ;usefull as a branch
+  if  ( chr and machine_fSpecial )
+    if      ( chr = machine_sUpper )
+      cmp                     al,                           'A'
+      jb                      false
+      cmp                     al,                           'Z'
+      jbe                     true
+      jmp                     false
+    else if ( chr = machine_sLower )
+      cmp                     al,                           'a'
+      jb                      false
+      cmp                     al,                           'z'
+      jbe                     true
+      jmp                     false
+    else if ( chr = machine_sAlpha )
+      or                      al,                           machine_fCaseMask
+      cmp                     al,                           'a'
+      jb                      false
+      cmp                     al,                           'z'
+      jbe                     true
+      jmp                     false
+    else if ( chr = machine_sAlphaSave )
+      cmp                     al,                           'A'
+      jb                      false
+      cmp                     al,                           'Z'
+      jbe                     true
+      cmp                     al,                           'a'
+      jb                      false
+      cmp                     al,                           'z'
+      jbe                     true
+      jmp                     false
+    else if ( chr = machine_sAlphaNumeric )
+      cmp                     al,                           '0'
+      jb                      false
+      cmp                     al,                           '9'
+      jbe                     true
+      or                      al,                           machine_fCaseMask
+      cmp                     al,                           'a'
+      jb                      false
+      cmp                     al,                           'z'
+      jbe                     true
+      jmp                     false
+    else if ( chr = machine_sAlphaNumericSave )
+      cmp                     al,                           '0'
+      jb                      false
+      cmp                     al,                           '9'
+      jbe                     true
+      cmp                     al,                           'A'
+      jb                      false
+      cmp                     al,                           'Z'
+      jbe                     true
+      cmp                     al,                           'a'
+      jb                      false
+      cmp                     al,                           'z'
+      jbe                     true
+      jmp                     false
+    else if ( chr = machine_sOctal )
+      cmp                     al,                           '0'
+      jb                      false
+      cmp                     al,                           '7'
+      jbe                     true
+      jmp                     false
+    else if ( chr = machine_sDecimal )
+      cmp                     al,                           '0'
+      jb                      false
+      cmp                     al,                           '9'
+      jbe                     true
+      jmp                     false
+    else if ( chr = machine_sNoDecimal )
+      cmp                     al,                           '0'
+      jb                      true
+      cmp                     al,                           '9'
+      jbe                     false
+      jmp                     true
+    else if ( chr = machine_sHexadecimal )
+      cmp                     al,                           '0'
+      jb                      false
+      cmp                     al,                           '9'
+      jbe                     true
+      or                      al,                           machine_fCaseMask
+      cmp                     al,                           'a'
+      jb                      false
+      cmp                     al,                           'f'
+      jbe                     true
+      jmp                     false
+    else if ( chr = machine_sHexadecimalSave )
+      cmp                     al,                           '0'
+      jb                      false
+      cmp                     al,                           '9'
+      jbe                     true
+      cmp                     al,                           'A'
+      jb                      false
+      cmp                     al,                           'F'
+      jbe                     true
+      cmp                     al,                           'a'
+      jb                      false
+      cmp                     al,                           'f'
+      jbe                     true
+      jmp                     false
+    else if ( chr = machine_sPunctuation )
+      cmp                     al,                           0x21
+      jb                      false
+      cmp                     al,                           0x2f
+      jbe                     true
+      cmp                     al,                           0x3a
+      jb                      false
+      cmp                     al,                           0x40
+      jbe                     true
+      cmp                     al,                           0x5b
+      jb                      false
+      cmp                     al,                           0x60
+      jbe                     true
+      cmp                     al,                           0x7b
+      jb                      false
+      cmp                     al,                           0x7e
+      jbe                     true
+      jmp                     false
+    else if ( chr = machine_sBlank )
+      display 'blank', 10
+      cmp                     al,                           machine_sWhitespace
+      je                      true
+      cmp                     al,                           machine_sTabulator
+      je                      true
+      jmp                     false
+    else if ( chr = machine_sSpace )
+      cmp                     al,                           0x09
+      jb                      false
+      cmp                     al,                           0x0d
+      jbe                     true
+      cmp                     al,                           machine_sWhitespace
+      je                      true
+      jmp                     false
+    else if ( chr = machine_sNoSpace )
+      cmp                     al,                           0x09
+      jb                      true
+      cmp                     al,                           0x0d
+      jbe                     false
+      cmp                     al,                           machine_sWhitespace
+      je                      false
+      jmp                     true
+    else if ( chr = machine_sControl )
+      cmp                     al,                           0x1f
+      jbe                     true
+      cmp                     al,                           0x7f
+      je                      true
+      jmp                     false
+    else if ( chr = machine_sGraphical )
+      cmp                     al,                           0x21
+      jb                      false
+      cmp                     al,                           0x7e
+      jbe                     true
+      jmp                     false
+    else if ( chr = machine_sPrintable )
+      cmp                     al,                           0x09
+      jb                      false
+      cmp                     al,                           0x0d
+      jbe                     true
+      cmp                     al,                           0x20
+      jb                      false
+      cmp                     al,                           0x7e
+      jbe                     true
+      jmp                     false
+    else if ( chr = machine_sWord )
+      cmp                     al,                           '0'
+      jb                      false
+      cmp                     al,                           '9'
+      jbe                     true
+      cmp                     al,                           '_'
+      je                      true
+      or                      al,                           machine_fCaseMask
+      cmp                     al,                           'a'
+      jb                      false
+      cmp                     al,                           'z'
+      jbe                     true
+      jmp                     false
+    else if ( chr = machine_sWordSave )
+      cmp                     al,                           '0'
+      jb                      false
+      cmp                     al,                           '9'
+      jbe                     true
+      cmp                     al,                           '_'
+      je                      true
+      cmp                     al,                           'A'
+      jb                      false
+      cmp                     al,                           'Z'
+      jbe                     true
+      cmp                     al,                           'a'
+      jb                      false
+      cmp                     al,                           'z'
+      jbe                     true
+      jmp                     false
+    else if ( chr = machine_sNoWord )
+      cmp                     al,                           '0'
+      jb                      true
+      cmp                     al,                           '9'
+      jbe                     false
+      cmp                     al,                           '_'
+      je                      false
+      or                      al,                           machine_fCaseMask
+      cmp                     al,                           'a'
+      jb                      true
+      cmp                     al,                           'z'
+      jbe                     false
+      jmp                     true
+    else if ( chr = machine_sNoWordSave )
+      cmp                     al,                           '0'
+      jb                      true
+      cmp                     al,                           '9'
+      jbe                     false
+      cmp                     al,                           '_'
+      je                      false
+      cmp                     al,                           'A'
+      jb                      true
+      cmp                     al,                           'Z'
+      jbe                     false
+      cmp                     al,                           'a'
+      jb                      true
+      cmp                     al,                           'z'
+      jbe                     false
+      jmp                     true
+    else if ( chr = machine_sString )
+      cmp                     al,                           0x22
+      je                      true
+      cmp                     al,                           0x27
+      je                      true
+      jmp                     false
+    else if ( chr = machine_sMathematical )
+      cmp                     al,                           '!'
+      je                      true
+      cmp                     al,                           '%'
+      je                      true
+      cmp                     al,                           '&'
+      je                      true
+      cmp                     al,                           '*'
+      je                      true
+      cmp                     al,                           '+'
+      je                      true
+      cmp                     al,                           '-'
+      je                      true
+      cmp                     al,                           '/'
+      je                      true
+      cmp                     al,                           '<'
+      je                      true
+      cmp                     al,                           '='
+      je                      true
+      cmp                     al,                           '>'
+      je                      true
+      cmp                     al,                           '^'
+      je                      true
+      cmp                     al,                           '|'
+      je                      true
+      cmp                     al,                           '~'
+      je                      true
+      jmp                     false
+    else if ( chr = machine_sBrackets )
+      cmp                     al,                           '<'
+      je                      true
+      cmp                     al,                           '{'
+      je                      true
+      cmp                     al,                           '['
+      je                      true
+      cmp                     al,                           '('
+      je                      true
+      cmp                     al,                           ')'
+      je                      true
+      cmp                     al,                           ']'
+      je                      true
+      cmp                     al,                           '}'
+      je                      true
+      cmp                     al,                           '>'
+      je                      true
+      jmp                     false
+    else if ( chr = machine_sAny )
+      jmp                     true
+    else if ((( chr and machine_fCharMask ) >= machine_fNoCaseA ) & (( chr and machine_fCharMask ) <= machine_fNoCaseZ ))
+      or                      al,                           maschine_fCaseMask
+      cmp                     al,                           ( chr and machine_fCharMask )
+      je                      true
+      jmp                     false
+    else
+      err "Error: Unknown special char!"
+    end if
+  else
+    cmp                       al,                           ( chr and machine_fCharMask )
+    je                        true
+    jmp                       false
+  end if
+}
+macro machine_orCase          chr,                          jump
+{
+  ;if chr in class
+  ;  jmp jump
+  ;end if
+  ;usefull as a choice
+  local final
+  if  ( chr and machine_fSpecial )
+    if      ( chr = machine_sUpper )
+      cmp                     al,                           'A'
+      jb                      final
+      cmp                     al,                           'Z'
+      jbe                     jump
+    else if ( chr = machine_sLower )
+      cmp                     al,                           'a'
+      jb                      final
+      cmp                     al,                           'z'
+      jbe                     jump
+    else if ( chr = machine_sAlpha )
+      or                      al,                           machine_fCaseMask
+      cmp                     al,                           'a'
+      jb                      final
+      cmp                     al,                           'z'
+      jbe                     jump
+    else if ( chr = machine_sAlphaNumeric )
+      cmp                     al,                           '0'
+      jb                      final
+      cmp                     al,                           '9'
+      jbe                     jump
+      or                      al,                           machine_fCaseMask
+      cmp                     al,                           'a'
+      jb                      final
+      cmp                     al,                           'z'
+      jbe                     jump
+    else if ( chr = machine_sOctal )
+      cmp                     al,                           '0'
+      jb                      final
+      cmp                     al,                           '7'
+      jbe                     jump
+    else if ( chr = machine_sDecimal )
+      cmp                     al,                           '0'
+      jb                      final
+      cmp                     al,                           '9'
+      jbe                     jump
+    else if ( chr = machine_sNoDecimal )
+      cmp                     al,                           '0'
+      jb                      jump
+      cmp                     al,                           '9'
+      ja                      jump
+    else if ( chr = machine_sHexadecimal )
+      cmp                     al,                           '0'
+      jb                      final
+      cmp                     al,                           '9'
+      jbe                     jump
+      or                      al,                           machine_fCaseMask
+      cmp                     al,                           'a'
+      jb                      final
+      cmp                     al,                           'f'
+      jbe                     jump
+    else if ( chr = machine_sPunctuation )
+      cmp                     al,                           0x21
+      jb                      final
+      cmp                     al,                           0x2f
+      jbe                     jump
+      cmp                     al,                           0x3a
+      jb                      final
+      cmp                     al,                           0x40
+      jbe                     jump
+      cmp                     al,                           0x5b
+      jb                      final
+      cmp                     al,                           0x60
+      jbe                     jump
+      cmp                     al,                           0x7b
+      jb                      final
+      cmp                     al,                           0x7e
+      jbe                     jump
+    else if ( chr = machine_sBlank )
+      cmp                     al,                           machine_sWhitespace
+      je                      jump
+      cmp                     al,                           machine_sTabulator
+      je                      jump
+    else if ( chr = machine_sSpace )
+      cmp                     al,                           0x09
+      jb                      final
+      cmp                     al,                           0x0d
+      jbe                     jump
+      cmp                     al,                           machine_sWhitespace
+      je                      jump
+    else if ( chr = machine_sNoSpace )
+      cmp                     al,                           0x09
+      jb                      jump
+      cmp                     al,                           0x0d
+      jbe                     final
+      cmp                     al,                           machine_sWhitespace
+      jne                     jump
+    else if ( chr = machine_sControl )
+      cmp                     al,                           0x1f
+      jbe                     jump
+      cmp                     al,                           0x7f
+      je                      jump
+    else if ( chr = machine_sGraphical )
+      cmp                     al,                           0x21
+      jb                      final
+      cmp                     al,                           0x7e
+      jbe                     jump
+    else if ( chr = machine_sPrintable )
+      cmp                     al,                           0x09
+      jb                      final
+      cmp                     al,                           0x0d
+      jbe                     jump
+      cmp                     al,                           0x20
+      jb                      final
+      cmp                     al,                           0x7e
+      jbe                     jump
+    else if ( chr = machine_sWord )
+      cmp                     al,                           '0'
+      jb                      final
+      cmp                     al,                           '9'
+      jbe                     jump
+      cmp                     al,                           '_'
+      je                      jump
+      or                      al,                           machine_fCaseMask
+      cmp                     al,                           'a'
+      jb                      final
+      cmp                     al,                           'z'
+      jbe                     jump
+    else if ( chr = machine_sNoWord )
+      cmp                     al,                           '0'
+      jb                      jump
+      cmp                     al,                           '9'
+      jbe                     final
+      cmp                     al,                           '_'
+      je                      final
+      or                      al,                           machine_fCaseMask
+      cmp                     al,                           'a'
+      jb                      jump
+      cmp                     al,                           'z'
+      ja                      jump
+    else if ( chr = machine_sString )
+      cmp                     al,                           0x22
+      je                      jump
+      cmp                     al,                           0x27
+      je                      jump
+    else if ( chr = machine_sMathematical )
+      cmp                     al,                           '!'
+      je                      jump
+      cmp                     al,                           '%'
+      je                      jump
+      cmp                     al,                           'and'
+      je                      jump
+      cmp                     al,                           '*'
+      je                      jump
+      cmp                     al,                           '+'
+      je                      jump
+      cmp                     al,                           '-'
+      je                      jump
+      cmp                     al,                           '/'
+      je                      jump
+      cmp                     al,                           '<'
+      je                      jump
+      cmp                     al,                           '='
+      je                      jump
+      cmp                     al,                           '>'
+      je                      jump
+      cmp                     al,                           '^'
+      je                      jump
+      cmp                     al,                           '|'
+      je                      jump
+      cmp                     al,                           '~'
+      je                      jump
+    else if ( chr = machine_sBrackets )
+      cmp                     al,                           '<'
+      je                      jump
+      cmp                     al,                           '{'
+      je                      jump
+      cmp                     al,                           '['
+      je                      jump
+      cmp                     al,                           '('
+      je                      jump
+      cmp                     al,                           ')'
+      je                      jump
+      cmp                     al,                           ']'
+      je                      jump
+      cmp                     al,                           '}'
+      je                      jump
+      cmp                     al,                           '>'
+      je                      jump
+    else if ( chr = machine_sAny )
+      jmp                     jump
+    else if ((( chr and machine_fCharMask ) >= machine_fNoCaseA ) & (( chr and machine_fCharMask ) <= machine_fNoCaseZ ))
+      or                      al,                           maschine_fCaseMask
+      cmp                     al,                           ( chr and machine_fCharMask )
+      je                      jump
+    else
+      err "Error: Unknown special char!"
+    end if
+  else
+    cmp                       al,                           ( chr and machine_fCharMask )
+    je                        jump
+  end if
+  final                       =                             $
+}
+macro machine_orFail          chr,                          jump
+{
+  ;if chr not in class
+  ;  jmp jump
+  ;end if
+  ;usefull as string
+  local final
+  if  ( chr and machine_fSpecial )
+    if      ( chr = machine_sUpper )
+      cmp                     al,                           'A'
+      jb                      jump
+      cmp                     al,                           'Z'
+      ja                      jump
+    else if ( chr = machine_sLower )
+      cmp                     al,                           'a'
+      jb                      jump
+      cmp                     al,                           'z'
+      ja                      jump
+    else if ( chr = machine_sAlpha )
+      or                      al,                           machine_fCaseMask
+      cmp                     al,                           'a'
+      jb                      jump
+      cmp                     al,                           'z'
+      ja                      jump
+    else if ( chr = machine_sAlphaNumeric )
+      cmp                     al,                           '0'
+      jb                      jump
+      cmp                     al,                           '9'
+      jbe                     final
+      or                      al,                           machine_fCaseMask
+      cmp                     al,                           'a'
+      jb                      jump
+      cmp                     al,                           'z'
+      ja                      jump
+    else if ( chr = machine_sOctal )
+      cmp                     al,                           '0'
+      jb                      jump
+      cmp                     al,                           '7'
+      ja                      jump
+    else if ( chr = machine_sDecimal )
+      cmp                     al,                           '0'
+      jb                      jump
+      cmp                     al,                           '9'
+      ja                      jump
+    else if ( chr = machine_sNoDecimal )
+      cmp                     al,                           '0'
+      jb                      final
+      cmp                     al,                           '9'
+      jbe                     jump
+    else if ( chr = machine_sHexadecimal )
+      cmp                     al,                           '0'
+      jb                      jump
+      cmp                     al,                           '9'
+      jbe                     final
+      or                      al,                           machine_fCaseMask
+      cmp                     al,                           'a'
+      jb                      jump
+      cmp                     al,                           'f'
+      ja                      jump
+    else if ( chr = machine_sPunctuation )
+      cmp                     al,                           0x21
+      jb                      jump
+      cmp                     al,                           0x2f
+      jbe                     final
+      cmp                     al,                           0x3a
+      jb                      jump
+      cmp                     al,                           0x40
+      jbe                     final
+      cmp                     al,                           0x5b
+      jb                      jump
+      cmp                     al,                           0x60
+      jbe                     final
+      cmp                     al,                           0x7b
+      jb                      jump
+      cmp                     al,                           0x7e
+      ja                      jump
+    else if ( chr = machine_sBlank )
+      cmp                     al,                           machine_sWhitespace
+      je                      final
+      cmp                     al,                           machine_sTabulator
+      jne                     jump
+    else if ( chr = machine_sSpace )
+      cmp                     al,                           0x09
+      jb                      jump
+      cmp                     al,                           0x0d
+      jbe                     final
+      cmp                     al,                           machine_sWhitespace
+      jne                     jump
+    else if ( chr = machine_sNoSpace )
+      cmp                     al,                           0x09
+      jb                      final
+      cmp                     al,                           0x0d
+      jbe                     jump
+      cmp                     al,                           machine_sWhitespace
+      je                      jump
+    else if ( chr = machine_sControl )
+      cmp                     al,                           0x1f
+      jbe                     final
+      cmp                     al,                           0x7f
+      jne                     jump
+    else if ( chr = machine_sGraphical )
+      cmp                     al,                           0x21
+      jb                      jump
+      cmp                     al,                           0x7e
+      ja                      jump
+    else if ( chr = machine_sPrintable )
+      cmp                     al,                           0x09
+      jb                      jump
+      cmp                     al,                           0x0d
+      jbe                     final
+      cmp                     al,                           0x20
+      jb                      jump
+      cmp                     al,                           0x7e
+      ja                      jump
+    else if ( chr = machine_sWord )
+      cmp                     al,                           '0'
+      jb                      jump
+      cmp                     al,                           '9'
+      jbe                     final
+      cmp                     al,                           '_'
+      je                      final
+      or                      al,                           machine_fCaseMask
+      cmp                     al,                           'a'
+      jb                      jump
+      cmp                     al,                           'z'
+      ja                      jump
+    else if ( chr = machine_sNoWord )
+      cmp                     al,                           '0'
+      jb                      jump
+      cmp                     al,                           '9'
+      jbe                     final
+      cmp                     al,                           '_'
+      je                      final
+      or                      al,                           machine_fCaseMask
+      cmp                     al,                           'a'
+      jb                      jump
+      cmp                     al,                           'z'
+      ja                      jump
+    else if ( chr = machine_sString )
+      cmp                     al,                           0x22
+      je                      final
+      cmp                     al,                           0x27
+      jne                     jump
+    else if ( chr = machine_sMathematical )
+      cmp                     al,                           '!'
+      je                      final
+      cmp                     al,                           '%'
+      je                      final
+      cmp                     al,                           'and'
+      je                      final
+      cmp                     al,                           '*'
+      je                      final
+      cmp                     al,                           '+'
+      je                      final
+      cmp                     al,                           '-'
+      je                      final
+      cmp                     al,                           '/'
+      je                      final
+      cmp                     al,                           '<'
+      je                      final
+      cmp                     al,                           '='
+      je                      final
+      cmp                     al,                           '>'
+      je                      final
+      cmp                     al,                           '^'
+      je                      final
+      cmp                     al,                           '|'
+      je                      final
+      cmp                     al,                           '~'
+      jne                     jump
+    else if ( chr = machine_sBrackets )
+      cmp                     al,                           '<'
+      je                      final
+      cmp                     al,                           '{'
+      je                      final
+      cmp                     al,                           '['
+      je                      final
+      cmp                     al,                           '('
+      je                      final
+      cmp                     al,                           ')'
+      je                      final
+      cmp                     al,                           ']'
+      je                      final
+      cmp                     al,                           '}'
+      je                      final
+      cmp                     al,                           '>'
+      jne                     jump
+    else if ( chr = machine_sAny )
+    else if ((( chr and machine_fCharMask ) >= machine_fNoCaseA ) & (( chr and machine_fCharMask ) <= machine_fNoCaseZ ))
+      or                      al,                           maschine_fCaseMask
+      cmp                     al,                           ( chr and machine_fCharMask )
+      jne                     jump
+    else
+      err "Error: Unknown special char!"
+    end if
+  else
+    cmp                       al,                           ( chr and machine_fCharMask )
+    jne                       jump
+  end if
+  final                       =                             $
+}
+macro machine_isTest          aaa,      ooo,                true,               false
+{
+  call                        machine.getChar
+  machine_inTest              aaa,      ooo,                true,               false
+}
+macro machine_isCase          aaa,      ooo,                jump
+{
+  call                        machine.getChar
+  machine_isCase              aaa,      ooo,                jump
+}
+macro machine_isFail          aaa,      ooo,                jump
+{
+  call                        machine.getChar
+  machine_isFail              aaa,      ooo,                jump
+}
+macro machine_inTest          aaa,      ooo,                true,               false
+{
+  if ( aaa < ooo )
+    cmp                       al,       aaa
+    jb                        false
+    cmp                       al,       ooo
+    jbe                       true
+    jmp                       false
+  else if ( aaa = ooo )
+    cmp                       al,       aaa
+    je                        true
+    jmp                       false
+  else
+    cmp                       al,       ooo
+    jb                        false
+    cmp                       al,       aaa
+    jbe                       true
+    jmp                       false
+  end if
+}
+macro machine_inCase          aaa,      ooo,                jump
+{
+  local final
+  if ( aaa < ooo )
+    cmp                       al,       aaa
+    jb                        final
+    cmp                       al,       ooo
+    jbe                       jump
+  else if ( aaa = ooo )
+    cmp                       al,       aaa
+    je                        jump
+  else
+    cmp                       al,       ooo
+    jb                        final
+    cmp                       al,       aaa
+    jbe                       jump
+  end if
+  final:
+}
+macro machine_inFail          aaa,      ooo,                jump
+{
+  local final
+  if ( aaa < ooo )
+    cmp                       al,       aaa
+    jb                        jump
+    cmp                       al,       ooo
+    ja                        jump
+  else if ( aaa = ooo )
+    cmp                       al,       aaa
+    jne                       jump
+  else
+    cmp                       al,       ooo
+    jb                        jump
+    cmp                       al,       aaa
+    ja                        jump
+  end if
+}

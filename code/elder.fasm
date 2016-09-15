@@ -1,0 +1,27 @@
+elder:
+  ;    *high
+  ;     /\
+  ;  ___||________________________
+  ; |                             |
+  ; | node:                       |
+  ; |   * size = 31               |
+  ; |   * NULL                    |==> *left
+  ; |   * ...                     |
+  ; |                             |
+  ; |_____________________________|
+  ;     ||
+  ;     \/
+  ;    *down
+  ;*node -> strucElderNode
+  ;{
+  ;  {
+  ;           .size           dw                            = 31
+  ;   0x00    .flags          db                            flags                         1
+  ;   0x01    .typeL          dw                            valueL.type                   2
+  ;   0x03    .typeD          dw                            valueD.type                   2
+  ;   0x05    .myself         dw                            myself.type                   2
+  ;   0x07    .high           dq                            tree ↑                        8
+  ;   0x0f    .left           dq                            tree -> / value0              8
+  ;   0x17    .down           dq                            tree ↓  / value1              8
+  ;  }
+  ;}

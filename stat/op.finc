@@ -1,0 +1,248 @@
+op_tImmediat                            =                                       0x00
+op_tMemory                              =                                       0x01
+op_tAddress                             =                                       0x02
+op_tPointer                             =                                       0x03
+op_tIndirect                            =                                       0x04
+op_tRegister                            =                                       0x05
+op_tUnknown                             =                                       0xff
+
+rax@type                                =                                       op_tRegister
+rax@size                                =                                       8
+rax@value                               =                                       0
+eax@type                                =                                       op_tRegister
+eax@size                                =                                       4
+eax@value                               =                                       0
+ax@type                                 =                                       op_tRegister
+ax@size                                 =                                       2
+ax@value                                =                                       0
+al@type                                 =                                       op_tRegister
+al@size                                 =                                       1
+al@value                                =                                       0
+ah@type                                 =                                       op_tRegister
+ah@size                                 =                                       1
+ah@value                                =                                       4
+rcx@type                                =                                       op_tRegister
+rcx@size                                =                                       8
+rcx@value                               =                                       1
+ecx@type                                =                                       op_tRegister
+ecx@size                                =                                       4
+ecx@value                               =                                       1
+cx@type                                 =                                       op_tRegister
+cx@size                                 =                                       2
+cx@value                                =                                       1
+cl@type                                 =                                       op_tRegister
+cl@size                                 =                                       1
+cl@value                                =                                       1
+ch@type                                 =                                       op_tRegister
+ch@size                                 =                                       1
+ch@value                                =                                       5
+rdx@type                                =                                       op_tRegister
+rdx@size                                =                                       8
+rdx@value                               =                                       2
+edx@type                                =                                       op_tRegister
+edx@size                                =                                       4
+edx@value                               =                                       2
+dx@type                                 =                                       op_tRegister
+dx@size                                 =                                       2
+dx@value                                =                                       2
+dl@type                                 =                                       op_tRegister
+dl@size                                 =                                       1
+dl@value                                =                                       2
+dh@type                                 =                                       op_tRegister
+dh@size                                 =                                       1
+dh@value                                =                                       6
+rbx@type                                =                                       op_tRegister
+rbx@size                                =                                       8
+rbx@value                               =                                       3
+ebx@type                                =                                       op_tRegister
+ebx@size                                =                                       4
+ebx@value                               =                                       3
+bx@type                                 =                                       op_tRegister
+bx@size                                 =                                       2
+bx@value                                =                                       3
+bl@type                                 =                                       op_tRegister
+bl@size                                 =                                       1
+bl@value                                =                                       3
+bh@type                                 =                                       op_tRegister
+bh@size                                 =                                       1
+bh@value                                =                                       7
+
+struc optype operant
+{
+  local done
+  done equ
+  match =[that=], operant
+  \{
+    done equ true
+    .type = op_tAddress
+    .size = 0
+  \}
+  match =*that, operant
+  \{
+    done equ true
+    .type = op_tPointer
+    .size = 0
+  \}
+  match ==that, operant
+  \{
+    display '=operant', 10
+    done equ true
+    .type = op_tUnknown
+    .size = 0
+  \}
+  match =|that, operant
+  \{
+    display '|operant', 10
+    done equ true
+    .type = op_tUnknown
+    .size = 0
+  \}
+  match =~that, operant
+  \{
+    display '~operant', 10
+    done equ true
+    .type = op_tUnknown
+    .size = 0
+  \}
+  match <that>, operant
+  \{
+    display '^operant', 10
+    done equ true
+    .type = op_tUnknown
+    .size = 0
+  \}
+  match =&that, operant
+  \{
+    display '&operant', 10
+    done equ true
+    .type = op_tUnknown
+    .size = 0
+  \}
+  match =+that, operant
+  \{
+    display '+operant', 10
+    done equ true
+    .type = op_tUnknown
+    .size = 0
+  \}
+  match =*=[that=], operant
+  \{
+    done equ true
+    .type = op_tIndirect
+    .size = 0
+  \}
+  match size =[that=], operant
+  \{
+    match =byte, size
+    \\{
+      done equ true
+      .type                             =                                       op_tMemory
+      .size                             =                                       1
+    \\}
+    match =word, size
+    \\{
+      done equ true
+      .type                             =                                       op_tMemory
+      .size                             =                                       2
+    \\}
+    match =dword, size
+    \\{
+      done equ true
+      .type                             =                                       op_tMemory
+      .size                             =                                       4
+    \\}
+    match =fword, size
+    \\{
+      done equ true
+      .type                             =                                       op_tMemory
+      .size                             =                                       6
+    \\}
+    match =pword, size
+    \\{
+      done equ true
+      .type                             =                                       op_tMemory
+      .size                             =                                       6
+    \\}
+    match =qword, size
+    \\{
+      done equ true
+      .type                             =                                       op_tMemory
+      .size                             =                                       8
+    \\}
+    match =tbyte, size
+    \\{
+      done equ true
+      .type                             =                                       op_tMemory
+      .size                             =                                       10
+    \\}
+    match =tword, size
+    \\{
+      done equ true
+      .type                             =                                       op_tMemory
+      .size                             =                                       10
+    \\}
+    match =dqword, size
+    \\{
+      done equ true
+      .type                             =                                       op_tMemory
+      .size                             =                                       16
+    \\}
+    match =xword, size
+    \\{
+      done equ true
+      .type                             =                                       op_tMemory
+      .size                             =                                       16
+    \\}
+    match =qqword, size
+    \\{
+      done equ true
+      .type                             =                                       op_tMemory
+      .size                             =                                       32
+    \\}
+    match =yword, size
+    \\{
+      done equ true
+      .type                             =                                       op_tMemory
+      .size                             =                                       32
+    \\}
+    match , done
+    \\{
+      done equ true
+      .type                             =                                       op_tUnknown
+      .size                             =                                       0
+    \\}
+  \}
+  match , done
+  \{
+     if ( operant in <rax,eax,ax,al,ah,rcx,ecx,cx,cl,ch,rdx,edx,dx,dl,dh,rbx,ebx,bx,bl,bh> )
+      .type                             =                                       operant#@type
+      .size                             =                                       operant#@size
+      .val                              =                                       operant#@value
+    else
+      .type                             =                                       op_tImmediat
+      .size                             =                                       0
+      .val                              =                                       operant
+      if      ( .val = 0 )
+        .length                         =                                       0
+      else if (( .val < ( 1 shl   8 )) & (( 0 - .val ) <= ( 1 shl   7 )))
+        .length                         =                                       1
+      else if (( .val < ( 1 shl  16 )) & (( 0 - .val ) <= ( 1 shl  15 )))
+        .length                         =                                       2
+      else if (( .val < ( 1 shl  32 )) & (( 0 - .val ) <= ( 1 shl  31 )))
+        .length                         =                                       4
+      else if (( .val < ( 1 shl  48 )) & (( 0 - .val ) <= ( 1 shl  47 )))
+        .length                         =                                       6
+      else if (( .val < ( 1 shl  64 )) & (( 0 - .val ) <= ( 1 shl  63 )))
+        .length                         =                                       8
+      else if (( .val < ( 1 shl  80 )) & (( 0 - .val ) <= ( 1 shl  79 )))
+        .length                         =                                       10
+      else if (( .val < ( 1 shl 128 )) & (( 0 - .val ) <= ( 1 shl 127 )))
+        .length                         =                                       16
+      else if (( .val < ( 1 shl 256 )) & (( 0 - .val ) <= ( 1 shl 255 )))
+        .length                         =                                       32
+      else if (( .val < ( 1 shl 512 )) & (( 0 - .val ) <= ( 1 shl 511 )))
+        .length                         =                                       64
+      end if
+    end if
+  \}
+}

@@ -1,0 +1,14 @@
+onDebug
+{
+  testName0                             str                                     'HalloWelt'
+  testName1                             str                                     'HalloWorld'
+  testName2                             str                                     'HalloWelt'
+  testName3                             str                                     '123456789'
+  symbols.msgSymbolFound                str                                     '[symbols] Symbol found!      UID = 0x'
+  symbols.msgEndOfPage                  str                                     '[symbols] Reached End of Page! You can create a new Page and insert a new Symbol there.', 10
+  symbols.msgCreatePage                 str                                     '[symbols] Create new Page.', 10
+  symbols.msgLastSymbol                 str                                     '[symbols] Reached Last Symbol! You can insert a new Symbol here.', 10
+  symbols.msgInsertSymbol               str                                     '[symbols] Insert new Symbol. UID = 0x'
+  symbols.msgSizeError                  str                                     '[symbols] Something is wrong with the size of the Symbol. The size must be between 1 and 65535!', 10
+  symbols.msgEpicFail                   str                                     '[symbols] Epic Fail!', 10
+}

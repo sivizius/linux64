@@ -1,0 +1,56 @@
+onDebug
+{
+  buffers.msgStart                      str                                     10, "[buffers] *page.start:     0x"
+  buffers.msgStop                       str                                     10, "[buffers] *page.stop:      0x"
+  buffers.msgLast                       str                                     10, "[buffers] *page.last:      0x"
+  buffers.msgHere                       str                                     10, "[buffers] *page.here:      0x"
+  buffers.msgFull                       str                                     10, "[buffers] size_full:       0x"
+  buffers.msgFree                       str                                     10, "[buffers] size_free:       0x"
+  buffers.msgUsed                       str                                     10, "[buffers] size_used:       0x"
+  buffers.msgSpam                       str                                     10, "[buffers] size_spam:       0x"
+  buffers.msgList                       str                                         "[buffers] *list:           0x"
+  buffers.msgLastPage                   str                                     10, "[buffers] *last.page:      0x"
+  buffers.msgLastItem                   str                                     10, "[buffers] *last.item:      0x"
+  buffers.msgSumFull                    str                                     10, "[buffers] sum full_size:   0x"
+  buffers.msgSumFree                    str                                     10, "[buffers] sum free_size:   0x"
+  buffers.msgSumMeta                    str                                     10, "[buffers] sum meta_size:   0x"
+  buffers.msgSumUsed                    str                                     10, "[buffers] sum used_size:   0x"
+  buffers.msgSumSpam                    str                                     10, "[buffers] sum spam_size:   0x"
+  buffers.msgCounter                    str                                     10, "[buffers] count objects:   0x"
+  buffers.msgBufferPointer              str                                     10, "[buffers] *buffer:         0x"
+  buffers.msgBufferSize                 str                                     10, "[buffers] size:            0x"
+  buffers.msgBufferPages                str                                     10, "[buffers] pages:           0x"
+  buffers.msgBufferData                 str                                     10, "[buffers] data:", 10, "> "
+  buffers.msgBufferMore                 str                                     10, "> "
+  buffers.msgBufferFail                 str                                     10, "[buffers] fail: undefined element!", 10
+  buffers.msgWastepicker                str                                     "[buffers] the wastepickers are doing their job!", 10
+  buffers.msgFailInternal               str                                     "[buffers] fail: internal error!", 10
+  buffers.msgFailRemoved                str                                     "[buffers] fail: *buffer already removed! try revive.", 10
+  buffers.msgFailBoundaries             str                                     "[buffers] fail: selected area out of boundaries!", 10
+  ;buffers.msgFailInit                   str                                     "[buffers] fail: module »buffers« not initialized!", 10
+  buffers.msgFailImplementation         str                                     "[buffers] fail: function not implemented yet :-/", 10
+  buffers.msgFailInvalid                str                                     "[buffers] fail: *buffer not valid!", 10
+  buffers.msgFailInvalidFree            str                                     "[buffers] fail: *buffer.free not valid!", 10
+  buffers.msgFailNull                   str                                     "[buffers] fail: *buffer is null!", 10
+  buffers.msgFailSize                   str                                     "[buffers] fail: input_size not valid!", 10
+  buffers.msgFailInput                  str                                     "[buffers] fail: *input not valid!", 10
+  buffers.msgFailDone                   str                                     "[buffers] fail: operation already done?!", 10
+  buffers.msgFailChar                   str                                     "[buffers] fail: invalid character!", 10
+  buffers.msgCallClone                  str                                     10, "[buffers] == clone *buffer, start = NULL, length = NULL ==", 10
+  buffers.msgCallDebug                  str                                     10, "[buffers] == debug ==", 10
+  buffers.msgCallDelete                 str                                     10, "[buffers] == delete *buffer ==", 10
+  buffers.msgCallEcho                   str                                     10, "[buffers] == echo *buffer ==", 10
+  buffers.msgCallExtend                 str                                     10, "[buffers] == extend *buffer, length , *input = NULL, input_size = NULL ==", 10
+  buffers.msgCallInit                   str                                     10, "[buffers] == init ==", 10
+  buffers.msgCallNew                    str                                     10, "[buffers] == new size, input = NULL, input_size = NULL ==", 10
+  buffers.msgCallPutB                   str                                     10, "[buffers] == putB *buffer, byte ==", 10
+  buffers.msgCallPutW                   str                                     10, "[buffers] == putW *buffer, word ==", 10
+  buffers.msgCallPutD                   str                                     10, "[buffers] == putD *buffer, dword ==", 10
+  buffers.msgCallPutQ                   str                                     10, "[buffers] == putQ *buffer, qword ==", 10
+  buffers.msgCallPutBin                 str                                     10, "[buffers] == putBin *buffer, qword, digits ==", 10
+  buffers.msgCallPutOct                 str                                     10, "[buffers] == putOct *buffer, qword, digits ==", 10
+  buffers.msgCallPutDec                 str                                     10, "[buffers] == putDec *buffer, qword, digits ==", 10
+  buffers.msgCallPutHexL                str                                     10, "[buffers] == putHexL *buffer, qword, digits ==", 10
+  buffers.msgCallPutHexU                str                                     10, "[buffers] == putHexU *buffer, qword, digits ==", 10
+  buffers.msgCallSet                    str                                     10, "[buffers] == set *buffer, *input ==", 10
+}

@@ -1,0 +1,56 @@
+macro env_init
+{
+  call                                  environment.init
+}
+macro env_echo                          jump,                                   message
+{
+  local                                 next
+  ;( if environment.get() failed -> jump )
+    call                                environment.get
+    if ( jump eq )
+      jz                                next
+    else
+      jz                                jump
+    end if
+  ;( else )
+  ;{
+    if ( message eq )
+    else
+      push                              rcx
+        echo_put                        message
+      pop                               rcx
+    end if
+    mov                                 sys2arg,                                rcx
+    mov                                 sys1arg,                                r15
+    mov                                 sys0arg,                                STDOUT
+    sys_call                            sys_write
+    next                                =                                       $
+  ;}
+}
+macro env_save                          jump,                                   addr
+{
+  local                                 next
+  ;( if environment.get() failed -> jump )
+    call                                environment.get
+    if ( jump eq )
+      jz                                next
+    else
+      jz                                jump
+    end if
+  ;( else )
+  ;{
+    mov                                 rsi,                                    r15
+    mov                                 rdx,                                    rcx
+    call                                buffers.new
+    lea                                 rax,                                    [ addr ]
+    call                                buffers.store
+    next                                =                                       $
+  ;}
+}
+macro env_void                          jump
+{
+  pop                                   r15
+  ;( if *argument = NULL -> jump )
+    or                                  r15,                                    r15
+    jz                                  jump
+}

@@ -1,0 +1,29 @@
+                                     ; _________________________________________________________________________________________________________________________________________________________________
+sbaChapter_tTypeInfo          = 0x14 ;| 0x2           *description              *string[?]                              | descripe used types with a human-readable text.                               |
+sbaChapter_tTypeInfo.do       =    0 ;| 0xa           size                      word                                    |                                                                               |
+                                     ;| 0xc           types                     cuid(symbols)                           |                                                                               |
+                                     ;|_________________________________________________________________________________|_______________________________________________________________________________|
+macro sbaTypeInfo                       types
+{
+  local                                 _content_
+  local                                 name
+  local                                 length
+  if ( _head_ eq '<none>' )
+    display                             'headless file!'
+    err
+  end if
+  store word                            sbaChapter_tTypeInfo                    at vYapters:( oYapters + 0x00 )         ;
+  store word                            length                                  at vYapters:( oYapters + 0x02 )         ;
+  store word                            types                                   at vYapters:( oYapters + 0x04 )         ;
+  store word                            0                                       at vYapters:( oYapters + 0x06 )         ;
+  store qword                           name                                    at vYapters:( oYapters + 0x08 )         ;
+  oYapters                              =                                       ( oYapters + 0x10 )
+  myCount                               =                                       ( myCount + 1 )
+  postpone
+  \{
+    name:
+      _content_
+    length                              =                                       ( $ - name )
+  \}
+  macro _content_
+}

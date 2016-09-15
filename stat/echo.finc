@@ -1,0 +1,110 @@
+macro echo_blink
+{
+  echo_print                            echo.nEcho
+  echo_print                            echo.blink
+}
+macro echo_n
+{
+  echo_put                              echo.newline,                           1
+}
+macro echo_s
+{
+  echo_put                              echo.space,                             1
+}
+macro echo_state
+{
+  call                                  echo.state
+}
+macro echo_msgLoad                      string,                                 size
+{
+  local done
+  done                                  equ                                     false
+  if ( size eq )
+    match =word [addr],string
+    \{
+      done                              equ                                     true
+      movzx                             sys2arg,                                word [ addr ]
+      lea                               sys1arg,                                [ addr + 2 ]
+    \}
+    match =false,done
+    \{
+      mov                               sys2arg,                                string#.size
+      lea                               sys1arg,                                [ string ]
+    \}
+  else
+    mov                                 sys2arg,                                size
+    lea                                 sys1arg,                                [ string ]
+  end if
+}
+macro echo_msgSet                       string,                                 size
+{
+  match =word [addr],string
+  \{
+    done                                equ                                     ok
+    lea                                 sys1arg,                                [ addr ]
+  \}
+  match =not,done
+  \{
+    mov                                 sys1arg,                                string
+  \}
+  mov                                   sys2arg,                                size
+}
+macro echo_put                          string,                                 size
+{
+  if ( string eq )
+  else
+    echo_msgLoad                        string,                                 size
+  end if
+  mov                                   sys0arg,                                STDOUT
+  sys_call                              sys_write
+}
+macro echo_putText                      string,                                 size
+{
+  echo_msgSet                           string,                                 size
+  mov                                   sys0arg,                                STDOUT
+  sys_call                              sys_write
+}
+macro echo_print                        string
+{
+  movzx                                 sys2arg,                                word [ string - 2 ]
+  lea                                   sys1arg,                                [ string ]
+  mov                                   sys0arg,                                STDOUT
+  sys_call                              sys_write
+}
+macro echo_putError                     string
+{
+  if ( string eq )
+   call                                 echo.error
+  else
+    mov                                 rdx,                                    string#.size
+    lea                                 rsi,                                    [ string ]
+    mov                                 rdi,                                    STDERR
+    sys_call                            sys_write
+  end if
+}
+macro echo_hexBuffer                    buffer,                                 size
+{
+  lea                                   lib1arg,                                [ buffer ]
+  mov                                   lib0arg,                                size
+  call                                  echo.hexBuffer
+}
+macro echo_hexValue                     buffer,                                 size
+{
+  lea                                   lib1arg,                                [ buffer ]
+  mov                                   lib0arg,                                size
+  call                                  echo.hexValue
+}
+macro echo_hexRegister                  register
+{
+ if ( register eq )
+    mov                                 qword [ echo.hexRegister ],             rax
+  else
+    mov                                 qword [ echo.hexRegister ],             register
+  end if
+  lea                                   lib1arg,                                [ echo.hexRegister ]
+  mov                                   lib0arg,                                8
+  call                                  echo.hexValue
+}
+echo_hexReg                             fix                                     echo_hexRegister
+echo_hexVal                             fix                                     echo_hexValue
+echo_hexBuf                             fix                                     echo_hexBuffer

@@ -1,0 +1,29 @@
+sbaChapter_tSymbolInfo        = 0x15 ;| 0x2           *description              *string[?]                              | descripe used symbols with a human-readable text.                             |
+sbaChapter_tSymbolInfo.do     =    0 ;| 0xa           size                      word                                    |                                                                               |
+                                     ;| 0xc           symbols                   cuid(symbols)                           |                                                                               |
+                                     ;|_________________________________________________________________________________|_______________________________________________________________________________|
+macro sbaSymbolInfo                     types
+{
+  local                                 _content_
+  local                                 name
+  local                                 length
+  if ( _head_ eq '<none>' )
+    display                             'headless file!'
+    err
+  end if
+  store word                            sbaChapter_tSymbolInfo                  at vYapters:( oYapters + 0x00 )
+  store word                            length                                  at vYapters:( oYapters + 0x02 )         ;
+  store word                            symbols                                 at vYapters:( oYapters + 0x04 )         ;
+  store word                            types                                   at vYapters:( oYapters + 0x06 )         ;
+  store qword                           name                                    at vYapters:( oYapters + 0x08 )         ;
+  oYapters                              =                                       ( oYapters + 0x10 )
+  myCount                               =                                       ( myCount + 1 )
+  times (  2 )                          db                                      0
+  postpone
+  \{
+    name:
+      _content_
+    length                              =                                       ( $ - name )
+  \}
+  macro _content_
+}

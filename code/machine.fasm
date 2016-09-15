@@ -1,0 +1,64 @@
+machine:
+  .init:
+    ;( I/O )
+    ;{
+    ;:  __file__                        input-file                              unchanged
+    ;}
+    mov                                 qword [ .file ],                        __file__
+    mov                                 qword [ .pos  ],                        null
+    mov                                 qword [ .line ],                        null
+    mov                                 qword [ .offs ],                        null
+    mov                                 qword [ .char ],                        null
+    mov                                 qword [ .utf8 ],                        null
+    mov                                 qword [ .size ],                        null
+    clc
+    ret
+  .ascii:
+    call                                files.getChar
+    mov                                 rdx,                                    1
+    jmp                                 .saveUTF8
+  .utf8:
+    call                                files.getUTF8
+    mov                                 qword [ .char ],                        rax
+  .saveUTF8:
+    flags                               rax
+    ;cmp                                 rax,                                    machine_sNull
+    cmovz                               rax,                                    '\0'
+    cmovz                               rdx,                                    2
+    cmp                                 rax,                                    machine_sBell
+    cmove                               rax,                                    '\a'
+    cmove                               rdx,                                    2
+    cmp                                 rax,                                    machine_sBackspace
+    cmove                               rax,                                    '\b'
+    cmove                               rdx,                                    2
+    cmp                                 rax,                                    machine_sTabulator
+    cmove                               rax,                                    '\t'
+    cmove                               rdx,                                    2
+    cmp                                 rax,                                    machine_sNewline
+    cmove                               rax,                                    '\n'
+    cmove                               rdx,                                    2
+    cmp                                 rax,                                    machine_sVerticalTab
+    cmove                               rax,                                    '\v'
+    cmove                               rdx,                                    2
+    cmp                                 rax,                                    machine_sFormFeed
+    cmove                               rax,                                    '\f'
+    cmove                               rdx,                                    2
+    cmp                                 rax,                                    machine_sCarriageReturn
+    cmove                               rax,                                    '\r'
+    cmove                               rdx,                                    2
+    cmp                                 rax,                                    machine_sSpace
+    cmove                               rax,                                    '\s'
+    cmove                               rdx,                                    2
+    cmp                                 rax,                                    machine_sEscape
+    cmove                               rax,                                    '\\'
+    cmove                               rdx,                                    2
+    mov                                 qword [ .utf8 ],                        rax
+    mov                                 qword [ .size ],                        rdx
+    clc
+    ret
+  .failChar:
+    stc
+    ret
+  .debug:
+    echo_hexValue                       ( .line )
+    echo_hexValue                       ( .offs )

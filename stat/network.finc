@@ -1,0 +1,110 @@
+;( socket domain )
+;{
+  AF_UNSPEC                             =                                       0
+  AF_UNIX                               =                                       1                                       ;Unix domain sockets
+  AF_INET                               =                                       2                                       ;Internet IP Protocol
+  AF_AX25                               =                                       3                                       ;Amateur Radio AX.25
+  AF_IPX                                =                                       4                                       ;Novell IPX
+  AF_APPLETALK                          =                                       5                                       ;Appletalk DDP
+  AF_NETROM                             =                                       6                                       ;Amateur radio NetROM
+  AF_BRIDGE                             =                                       7                                       ;Multiprotocol bridge
+  AF_AAL5                               =                                       8                                       ;Reserved for Werner's ATM
+  AF_X25                                =                                       9                                       ;Reserved for X.25 project
+  AF_INET6                              =                                       10                                      ;IP version 6
+  AF_MAX                                =                                       12                                      ;For now..
+;}
+;( socket types )
+;{
+  SOCKET_STREAM                         =                                       1                                       ;stream (connection) socket
+  SOCKET_DGRAM                          =                                       2                                       ;datagram (conn.less) socket
+  SOCKET_RAW                            =                                       3                                       ;raw socket
+  SOCKET_RDM                            =                                       4                                       ;reliably-delivered message
+  SOCKET_SEQPACKET                      =                                       5                                       ;sequential packet socket
+  SOCKET_PACKET                         =                                       10                                      ;linux specific way of getting packets at the dev level.
+                                                                                                                        ;For writing rarp and other similar things on the user level.
+;}
+macro tcp_socket                        domain,                                 type
+{
+  null                                  sys2arg
+  mov                                   sys1arg,                                type
+  mov                                   sys0arg,                                domain
+  sys_call                              sys_socket
+}
+macro tcp_connect                       addr,                                   socket
+{
+  mov                                   sys2arg,                                ( addr#.size )
+  lea                                   sys1arg,                                [ addr ]
+  if ( socket eq )
+    mov                                 sys0arg,                                sys0ret
+  else
+    mov                                 sys0arg,                                socket
+  end if
+  sys_call                              sys_connect
+}
+macro tcp_send                          socket,                                 message,                                size
+{
+  local done
+  done                                  equ                                     false
+  null                                  sys5arg
+  null                                  sys4arg
+  null                                  sys3arg
+  if ( size eq )
+    mov                                 sys2arg,                                ( message#.size )
+  else
+    match =[addr=], size
+    \{
+      done                              equ                                     true
+      lea                               sys2arg,                                [ addr ]
+    \}
+    match =false, done
+    \{
+      mov                               sys2arg,                                size
+    \}
+  end if
+  lea                                   sys1arg,                                [ message ]
+  mov                                   sys0arg,                                socket
+  sys_call                              sys_sendto
+}
+macro tcp_recv                          socket,                                 message,                                size
+{
+  local done
+  done                                  equ                                     false
+  null                                  sys5arg
+  null                                  sys4arg
+  null                                  sys3arg
+  if ( size eq )
+    mov                                 sys2arg,                                ( message#.size )
+  else
+    match =[addr=], size
+    \{
+      done                              equ                                     true
+      lea                               sys2arg,                                [ addr ]
+    \}
+    match =false, done
+    \{
+      mov                               sys2arg,                                size
+    \}
+  end if
+  lea                                   sys1arg,                                [ message ]
+  mov                                   sys0arg,                                socket
+  sys_call                              sys_recvfrom
+}
+struc socketaddr                        af,                                     addr
+{
+  .                                     =                                       $
+  match a=:b=:c=:d=/port, addr
+  \{
+    dw                                  af
+    db                                  (( port shr 8 ) and 0xff )
+    db                                  (( port shr 0 ) and 0xff )
+    db                                  ( a and 0xff )
+    db                                  ( b and 0xff )
+    db                                  ( c and 0xff )
+    db                                  ( d and 0xff )
+    rq                                  1
+  \}
+  .size                                 =                                       ( $ - . )
+  if ( .size = 0 )
+    display "[asm:network] fail: invalid address in socketaddr!", 10
+  end if
+}

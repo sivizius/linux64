@@ -1,0 +1,112 @@
+struc sbaLibrary                        _library_
+{
+  sbaModule                             _library_,                              .
+  \{
+    include                             '../yalib/' # _library_ # '.fobj'
+  \}
+}
+macro sbaLibrary                        _library_
+{
+  sbaModule                             _library_
+  \{
+    include                             '../yalib/' # _library_ # '.fobj'
+  \}
+}
+struc sbaLocalLibrary                   _library_
+{
+  sbaModule                             _library_,                              .
+  \{
+    include                             'libs/' # _library_ # '.fobj'
+  \}
+}
+macro sbaLocalLibrary                   _library_
+{
+  sbaModule                             _library_
+  \{
+    include                             'libs/' # _library_ # '.fobj'
+  \}
+}
+struc sbaModule                         _filename_
+{
+;  .offs                                 =                                       ( mPointers + myPointerOffset )
+  sbaModule                             _filename_,                             .
+}
+macro sbaModule                         _filename_,                             object
+{
+  ;( module )
+  ;{
+  ;:  load file *filename as sba-file if not already done
+  ;:  create a pointer-table *pointers by using %symbols as reference
+  ;:  the current location in yapter-table (cuid) can be used while building the yapter-structure
+  ;:  this macro combine the definitions of the symbols-yapter and the interface-yapter
+  ;:  this is just the structure of the module-yapter itself
+  ;:  0x00  word                        <module>                                <pointers>
+  ;:  0x02  cuid/word                   %symbols                                size
+  ;:  0x04  magic/word                  'lo'                                    resv
+  ;:  0x06  magic/word                  'ad'                                    count
+  ;:  0x08  *string[?]                  @filename                               *pointers
+  ;}
+  local                                 myLoad                                  ;length   of symbol-yapter  in file
+  local                                 mySize                                  ;length   of symbol-yapter  in memory
+  local                                 _content_                               ;content  of symbol-yapter
+  local                                 _module_                                ;offset   of pointer-yapter in memory
+  local                                 _file_                                  ;offset   of symbol-yapter  in file
+  local                                 _load_                                  ;length   of symbol-yapter  in file   for yapter-table
+  local                                 _base_                                  ;offset   of symbol-yapter  in memory
+  local                                 _size_                                  ;length   of symbol-yapter  in memory for yapter-table
+  local                                 _name_                                  ;offset   of filename       in file   for yapter-table
+  local                                 _length_                                ;length   of filename       in file   for yapter-table
+  local                                 tPointers                               ;offset   of yapter in virtual
+  local                                 sPointers                               ;size     of yapter in virtual
+  if ( _head_ eq '<none>' )
+    display                             '[asm:sba] an error occured while processing yapter <symbols>: headless file!'
+    err
+  end if
+  store word                            sbaYapter_tSymbols                      at vYapters:( oYapters + 0x00 )         ;<symbols>  count + 0
+  store word                            sPointers                               at vYapters:( oYapters + 0x02 )         ;number of symbols in yapter
+  store dword                           _load_                                  at vYapters:( oYapters + 0x04 )         ;size in virtual, magic »symb« in file
+  store qword                           _file_                                  at vYapters:( oYapters + 0x08 )         ;offset of  symbols-yapter in file
+  store word                            sbaYapter_tModule                       at vYapters:( oYapters + 0x10 )         ;<module> count + 1
+  store word                            ( myPointers + myCountPointers )        at vYapters:( oYapters + 0x12 )         ;cuid   of  symbols-yapter in file
+  store word                            _length_                                at vYapters:( oYapters + 0x14 )         ;size   in virtual, magic »lo« in file
+  store word                            sPointers                               at vYapters:( oYapters + 0x16 )         ;number of symbols in yapter in virtual, magic »ad« in file
+  store qword                           _name_                                  at vYapters:( oYapters + 0x18 )         ;filename of module
+  match any, object
+  \{
+    object#.symb                        =                                       ( myPointers + myCountPointers + 0 )
+    object#.symb.offs                   =                                       ( mPointers + myPointerOffset )
+    object                              =                                       ( myPointers + myCountPointers + 1 )
+    object#.offs                        =                                       ( mPointers + myPointerOffset + ( 8 * sPointers ))
+  \}
+  oYapters                              =                                       ( oYapters + 0x20 )
+  myPointers                            =                                       ( myPointers + 2 )
+  myPointerOffset                       =                                       ( myPointerOffset + ( 16 * sPointers ))
+  postpone
+  \{
+    display 'load base: *0x:'
+    displayHex ( _base_ )
+    display 10
+    _name_:
+      dw                                ( _length_ - 2 )
+      db                                _filename_
+      _length_                          =                                       ( $ - _name_ )
+    if ( _length_ > 257 )
+      display                           '[asm:sba] an error occured while processing yapter <module>: filename too long!'
+      err
+    end if
+    myFile                              =                                       ( $ )
+    tPointers                           =                                       oPointers
+    _offs_                              =                                       ( sPointers * 8 )
+    symbol                              fix                                     yapter_symbol
+    _content_                           sbaYapter_tSymbols, _base_, _size_, _file_, _load_
+    sPointers                           =                                       ( oPointers - tPointers )
+    oPointers                           =                                       ( oPointers + sPointers )
+    _base_                              =                                       ( mPointers + (( tPointers + sPointers ) * 8 ))
+    _file_                              =                                       myFile
+    _load_                              =                                       ( $ - myFile )
+    _size_                              =                                       ( sPointers * 8 )
+    myFile                              =                                       ( myFile + _load_ )
+    org                                 myFile
+  \}
+  macro _content_ yType, yBase, yResv, yFile, ySize
+}

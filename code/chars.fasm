@@ -1,0 +1,143 @@
+chars_debug                   equ                           "false"
+chars:
+  .init: ;rdi/lib0arg file_handler -> rax/lib0ret NULL/file_handler
+    ;( if lib0arg )
+      or                      lib0arg,                      lib0arg
+      jz                      @f
+    ;{
+      mov                     word  [ .buffer.pos ],        .buffer.len_max
+      mov                     word  [ .store.pos ],         .store.len_max
+      mov                     word  [ .buffer.len ],        .buffer.len_max
+      mov                     word  [ .store.len ],         .store.len_max
+      mov                     qword [ .input ],             lib0arg
+    ;}
+    @@:
+    mov                       lib0ret,                      lib0arg
+    ret
+  .recv:
+    ;( load char )
+      if ( chars_debug eq "true" )
+        echo_put              newline
+        lea                   lib1arg,                      [ .buffer.len ]
+        mov                   lib0arg,                      2
+        call                  echo.hex
+        echo_put              newline
+        lea                   lib1arg,                      [ .buffer.pos ]
+        mov                   lib0arg,                      2
+        call                  echo.hex
+        echo_put              newline
+        echo_put              newline
+      end if
+    ;( if store is empty )
+      movzx                   rdx,                          word  [ .store.pos ]
+      cmp                     dx,                           word  [ .store.len ]
+      jb                      .recv.fromStore
+    ;{
+      ;( if buffer is empty )
+        movzx                 rdx,                          word  [ .buffer.pos ]
+        cmp                   dx,                           word  [ .buffer.len ]
+        jb                    .recv.fromBuffer
+      ;{
+        mov                   sys2arg,                      .buffer.len_max
+        lea                   sys1arg,                      [ .buffer ]
+        mov                   sys0arg,                      qword [ .input ]
+        sys_call              sys_read
+        mov                   word  [ .buffer.len ],        sys0ret_w
+        or                    sys0ret,                      sys0ret
+        jnz                   @f
+          xor                 lib0ret,                      lib0ret
+          ret
+        @@:
+        ;( do you really want to see the full content of the file? fine, use the next line )
+          ;echo_put            char.buffer,                  sys0ret
+        xor                   rdx,                          rdx
+      ;}
+      ;( else )
+        .recv.fromBuffer:
+      ;{
+        lea                   rax,                          [ .buffer ]
+        add                   rax,                          rdx
+        inc                   rdx
+        mov                   word  [ .buffer.pos ],        dx
+        mov                   lib0ret_b,                    byte  [ rax ]
+        if ( chars_debug eq "true" )
+          push                lib0ret
+          ;( echo char )
+            mov               sys2arg,                      0x03 ;= bytes('\', char, 0)
+            mov               sys0arg,                      STDOUT
+            @@:
+              or              lib0ret_b,                    lib0ret_b
+              jnz             @f
+                lea           sys1arg,                      [ strNULL ]
+                jmp           .recv.put
+            @@:
+              cmp             lib0ret_b,                    0x07
+              jne             @f
+                lea           sys1arg,                      [ strBELL ]
+                jmp           .recv.put
+            @@:
+              cmp             lib0ret_b,                    0x08
+              jne             @f
+                lea           sys1arg,                      [ strBS ]
+                jmp           .recv.put
+            @@:
+              cmp             lib0ret_b,                    0x09
+              jne             @f
+                lea           sys1arg,                      [ strTAB ]
+                jmp           .recv.put
+            @@:
+              cmp             lib0ret_b,                    0x0a
+              jne             @f
+                lea           sys1arg,                      [ strLF ]
+                jmp           .recv.put
+            @@:
+              cmp             lib0ret_b,                    0x0b
+              jne             @f
+                lea           sys1arg,                      [ strVTAB ]
+                jmp           .recv.put
+            @@:
+              cmp             lib0ret_b,                    0x0c
+              jne             @f
+                lea           sys1arg,                      [ strFF ]
+                jmp           .recv.put
+            @@:
+              cmp             lib0ret_b,                    0x0d
+              jne             @f
+                lea           sys1arg,                      [ strCR ]
+                jmp           .recv.put
+            @@:
+              cmp             lib0ret_b,                    0x1b
+              jne             @f
+                lea           sys1arg,                      [ strESC ]
+                jmp           .recv.put
+            @@:
+              cmp             lib0ret_b,                    0x20
+              jne             @f
+                lea           sys1arg,                      [ strSPACE ]
+                jmp           .recv.put
+            @@:
+              cmp             lib0ret_b,                    '\'
+              jne             @f
+                lea           sys1arg,                      [ strBackBack ]
+                jmp           .recv.put
+            @@:
+              mov             byte [ char ],                lib0ret_b
+              dec             sys2arg
+              lea             sys1arg,                      [ char ]
+            .recv.put:
+              sys_call        sys_write
+          pop                 lib0ret
+        end if
+        ret
+      ;}
+    ;}
+    ;( else )
+    ;{
+      .recv.fromStore:
+        xor                   lib0ret,                      lib0ret
+        ret
+    ;}
+  .send:
+    ;( store char )
+  ret
+

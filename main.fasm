@@ -1,0 +1,121 @@
+theOS                                   equ                                     'linux64'
+
+;( import macros )
+macro useCode                           name
+{
+  include                               'code/' # name # '.fasm'
+}
+macro useData                           name
+{
+  include                               'data/' # name # '.fdat'
+}
+macro useResv                           name
+{
+  include                               'resv/' # name # '.fres'
+}
+macro useText                           name
+{
+  include                               'text/' # name # '.ftxt'
+}
+macro useStat                           name
+{
+  include                               'stat/' # name # '.finc'
+}
+macro useXCode                          name
+{
+  include                               'libs/code/' # name # '.fasm'
+}
+macro useXData                          name
+{
+  include                               'libs/data/' # name # '.fdat'
+}
+macro useXResv                          name
+{
+  include                               'libs/resv/' # name # '.fres'
+}
+macro useXText                          name
+{
+  include                               'libs/text/' # name # '.ftxt'
+}
+macro useXStat                          name
+{
+  include                               'libs/stat/' # name # '.finc'
+}
+macro useYalib                          name
+{
+  include                               '../yalib/' # name # '.flib'
+}
+code                                    fix                                     useCode
+vars                                    fix                                     useData
+text                                    fix                                     useText
+resv                                    fix                                     useResv
+stat                                    fix                                     useStat
+xcode                                   fix                                     useXCode
+xvars                                   fix                                     useXData
+xtext                                   fix                                     useXText
+xresv                                   fix                                     useXResv
+xstat                                   fix                                     useXStat
+yalib                                   fix                                     useYalib
+macro onError_fail                      jump
+{
+  flags                                 rax
+  js                                    jump
+}
+macro onError_put
+{
+  call                                  echo.error
+}
+macro onError do, [ arg ]
+{
+  local _content_, _do_, _next_
+  match a, do
+  \{
+    or                                  rax,                                    rax
+    js                                  _do_
+      jmp                               _next_
+    _do_:
+      do                                arg
+    _next_:
+  \}
+  match , do
+  \{
+    or                                  rax,                                    rax
+    js                                  _do_
+      jmp                               _next_
+    _do_:
+      _content_
+    _next_:
+    macro _content_
+  \}
+}
+
+macro onDebug do, [ arg ]
+{
+  match a, do
+  \{
+    match =true, __debug__
+    \\{
+      do                                arg
+    \\}
+  \}
+  match , do
+  \{
+    match =true, __debug__
+  \}
+}
+
+macro onAlone do, [ arg ]
+{
+  match a, do
+  \{
+    match =false, __debug__
+    \\{
+      do                                arg
+    \\}
+  \}
+  match , do
+  \{
+    match =false, __debug__
+  \}
+}
+

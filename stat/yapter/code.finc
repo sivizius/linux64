@@ -1,0 +1,151 @@
+struc sbaCode                           machine
+{
+  .                                     =                                       myCount
+  .offs                                 =                                       myOffset
+  match any,machine
+  \{
+    sbaCode                             machine
+  \}
+  match ,machine
+  \{
+    sbaCode
+  \}
+}
+macro sbaCode                           machine
+{
+  local                                 _content_                               ;content of yapter
+  local                                 _load_                                  ;length  of yapter in file   for yapter-table
+  local                                 _size_                                  ;length  of yapter in memory for yapter-table
+  local                                 _base_                                  ;offset  of yapter in memory
+  local                                 _file_                                  ;offset  of yapter in file   for yapter-table
+  local                                 myLoad                                  ;length  of yapter in file
+  local                                 mySize                                  ;length  of yapter in memory
+  if ( _head_ eq '<none>' )
+    display                             'headless file!'
+    err
+  end if
+  if ( machine eq )
+    store word                          _code_                                  at vYapters:( oYapters + 0x00 )
+  else
+    display                             '[asm:sba] an error occured while processing yapter <code>: machine »'
+    display                             machine
+    display                             '« unknown! Not implemented yet.'
+    err
+  end if
+  store word                            _load_                                  at vYapters:( oYapters + 0x02 )         ;length in file
+  store dword                           _magic_                                 at vYapters:( oYapters + 0x04 )         ;magic
+  store qword                           _file_                                  at vYapters:( oYapters + 0x08 )         ;offset in file
+  if ( myMain = 0 )
+    myMain                              =                                       myCount
+  end if
+  display                               '[asm:sba] <code>         (2016-01-07) %'
+  displayHex2                           ( myCount + 0 )
+  display                               ' '
+  displayHex2                           _code_
+  display                               ' '
+  displayHex2                           _load_
+  display                               ' '
+  displayHex2                           (( _magic_ shr  0 ) and 0xffff )
+  display                               ' '
+  displayHex2                           (( _magic_ shr 16 ) and 0xffff )
+  display                               ' *0x'
+  displayHex                            _file_
+  display                               ' -> *0x'
+  displayHex                            myOffset
+  display                               ' #0x'
+  displayHex2                           _size_
+  display                               ' ( #0x'
+  displayHex2                           _load_
+  display                               ' )', 10
+  oYapters                              =                                       ( oYapters + 0x10 )
+  myOffset                              =                                       ( myOffset + _size_ )
+  myCount                               =                                       ( myCount + 1 )
+  sizeBody                              =                                       ( sizeBody + _load_ )
+  postpone
+  \{
+    display 'code base: *0x:'
+    displayHex _base_
+    display 10
+    myFile                              =                                       $
+    org                                 myBase
+    if ( machine eq )
+      _content_                         _code_, _base_, _size_, _file_, _load_
+    else
+      _content_                         machine, _base_, _size, _file_, _load_
+    end if
+    myLoad                              =                                       ( $ - myBase )
+    mySize                              =                                       ( myLoad )
+    if ( mySize and 0x0000000000000fff )
+      mySize                            =                                       (( mySize + 4096 ) and 0xfffffffffffff000 )
+    end if
+    if ( mySize and 0xffffffff00000000 )
+      display                           '_size_ too large!'
+      err
+    end if
+    _base_                              =                                       myBase
+    _file_                              =                                       myFile
+    _load_                              =                                       myLoad
+    _size_                              =                                       mySize
+    myBase                              =                                       ( myBase + mySize )
+    myFile                              =                                       ( myFile + myLoad )
+    org                                 myFile
+  \}
+  macro _content_ yType, yBase, yResv, yFile, ySize
+}
+macro sbaExec16                         filename
+{
+  db                                    '#!sba16', 10
+  if ( filename eq )
+  else
+    file                                filename
+  end if
+  db                                    0
+  sizeHeader                            =                                       ( $ )
+  org                                   0
+  use16
+  _head_                                equ                                     'exec16'
+  _code_                                =                                       sbaYapter_tx86_16
+  _magic_                               =                                       ( 'x86' + 0x16000000 )
+  myCount                               =                                       ( 1 )
+  oPointers                             =                                       ( 0 )
+  oYapters                              =                                       ( 0 )
+  display                               '[asm:sba] <type>         ( modified ) %CUID WORD WORD WORD WORD QWORD / @file / ... -> QWORD / @mem / ...  #RESV   ( #SIZE   )', 10
+}
+macro sbaExec32                         filename
+{
+  db                                    '#!sba32', 10
+  if ( filename eq )
+  else
+    file                                filename
+  end if
+  db                                    0
+  sizeHeader                            =                                       ( $ )
+  org                                   0
+  use32
+  _head_                                equ                                     'exec32'
+  _code_                                =                                       sbaYapter_tx86_32
+  _magic_                               =                                       ( 'x86' + 0x32000000 )
+  myCount                               =                                       ( 1 )
+  oPointers                             =                                       ( 0 )
+  oYapters                              =                                       ( 0 )
+  display                               '[asm:sba] <type>         ( modified ) %CUID WORD WORD WORD WORD QWORD / @file / ... -> QWORD / @mem / ...  #RESV   ( #SIZE   )', 10
+}
+macro sbaExec64                         filename
+{
+  db                                    '#!sba64', 10
+  if ( filename eq )
+  else
+    file                                filename
+  end if
+  db                                    0
+  sizeHeader                            =                                       ( $ )
+  org                                   0
+  use64
+  _head_                                equ                                     'exec64'
+  _code_                                =                                       sbaYapter_tx86_64
+  _magic_                               =                                       ( 'amd' + 0x64000000 )
+  myCount                               =                                       ( 1 )
+  oPointers                             =                                       ( 0 )
+  oYapters                              =                                       ( 0 )
+  display                               '[asm:sba] <type>         ( modified ) %CUID WORD WORD WORD WORD QWORD / @file / ... -> QWORD / @mem / ...  #RESV   ( #SIZE   )', 10
+}

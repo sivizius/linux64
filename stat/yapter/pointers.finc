@@ -1,0 +1,62 @@
+struc sbaPointers
+{
+  .                                     =                                       ( myPointers + myCountPointers )
+  .offs                                 =                                       ( mPointers + myPointerOffset )
+  sbaPointers
+}
+macro sbaPointers
+{
+  ;( pointers )
+  ;{
+  ;:  if (( #size mod 8 ) is equal to 0 ), than set #count to ( #size / 8 )
+  ;:  else fail safe
+  ;:  set #resv to page-aligned #size
+  ;:  allocate #resv for this table of @pointers and load #count pointers there
+  ;:  the current location in yapter-table (cuid) can be used while building the yapter-structure
+  ;:  0x00  word                        <pointers>                              <pointers>
+  ;:  0x02  word                        size                                    size
+  ;:  0x04  magic/word                  '*p'                                    resv
+  ;:  0x06  magic                       'tr'                                    count
+  ;:  0x08  *qword[count]               @pointers                               *pointers
+  ;}
+  local                                 _content_                               ;content of yapter
+  local                                 _load_                                  ;length  of yapter in file   for yapter-table
+  local                                 myLoad                                  ;length  of yapter in file
+  local                                 _file_                                  ;offset  of yapter in file
+  local                                 _size_                                  ;length  of yapter in memory for yapter-table
+  local                                 mySize                                  ;length  of yapter in memory
+  local                                 _base_                                  ;offset  of yapter in memory
+  local                                 tPointers                               ;offset  of yapter in virtual
+  local                                 sPointers                               ;size    of yapter in virtual
+  local                                 _temp_                                  ;something temporary
+  if ( _head_ eq '<none>' )
+    display                             '[asm:sba] an error occured while processing yapter <pointers>: headless file!'
+    err
+  end if
+  store word                            sbaYapter_tPointers                     at vYapters:( oYapters + 0x00 )
+  store word                            sPointers                               at vYapters:( oYapters + 0x02 )         ;count pointers
+  store dword                           ( sPointers * 8 )                       at vYapters:( oYapters + 0x04 )         ;number of pointers multiplied by 8 (virtual), magic in file
+  store qword                           ( _file_ )                              at vYapters:( oYapters + 0x08 )         ;offset (virtual)
+  oYapters                              =                                       ( oYapters + 0x10 )
+  myPointers                            =                                       ( myPointers + 1 )
+  myPointerOffset                       =                                       ( myPointerOffset + ( 8 * sPointers ))
+  postpone
+  \{
+    display '*ptr base: *0x:'
+    displayHex myBase
+    display 10
+    pointer                             fix                                     yapter_pointer
+    tPointers                           =                                       aPointers
+    _temp_                              =                                       $
+    org                                 ( mPointers + ( tPointers * 8 ))
+    display                             'base'
+    _content_                           sbaYapter_tPointers, _base_, _size_, _file_, _load_
+    org                                 _temp_
+    sPointers                           =                                       ( aPointers - tPointers )
+    _base_                              =                                       ( mPointers + ( tPointers * 8 ))
+    _file_                              =                                       ( rPointers + ( tPointers * 8 ))
+    _size_                              =                                       ( sPointers * 8 )
+    _load_                              =                                       ( sPointers * 8 )
+  \}
+  macro _content_                       yType, yBase, yResv, yFile, ySize
+}

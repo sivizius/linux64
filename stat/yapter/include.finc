@@ -1,0 +1,60 @@
+macro sbaInclude                        filename,                               offs,                                   size
+{
+  ;( include )
+  ;{
+  ;:  set #resv to page-aligned #size
+  ;:  allocate #resv bytes as read- and writeable
+  ;:  open file @filename and seek to #offset
+  ;:  load #size bytes into the allocated memory
+  ;:  0x00  word                        <include>                               <include>
+  ;:  0x02  word                        size                                    size
+  ;:  0x04  magic/word                  'ff'                                    resv
+  ;:  0x06  word                        offset                                  offset
+  ;:  0x08  *string/*file               @filename                               *file
+  ;}
+  local                                 _load_                                  ;length  of yapter in file   for yapter-table
+  local                                 myLoad                                  ;length  of yapter in file
+  local                                 _file_                                  ;offset  of yapter in file
+  local                                 _size_                                  ;length  of yapter in memory for yapter-table
+  local                                 mySize                                  ;length  of yapter in memory
+  local                                 _base_                                  ;offset  of yapter in memory
+  if ( _head_ eq '<none>' )
+    display                             '[asm:sba] an error occured while processing yapter <include>: headless file!'
+    err
+  end if
+  if ( size > 0x8000 )
+    display                             '[asm:sba] an error occured while processing yapter <include>: length too large!'
+    err
+  end if
+  store word                            sbaYapter_tFile                         at vYapters:( oYapters + 0x00 )
+  store word                            size                                    at vYapters:( oYapters + 0x02 )         ;size
+  store dword                           offs                                    at vYapters:( oYapters + 0x04 )         ;offset in file
+  store qword                           ( _file_ + 2 )                          at vYapters:( oYapters + 0x08 )         ;@filename
+  oYapters                              =                                       ( oYapters + 0x10 )
+  myCount                               =                                       ( myCount + 1 )
+  _head_                                equ                                     '<include>'
+  _update_                              equ                                     '2015-11-21'
+  postpone
+  \{
+    myFile                              =                                       $
+    org                                 myBase
+    dw                                  ( _load_ - 2 )
+    db                                  _note_
+    myLoad                              =                                       ( $ - myBase )
+    mySize                              =                                       ( myLoad )
+    if ( mySize and 0x0000000000000fff )
+      mySize                            =                                       (( mySize + 4096 ) and 0xfffffffffffff000 )
+    end if
+    if ( mySize and 0xffffffff00000000 )
+      display                           '[asm:sba] an error occured while processing yapter <include>: _size_ too large!'
+      err
+    end if
+    _base_                              =                                       myBase
+    _file_                              =                                       myFile
+    _load_                              =                                       myLoad
+    _size_                              =                                       mySize
+    myBase                              =                                       ( myBase + mySize )
+    myFile                              =                                       ( myFile + myLoad )
+    org                                 myFile
+  \}
+}

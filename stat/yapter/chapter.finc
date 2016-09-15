@@ -1,0 +1,30 @@
+                                     ; _________________________________________________________________________________________________________________________________________________________________
+sbaChapter_tChapters          = 0x1f ;| 0x2           *chapters                 *cuid[size/2]                           | load a list of pointers to each chapter refered in list *chapters there.      |
+sbaChapter_tChapters.do       =    0 ;| 0xa           size                      word                                    |                                                                               |
+                                     ;|_________________________________________________________________________________|_______________________________________________________________________________|
+macro sbaChapters
+{
+  local                                 _content_
+  local                                 name
+  local                                 length
+  if ( _head_ eq '<none>' )
+    display                             'headless file!'
+    err
+  end if
+  store word                            sbaChapter_tChapters                    at vYapters:( oYapters + 0x00 )
+  store word                            length                                  at vYapters:( oYapters + 0x02 )         ;
+  store dword                           'list'                                  at vYapters:( oYapters + 0x04 )         ;
+  store qword                           name                                    at vYapters:( oYapters + 0x08 )         ;
+  oYapters                              =                                       ( oYapters + 0x10 )
+  myCount                               =                                       ( myCount + 1 )
+  times (  2 )                          db                                      0
+  postpone
+  \{
+    name:
+      _content_
+    length                              =                                       ( $ - name )
+  \}
+  macro _content_
+}
+sbaChapter_tMaximum                     =                                       0x20
+

@@ -1,0 +1,51 @@
+struc sbaNote                           [ _note_ ]
+{
+  .                                     =                                       myCount
+  .offs                                 =                                       ( 0 - 1 )
+  sbaNote                               _note_
+}
+macro sbaNote                           [ _note_ ]
+{
+  ;( note )
+  ;{
+  ;:  just a note at @note with the full length of #size
+  ;:  ignore it
+  ;:  0x00  word                        <note>                                  <note>
+  ;:  0x02  word                        size                                    size
+  ;:  0x04  magic                       'note'                                  unused
+  ;:  0x08  *string                     @note                                   @note
+  ;}
+  local                                 _load_                                  ;length  of yapter in file   for yapter-table
+  local                                 myLoad                                  ;length  of yapter in file
+  local                                 _file_                                  ;offset  of yapter in file
+  if ( _head_ eq '<none>' )
+    display                             '[asm:sba] an error occured while processing yapter <note>: headless file!'
+    err
+  end if
+  store word                            sbaYapter_tNote                         at vYapters:( oYapters + 0x00 )
+  store word                            ( _load_ - 2 )                          at vYapters:( oYapters + 0x02 )         ;string-size
+  store dword                           'note'                                  at vYapters:( oYapters + 0x04 )         ;magic
+  store qword                           ( _file_ )                              at vYapters:( oYapters + 0x08 )         ;*buffer of string in file
+  oYapters                              =                                       ( oYapters + 0x10 )
+  display                               '[asm:sba] <note>         (2016-02-09) %'
+  displayHex2                           ( myCount + 0 )
+  display                               ' '
+  displayHex2                           sbaYapter_tNote
+  display                               ' '
+  displayHex2                           ( _load_ - 2 )
+  display                               ' »no« »te« *0x'
+  displayHex                            _file_
+  display                               ' -> »', _note_, '«', 10
+  myCount                               =                                       ( myCount + 1 )
+  postpone
+  \{
+    myFile                              =                                       $
+    org                                 myBase
+    dw                                  ( _load_ - 2 )
+    db                                  _note_
+    _file_                              =                                       myFile
+    _load_                              =                                       ( $ - myBase )
+    myFile                              =                                       ( myFile + _load_ )
+    org                                 myFile
+  \}
+}

@@ -1,0 +1,186 @@
+;( error messages )
+  echo.fail                                         str   10, '[echo] FAIL: '
+  echo.failEpic                                     str   10, '[echo] EPIC FAIL: Unexspected error. WTF?!', 10
+  echo.failOperationNotPermitted                    str   'Operation not permitted!', 10
+  echo.failNoSuchFileOrDirectory                    str   'No such file or directory!', 10
+  echo.failNoSuchProcess                            str   'No such process!', 10
+  echo.failInterruptedSystemCall                    str   'Interrupted system call!', 10
+  echo.failIOError                                  str   'I/O error!', 10
+  echo.failNoSuchDeviceOrAddress                    str   'No such device or address!', 10
+  echo.failArgumentListTooLong                      str   'Argument list too long!', 10
+  echo.failExecFormatError                          str   'Exec format error!', 10
+  echo.failBadFileNumber                            str   'Bad file number!', 10
+  echo.failNoChildProcesses                         str   'No child processes!', 10
+  echo.failTryAgain                                 str   'Try again!', 10
+  echo.failOutOfMemory                              str   'Out of memory!', 10
+  echo.failPermissionDenied                         str   'Permission denied!', 10
+  echo.failBadAddress                               str   'Bad address!', 10
+  echo.failBlockDeviceRequired                      str   'Block device required!', 10
+  echo.failDeviceOrResourceBusy                     str   'Device or resource busy!', 10
+  echo.failFileExists                               str   'File exists!', 10
+  echo.failCrossDeviceLink                          str   'Cross-device link!', 10
+  echo.failNoSuchDevice                             str   'No such device!', 10
+  echo.failNotADirectory                            str   'Not a directory!', 10
+  echo.failIsADirectory                             str   'Is a directory!', 10
+  echo.failInvalidArgument                          str   'Invalid argument!', 10
+  echo.failFileTableOverflow                        str   'File table overflow!', 10
+  echo.failTooManyOpenFiles                         str   'Too many open files!', 10
+  echo.failNotATypewriter                           str   'Not a typewriter!', 10
+  echo.failTextFileBusy                             str   'Text file busy!', 10
+  echo.failFileTooLarge                             str   'File too large!', 10
+  echo.failNoSpaceLeftOnDevice                      str   'No space left on device!', 10
+  echo.failIllegalSeek                              str   'Illegal seek!', 10
+  echo.failReadOnlyFileSystem                       str   'Read-only file system!', 10
+  echo.failTooManyLinks                             str   'Too many links!', 10
+  echo.failBrokenPipe                               str   'Broken pipe!', 10
+  echo.failMathArgumentOutOfDomainOfFunction        str   'Math argument out of domain of func!', 10
+  echo.failMathResultNotRepresentable               str   'Math result not representable!', 10
+  echo.failRessourceDeadlockWouldOccur              str   'Resource deadlock would occur!', 10
+  echo.failFileNameTooLong                          str   'File name too long!', 10
+  echo.failNoRecordLocksAvailable                   str   'No record locks available!', 10
+  echo.failFunctionNotImplemented                   str   'Function not implemented!', 10
+  echo.failDirectoryNotEmpty                        str   'Directory not empty!', 10
+  echo.failTooManySymbolicLinksEncountered          str   'Too many symbolic links encountered!', 10
+  echo.failNoMessageOfDesiredType                   str   'No message of desired type!', 10
+  echo.failIdentifierRemoved                        str   'Identifier removed!', 10
+  echo.failChannelNumberOutOfRange                  str   'Channel number out of range!', 10
+  echo.failLevel2NotSynchronized                    str   'Level 2 not synchronized!', 10
+  echo.failLevel3Halted                             str   'Level 3 halted!', 10
+  echo.failLevel3Reset                              str   'Level 3 reset!', 10
+  echo.failLinkNumberOutOfRange                     str   'Link number out of range!', 10
+  echo.failProtocolDriverNotAttached                str   'Protocol driver not attached!', 10
+  echo.failNoCSIStructureAvailable                  str   'No CSI structure available!', 10
+  echo.failLevel2Halted                             str   'Level 2 halted!', 10
+  echo.failInvalidExchange                          str   'Invalid exchange!', 10
+  echo.failInvalidRequestDescriptor                 str   'Invalid request descriptor!', 10
+  echo.failExchangeFull                             str   'Exchange full!', 10
+  echo.failNoAnode                                  str   'No anode!', 10
+  echo.failInvalidRequestCode                       str   'Invalid request code!', 10
+  echo.failInvalidSlot                              str   'Invalid slot!', 10
+  echo.failBadFontFileFormat                        str   'Bad font file format!', 10
+  echo.failDeviceNotAStream                         str   'Device not a stream!', 10
+  echo.failNoDataAvailable                          str   'No data available!', 10
+  echo.failTimerExpired                             str   'Timer expired!', 10
+  echo.failOutOfStreamsResources                    str   'Out of streams resources!', 10
+  echo.failMachineIsNotOnTheNetwork                 str   'Machine is not on the network!', 10
+  echo.failPackageNotInstalled                      str   'Package not installed!', 10
+  echo.failObjectIsRemote                           str   'Object is remote!', 10
+  echo.failLinkHasBeenSevered                       str   'Link has been severed!', 10
+  echo.failAdvertiseError                           str   'Advertise error!', 10
+  echo.failSrmountError                             str   'Srmount error!', 10
+  echo.failCommunicationErrorOnSend                 str   'Communication error on send!', 10
+  echo.failProtocolError                            str   'Protocol error!', 10
+  echo.failMultihopAttempted                        str   'Multihop attempted!', 10
+  echo.failRFSSpecificError                         str   'RFS specific error!', 10
+  echo.failNotADataMessage                          str   'Not a data message!', 10
+  echo.failValueTooLargeForDefinedDataType          str   'Value too large for defined data type!', 10
+  echo.failNameNotUniqueOnNetwork                   str   'Name not unique on network!', 10
+  echo.failFileDescriptorInBadState                 str   'File descriptor in bad state!', 10
+  echo.failRemoteAddressChanged                     str   'Remote address changed!', 10
+  echo.failCanNotAccessANeededSharedLibrary         str   'Can not access a needed shared library!', 10
+  echo.failAccessingACorruptedSharedLibrary         str   'Accessing a corrupted shared library!', 10
+  echo.failLibSectionInAOutCorrupted                str   '.lib section in a.out corrupted!', 10
+  echo.failAttemptingToLinkTooManySharedLibs        str   'Attempting to link in too many shared libs!', 10
+  echo.failCannotExecASharedLibraryDirectly         str   'Cannot exec a shared library directly!', 10
+  echo.failIllegalByteSequence                      str   'Illegal byte sequence!', 10
+  echo.failInterruptedSystemCallShouldBeRestarted   str   'Interrupted system call should be restarted!', 10
+  echo.failStreamsPipeError                         str   'Streams pipe error!', 10
+  echo.failTooManyUsers                             str   'Too many users!', 10
+  echo.failSocketOperationOnNonSocket               str   'Socket operation on non-socket!', 10
+  echo.failDestinationAddressRequired               str   'Destination address required!', 10
+  echo.failMessageTooLong                           str   'Message too long!', 10
+  echo.failProtocolWrongTypeForSocket               str   'Protocol wrong type for socket!', 10
+  echo.failProtocolNotAvailable                     str   'Protocol not available!', 10
+  echo.failProtocolNotSupported                     str   'Protocol not supported!', 10
+  echo.failSocketTypeNotSupported                   str   'Socket type not supported!', 10
+  echo.failOperationNotSupportedOnTransportEndpoint str   'Operation not supported on transport endpoint!', 10
+  echo.failProtocolFamilyNotSupported               str   'Protocol family not supported!', 10
+  echo.failAddressFamilyNotSupportedByProtocol      str   'Address family not supported by protocol!', 10
+  echo.failAddressAlreadyInUse                      str   'Address already in use!', 10
+  echo.failCannotAssignRequestedAddress             str   'Cannot assign requested address!', 10
+  echo.failNetworkIsDown                            str   'Network is down!', 10
+  echo.failNetworkIsUnreachable                     str   'Network is unreachable!', 10
+  echo.failNetworkDroppedConnectionBecauseOfReset   str   'Network dropped connection because of reset!', 10
+  echo.failSoftwareCausedConnectionAbort            str   'Software caused connection abort!', 10
+  echo.failConnectionResetByPeer                    str   'Connection reset by peer!', 10
+  echo.failNoBufferSpaceAvailable                   str   'No buffer space available!', 10
+  echo.failTransportEndpointIsAlreadyConnected      str   'Transport endpoint is already connected!', 10
+  echo.failTransportEndpointIsNotConnected          str   'Transport endpoint is not connected!', 10
+  echo.failCannotSendAfterTransportEndpointShutdown str   'Cannot send after transport endpoint shutdown!', 10
+  echo.failTooManyReferencesCannotSplice            str   'Too many references: cannot splice!', 10
+  echo.failConnectionTimedOut                       str   'Connection timed out!', 10
+  echo.failConnectionRefused                        str   'Connection refused!', 10
+  echo.failHostIsDown                               str   'Host is down!', 10
+  echo.failNoRouteToHost                            str   'No route to host!', 10
+  echo.failOperationAlreadyInProgress               str   'Operation already in progress!', 10
+  echo.failOperationNowInProgress                   str   'Operation now in progress!', 10
+  echo.failStaleNFSFileHandle                       str   'Stale NFS file handle!', 10
+  echo.failStructureNeddsCleaning                   str   'Structure needs cleaning!', 10
+  echo.failNotAXENIXNamedTypeFile                   str   'Not a XENIX named type file!', 10
+  echo.failNoXENIXSemaphoresAvailable               str   'No XENIX semaphores available!', 10
+  echo.failIsANamedTypeFile                         str   'Is a named type file!', 10
+  echo.failRemoteIOError                            str   'Remote I/O error!', 10
+  echo.failQuotaExceeded                            str   'Quota exceeded!', 10
+  echo.failNoMediumFound                            str   'No medium found!', 10
+  echo.failWrongMediumType                          str   'Wrong medium type!', 10
+  echo.failOperationCanceled                        str   'Operation Canceled!', 10
+  echo.failRequiredKeyNotAvailable                  str   'Required key not available!', 10
+  echo.failKeyHasExpired                            str   'Key has expired!', 10
+  echo.failKeyHasBeenRevoked                        str   'Key has been revoked!', 10
+  echo.failKeyWasRejectedByService                  str   'Key was rejected by service!', 10
+  echo.failOwnerDied                                str   'Owner died!', 10
+  echo.failStateNotRecoverable                      str   'State not recoverable!', 10
+  echo.space                                        str   ' '
+  echo.newline                                      str   10
+  echo.blink                                        str   '*blink*', 10
+  echo.msgRAX                                       str   '== register-state ==', 10, '[echo] RAX    = 0x'
+  echo.msgSys0ret                                   str   ' : sys0ret'
+  echo.msgRBX                                       str   'RBX    = 0x'
+  echo.msgRCX                                       str   'RCX    = 0x'
+  echo.msgRDX                                       str   'RDX    = 0x'
+  echo.msgSys2arg                                   str   ' : sys2arg'
+  echo.msgRDI                                       str   'RDI    = 0x'
+  echo.msgSys0arg                                   str   ' : sys0arg'
+  echo.msgRSI                                       str   'RSI    = 0x'
+  echo.msgSys1arg                                   str   ' : sys1arg'
+  echo.msgRBP                                       str   'RBP    = 0x'
+  echo.msgRSP                                       str   'RSP    = 0x'
+  echo.msgStack                                     str   ' : *stack'
+  echo.msgR8                                        str   'R8     = 0x'
+  echo.msgSys4arg                                   str   ' : sys4arg'
+  echo.msgR9                                        str   'R9     = 0x'
+  echo.msgSys5arg                                   str   ' : sys5arg'
+  echo.msgR10                                       str   'R10    = 0x'
+  echo.msgSys3arg                                   str   ' : sys3arg'
+  echo.msgR11                                       str   'R11    = 0x'
+  echo.msgR12                                       str   'R12    = 0x'
+  echo.msgTemp2                                     str   ' : _tmp2_ '
+  echo.msgR13                                       str   'R13    = 0x'
+  echo.msgTemp3                                     str   ' : _tmp3_ '
+  echo.msgR14                                       str   'R14    = 0x'
+  echo.msgTemp4                                     str   ' : _tmp4_ '
+  echo.msgR15                                       str   'R15    = 0x'
+  echo.msgRIP                                       str   'RIP    = 0x'
+  echo.msgRFLAGS                                    str   'RFLAGS = 0x'
+  echo.msgF0                                        str   'carry'
+  echo.msgF2                                        str   'parity'
+  echo.msgF4                                        str   'adjust'
+  echo.msgF6                                        str   'zero'
+  echo.msgF7                                        str   'sign'
+  echo.msgF8                                        str   'trab'
+  echo.msgF9                                        str   'interrupt'
+  echo.msgF10                                       str   'direction'
+  echo.msgF11                                       str   'overflow'
+  echo.msgF14                                       str   'nested'
+  echo.msgF16                                       str   'resume'
+  echo.msgF17                                       str   'virtual mode'
+  echo.msgF18                                       str   'alignment check'
+  echo.msgF19                                       str   'virtual interrupt flag'
+  echo.msgF20                                       str   'virtual interrupt pending'
+  echo.msgF21                                       str   'able to use CPUID'
+  echo.msgRING0                                     str   'ring 0'
+  echo.msgRING1                                     str   'ring 1'
+  echo.msgRING2                                     str   'ring 2'
+  echo.msgRING3                                     str   'ring 3'
+  echo.nEcho                                        str   10, '[echo] '
+  echo.nEchoSub                                     str   10, '[echo] > '

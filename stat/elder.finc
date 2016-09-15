@@ -1,0 +1,13 @@
+elder.itemSize                =                             31
+elder.offFlags                =                             0x00
+elder.offTypeL                =                             0x01
+elder.offTypeD                =                             0x03
+elder.offMyself               =                             0x05
+elder.offHigh                 =                             0x07
+elder.offLeft                 =                             0x0f
+elder.offDown                 =                             0x17
+elder.f                       =                             0x00
+macro elder_init
+{
+  buffers_new                 qword [ elder.top ],        elder.itemSize
+}

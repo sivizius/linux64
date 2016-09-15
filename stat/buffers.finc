@@ -1,0 +1,333 @@
+;( constants )
+  buffers.ctrPage                       =                                       8                                       ;in [1,8]
+  buffers.lenBigFoo                     =                                       18
+  buffers.lenMeta                       =                                       40
+  buffers.lenFree                       =                                       ( buffers.lenFull - buffers.lenMeta )
+  buffers.lenFull                       =                                       ( 4096 * buffers.ctrPage )
+  buffers.start                         =                                       0x0000
+  buffers.startPositiv                  =                                       0x0001
+  buffers.startInvalid                  =                                       (( buffers.lenFree - 2 ) + 1 )
+  buffers.startNegativ                  =                                       ( 0x10000 - ( buffers.lenFree - 2 ))
+  buffers.offNext                       =                                       0x00
+  buffers.offStop                       =                                       0x08
+  buffers.offHere                       =                                       0x10
+  buffers.offLast                       =                                       0x18
+  buffers.offFull                       =                                       0x20
+  buffers.offFree                       =                                       0x22
+  buffers.offUsed                       =                                       0x24
+  buffers.offSpam                       =                                       0x26
+  buffers.offContent                    =                                       0x28
+  buffers.offSize                       =                                       0x00
+  buffers.offNormal                     =                                       0x02
+  buffers.offBigFoo                     =                                       0x02
+  buffers.offBigUsed                    =                                       0x0a
+  buffers.offBigPage                    =                                       0x0e
+  buffers.magicBigFoo                   =                                       0x8000
+  buffers.magicBigFooRemoved            =                                       0x8001
+;;?!?  buffers.
+;( macros )
+  macro buffers_clone                   buffer,                                 start,                                  length
+  {
+    ;( I/O )
+    ;{
+    ;:  rax                             ignored                                 unchanged
+    ;:  rbx                             ignored                                 *content_new
+    ;:  rcx                             ignored                                 content_size_new
+    ;:  rdx                             length                                  content_size_new
+    ;:  rsi                             offset                                  *content_old + content_size_new
+    ;:  rdi                             *buffer                                 *buffer_new
+    ;:  r15                             ignored                                 *page_new
+    ;:  CF                              ignored                                 set if failed
+    ;:  ZF                              ignored                                 set if bigfoo, clr if normal
+    ;}
+    if ( start eq )
+      xor                               rsi,                                    rsi
+      xor                               rdx,                                    rdx
+    else
+      if ( start eq 0 )
+        xor                             rsi,                                    rsi
+      else
+        mov                             rsi,                                    start
+      end if
+      if ( length eq )
+        xor                             rdx,                                    rdx
+      else
+        if ( length eq 0 )
+          xor                           rdx,                                    rdx
+        else
+          mov                           rdx,                                    length
+        end if
+      end if
+    end if
+    mov                                 rdi,                                    buffer
+    call                                buffers.clone
+  }
+  macro buffers_create                  size,                                   input,                                  input_size
+  {
+    buffers_new                         size,                                   input,                                  input_size
+  }
+  macro buffers_debug
+  {
+    call                                buffers.debug
+  }
+  macro buffers_del                     buffer
+  {
+    ;( I/O )
+    ;{
+    ;:  rax                             ignored                                 unchanged
+    ;:  rbx                             ignored                                 invalid *content
+    ;:  rcx                             ignored                                 removed_size
+    ;:  rdx                             ignored                                 unchanged
+    ;:  rsi                             ignored                                 unchanged
+    ;:  rdi                             *buffer                                 invalid *buffer
+    ;:  r15                             ignored                                 *page
+    ;:  CF                              ignored                                 set if failed
+    ;:  ZF                              ignored                                 undefined
+    ;}
+    if ( buffer eq )
+    else
+      mov                               rdi,                                    buffer
+    end if
+    call                                buffers.del
+  }
+  macro buffers_delete                  buffer
+  {
+    if ( buffer eq )
+      buffers_del
+    else
+      buffers_del                       buffer
+    end if
+  }
+  macro buffers_echo                    buffer
+  {
+    ;( I/O )
+    ;{
+    ;:  rax                             ignored                                 NULL/error
+    ;:  rbx                             ignored                                 *content
+    ;:  rcx                             ignored                                 content_size
+    ;:  rdx                             ignored                                 unchanged
+    ;:  rsi                             ignored                                 unchanged
+    ;:  rdi                             *buffer                                 *buffer
+    ;:  r15                             ignored                                 *page
+    ;:  CF                              ignored                                 set if failed
+    ;:  ZF                              ignored                                 set if bigfoo, clr if normal
+    ;}
+    if ( buffer eq )
+    else
+      mov                               rdi,                                    buffer
+    end if
+    call                                buffers.echo
+  }
+  macro buffers_extend                  buffer,                                 length,                                 input,                                  input_size
+  {
+    ;( I/O )
+    ;{
+    ;:  rax                             length                                  length
+    ;:  rbx                             ignored                                 *content
+    ;:  rcx                             ignored                                 content_size
+    ;:  rdx                             input_size                              input_size
+    ;:  rsi                             *input                                  *input
+    ;:  rdi                             *buffer                                 *buffer
+    ;:  r15                             ignored                                 *page
+    ;:  CF                              ignored                                 set if failed
+    ;:  ZF                              ignored                                 set if bigfoo, clr if normal
+    ;}
+    if ( buffer eq )
+    else
+      mov                               rdi,                                    buffer
+      if ( length eq )
+      else
+        mov                             rax,                                    length
+        if ( input eq )
+          xor                           rsi,                                    rsi
+          xor                           rdx,                                    rdx
+        else
+          if ( input eq 0 )
+            xor                         rsi,                                    rsi
+          else
+            mov                         rsi,                                    input
+          end if
+          if ( input_size eq )
+            xor                         rdx,                                    rdx
+          else
+            if ( input_size eq 0 )
+              xor                       rdx,                                    rdx
+            else
+              mov                       rdx,                                    input_size
+            end if
+          end if
+        end if
+      end if
+    end if
+    call                                buffers.extend
+  }
+  macro buffers_get                     buffer,                                 jump
+  {
+    if ( buffer eq )
+    else
+      mov                               rdi,                                    buffer
+    end if
+    call                                buffers.get
+    if ( jump eq )
+    else
+      jc                                jump
+    end if
+  }
+  macro buffers_new                     size,                                   input,                                  input_size
+  {
+    ;( I/O )
+    ;{
+    ;:  rax                             ignored                                 unchanged
+    ;:  rbx                             ignored                                 *content
+    ;:  rcx                             length                                  content_size
+    ;:  rdx                             input_size                              input_size
+    ;:  rsi                             *input                                  *input + input_size
+    ;:  rdi                             ignored                                 *buffer
+    ;:  r15                             ignored                                 *page
+    ;:  CF                              ignored                                 set if failed
+    ;:  ZF                              ignored                                 set if bigfoo, clr if normal
+    ;}
+    match any,size
+    \{
+      mov                               rcx,                                    size
+      match ,input
+      \\{
+        xor                             rdx,                                    rdx
+      \\}
+      match any,input
+      \\{
+        lea                             rsi,                                    [ input ]
+        mov                             rdx,                                    input_size
+      \\}
+    \}
+    call                                buffers.new
+  }
+  macro buffers_putB                    buffer,                                 char
+  {
+    ;( I/O )
+    ;{
+    ;:  rax                             char                                    char
+    ;:  rbx                             ignored                                 *content
+    ;:  rcx                             ignored                                 content_size
+    ;:  rdx                             ignored                                 unchanged
+    ;:  rsi                             ignored                                 unchanged
+    ;:  rdi                             *buffer                                 *buffer
+    ;:  r15                             ignored                                 *page
+    ;:  CF                              ignored                                 set if failed
+    ;:  ZF                              ignored                                 set if bigfoo, clr if normal
+    ;}
+    if ( buffer eq )
+    else
+      mov                               rdi,                                    buffer
+      if ( char eq )
+      else
+        mov                             al,                                     char
+      end if
+    end if
+    call                                buffers.putB
+  }
+  macro buffers_putW                    buffer,                                 char
+  {
+    ;( I/O )
+    ;{
+    ;:  rax                             char                                    char
+    ;:  rbx                             ignored                                 *content
+    ;:  rcx                             ignored                                 content_size
+    ;:  rdx                             ignored                                 unchanged
+    ;:  rsi                             ignored                                 unchanged
+    ;:  rdi                             *buffer                                 *buffer
+    ;:  r15                             ignored                                 *page
+    ;:  CF                              ignored                                 set if failed
+    ;:  ZF                              ignored                                 set if bigfoo, clr if normal
+    ;}
+    if ( buffer eq )
+    else
+      mov                               rdi,                                    buffer
+      if ( char eq )
+      else
+        mov                             ax,                                     char
+      end if
+    end if
+    call                                buffers.putW
+  }
+  macro buffers_putD                    buffer,                                 char
+  {
+    ;( I/O )
+    ;{
+    ;:  rax                             char                                    char
+    ;:  rbx                             ignored                                 *content
+    ;:  rcx                             ignored                                 content_size
+    ;:  rdx                             ignored                                 unchanged
+    ;:  rsi                             ignored                                 unchanged
+    ;:  rdi                             *buffer                                 *buffer
+    ;:  r15                             ignored                                 *page
+    ;:  CF                              ignored                                 set if failed
+    ;:  ZF                              ignored                                 set if bigfoo, clr if normal
+    ;}
+    if ( buffer eq )
+    else
+      mov                               rdi,                                    buffer
+      if ( char eq )
+      else
+        mov                             eax,                                    char
+      end if
+    end if
+    call                                buffers.putD
+  }
+  macro buffers_putQ                    buffer,                                 char
+  {
+    ;( I/O )
+    ;{
+    ;:  rax                             char                                    char
+    ;:  rbx                             ignored                                 *content
+    ;:  rcx                             ignored                                 content_size
+    ;:  rdx                             ignored                                 unchanged
+    ;:  rsi                             ignored                                 unchanged
+    ;:  rdi                             *buffer                                 *buffer
+    ;:  r15                             ignored                                 *page
+    ;:  CF                              ignored                                 set if failed
+    ;:  ZF                              ignored                                 set if bigfoo, clr if normal
+    ;}
+    if ( buffer eq )
+    else
+      mov                               rdi,                                    buffer
+      if ( char eq )
+      else
+        mov                             rax,                                    char
+      end if
+    end if
+    call                                buffers.putQ
+  }
+  macro buffers_revive
+  {
+    ;( I/O )
+    ;{
+    ;:  rax                             ignored                                 unchanged
+    ;:  rbx                             ignored                                 *content
+    ;:  rcx                             ignored                                 content_size
+    ;:  rdx                             ignored                                 unchanged
+    ;:  rsi                             ignored                                 unchanged
+    ;:  rdi                             *buffer                                 *buffer
+    ;:  r15                             ignored                                 *page
+    ;:  CF                              ignored                                 set
+    ;:  ZF                              ignored                                 clr
+    ;}
+    if ( buffer eq )
+    else
+      mov                               rdi,                                    buffer
+    end if
+    call                                buffers.revive
+  }
+  macro buffers_savePage                memory
+  {
+    mov                                 qword [ memory ],                       r15
+  }
+  macro buffers_saveBuffer              memory
+  {
+    lea                                 rax,                                    [ memory ]
+    call                                buffers.store
+  }
+  macro buffers_saveContent             memory
+  {
+    mov                                 qword [ memory ],                       rbx
+  }

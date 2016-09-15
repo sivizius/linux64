@@ -1,0 +1,31 @@
+onDebug
+{
+  files.msgFile                         str                                              '[files] *file:            *0x'
+  files.msgSelf                         str                                              '[files] fd:                0x'
+  files.msgName                         str                                          10, '[files] name:              »'
+  files.msgFileName                     str                                     '«', 10, '[files] *name:            *0x'
+  files.msgBuffer                       str                                          10, '[files] *buffer:          *0x'
+  files.msgPosition                     str                                          10, '[files] *position:        *0x'
+  files.msgOffset                       str                                          10, '[files] *offset:          *0x'
+  files.msgNext                         str                                          10, '[files] next->:           *0x'
+  files.msgLast                         str                                          10, '[files] <-last:           *0x'
+  files.msgYtable                       str                                          10, '[files] == yapters ==', \
+                                                                                     10, '[files] > ytable:         *0x'
+  files.msgYcontent                     str                                          10, '[files] > ycontent:       *0x'
+  files.msgYfce_symbols                 str                                          10, '[files] > ysymbols/yid:   *0x'
+  files.msgYfce_pointers                str                                          10, '[files] > ypointers:      *0x'
+  files.msgYfce_count                   str                                          10, '[files] > ycount:          0x'
+  files.msgYfce_cuid                    str                                          10, '[files] > ycuid:           0x'
+  files.msgYfce_size                    str                                          10, '[files] > ysize:           0x'
+  files.msgYfce_state                   str                                          10, '[files] > ystate:          0x'
+  files.msgSize                         str                                          10, '[files] size:              0x'
+  files.msgATime                        str                                          10, '[files] a-time:            0x'
+  files.msgNATime                       str                                          10, '[files] a-time_nsec:       0x'
+  files.msgMTime                        str                                          10, '[files] m-time:            0x'
+  files.msgNMTime                       str                                          10, '[files] m-time_nsec:       0x'
+  files.msgCTime                        str                                          10, '[files] c-time:            0x'
+  files.msgNCTime                       str                                          10, '[files] c-time_nsec:       0x'
+  files.msgFailInternal                 str                                     '[files] fail: an internal error occured! :-/', 10
+  files.msgFailFileName                 str                                     '[files] fail: invalid file-name!', 10
+  files.msgFailChar                     str                                     '[files] fail: invalid character!', 10
+}

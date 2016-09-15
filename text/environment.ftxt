@@ -1,0 +1,11 @@
+onDebug
+{
+  environment.msgEnvironment            str                                     '[environment] parse: '
+  environment.msgCurrent                str                                     '[environment] current directory: '
+  environment.msgHome                   str                                     '[environment] home directory: '
+  environment.msgUser                   str                                     '[environment] username: '
+  environment.msgMyself                 str                                     '[environment] myself: '
+}
+environment.pwd                         str                                     'PWD=', 0, 0, 0, 0
+environment.user                        str                                     'USER=', 0, 0, 0
+environment.home                        str                                     'HOME=', 0, 0, 0

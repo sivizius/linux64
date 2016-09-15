@@ -1,0 +1,205 @@
+symbols:
+  ;.
+  .look:
+    ;( IO )
+    ;{
+    ; rax                               ignored                                 undefined/uid/*symbol.next
+    ; rcx                               ignored                                 unknown
+    ; rbx                               *symbols.stop                           unknown
+    ; rdx                               string.size                             symbols_SymbolFound/EndOfPage/LastSymbol/SizeError
+    ; rsi                               *string                                 unknown
+    ; rdi                               *symbols.start                          unknown
+    ;}
+    ;*context -> 
+    ;{
+    ;  list                             
+    ;}
+    ;array[256].structure()
+    ;{
+    ;   0x00  *string                   cq                                      buffers::*buffer
+    ;   0x08  uid                       cd                                      unique identifier of symbol
+    ;   0x0c  string.size               cw                                      buffers::content_size
+    ;   0x0e  NULL                      cw                                      idk?
+    ;}
+    mov                                 qword [ symbols.base ],                 lib0arg
+    ;( if string.size = NULL -> failSize )
+      or                                lib2arg_w,                              lib2arg_w
+      jz                                .look.failSize
+    ;{
+      ;( foreach *symbols )
+        cmp                             lib0arg,                                rbx
+        jae                             .look.next
+        .look.look:
+      ;{
+        ;( if symbols.size != NULL )
+          mov                           ax,                                     word  [ lib0arg + 8 ]
+          or                            ax,                                     ax
+          jz                            .look.failStop
+        ;{
+          ;( if string.size == symbols.size )
+            cmp                         ax,                                     lib2arg_w
+            jne                         .look.loop
+          ;{
+            ;( if str(*string) === str(*symbols.string) )
+              movzx                     rcx,                                    lib2arg_w
+              push                      lib0arg
+              push                      lib1arg
+              mov                       rdi,                                    qword [ lib0arg ]
+              repne                     cmpsb
+              pop                       lib1arg
+              pop                       lib0arg
+              jnz                       .look.loop
+            ;{
+              ;mov                       lib1ret,                                symbols_SymbolFound
+              xor                       lib1ret,                                lib1ret
+              mov                       lib0ret_d,                              dword [ lib0arg + 10 ]
+              ret
+            ;}
+          ;}
+          ;( loop )
+            .look.loop:
+            add                         lib0arg,                                16
+            cmp                         lib0arg,                                rbx
+            jb                          .look.look
+          ;( next )
+            .look.next:
+            mov                         lib1ret,                                symbols_EndOfPage
+            mov                         lib0ret,                                qword [ symbols.base ]
+            ret
+        ;( else )
+          .look.failStop:
+        ;{
+          mov                           lib1ret,                                symbols_LastSymbol
+          mov                           lib0ret,                                rdi
+          ret
+        ;}
+      ;}
+    ;}
+    ;( else )
+      .look.failSize:
+    ;{
+        mov                             lib1ret,                                symbols_SizeError
+        ret
+    ;}
+  .send: ;rdi/lib0arg *page, rsi/lib1arg *string, rdx/lib2arg string.size, local ( rbx, rcx/lib3ret ) -> rax/lib0ret NULL/uid
+    ;( if lib0arg != NULL)
+      or                                lib0arg,                                lib0arg
+      jz                                .send.fail
+    ;{
+      jmp                               .send.again
+      .send.again.stack:
+        pop                             lib2arg
+        pop                             lib1arg
+      .send.again:
+      mov                               rbx,                                    qword [ rdi + 8 ]
+      add                               rdi,                                    16
+      push                              lib1arg
+      push                              lib2arg
+      call                              .look
+      push                              symbols_retValue
+      ;( select error )
+      ;{
+        or                              symbols_retError,                       symbols_retError
+        jnz                             @f
+        ;( case symbols_SymbolFound )
+          echo_put                      symbols.msgSymbolFound
+          pop                           rax
+          pop                           lib2arg
+          pop                           lib1arg
+          push                          rax
+          mov                           dword [ echo.hexRegister ],             eax
+          echo_hexValue                 echo.hexRegister,                       4
+          echo_n
+          pop                           lib0ret
+          ret
+        @@:
+        cmp                             symbols_retError,                       symbols_EndOfPage
+        jne                             @f
+        ;( case symbols_EndOfPage )
+          ;echo_put                      symbols.msgEndOfPage
+          echo_put                      symbols.msgCreatePage
+          pop                           rax
+          sub                           rax,                                    16
+          mov                           rdi,                                    qword [ rax ]
+          ;( if *page.next == NULL )
+            or                          rdi,                                    rdi
+            jnz                         .send.again.stack
+          ;{
+            push                        rax
+              xor                       sys5arg,                                sys5arg
+              mov                       sys4arg,                                0xffffffffffffffff
+              mov                       sys3arg,                                0x0000000000000022  ;private, anonymous
+              mov                       sys2arg,                                0x0000000000000003  ;read, write
+              mov                       sys1arg,                                4096
+              xor                       sys0arg,                                sys0arg
+              sys_call                  sys_mmap
+            pop                         rsi
+            mov                         rdi,                                    rax
+            add                         rax,                                    4096
+            mov                         qword [ rsi ],                          rdi
+            mov                         qword [ rdi + 8 ],                      rax
+            pop                         lib2arg
+            pop                         lib1arg
+            jmp                         .send.again
+          ;}
+        @@:
+        cmp                             symbols_retError,                       symbols_LastSymbol
+        jne                             @f
+        ;( case symbols_LastSymbol )
+          ;echo_put                      symbols.msgLastSymbol
+          echo_put                      symbols.msgInsertSymbol
+          ;echo_n
+          pop                           rdi
+          pop                           lib2arg
+          pop                           lib1arg
+          push                          lib1arg
+          push                          lib2arg
+          ;yalave_stop                   'ExitHere'
+          mov                           eax,                                    dword [ symbols.uid ]
+          inc                           eax
+          ;( if uid != NULL )
+            or                          eax,                                    eax
+            jz                          .send.fail
+          ;{
+            mov                         qword [ rdi ],                          lib1arg
+            mov                         word  [ rdi + 8 ],                      lib2arg_w
+            mov                         dword [ rdi + 10 ],                     eax
+            mov                         word  [ rdi + 14 ],                     0x0000
+            mov                         dword [ symbols.uid ],                  eax
+            mov                         dword [ echo.hexRegister ],             eax
+            echo_hexValue               echo.hexRegister,                       4
+            echo_n
+            pop                         lib2arg
+            pop                         lib1arg
+            ret
+          ;}
+        @@:
+        cmp                             symbols_retError,                       symbols_SizeError
+        jne                             .send.fail
+        ;( case symbols_SizeError )
+          pop                           rax
+          pop                           rax
+          pop                           rax
+          echo_put                      symbols.msgSizeError
+          xor                           lib0ret,                                lib0ret
+          ret
+        @@:
+        ;( default )
+          pop                           rax
+          pop                           rax
+          pop                           rax
+          echo_put                      symbols.msgEpicFail
+          xor                           lib0ret,                                lib0ret
+          ret
+      ;}
+    ;}
+    ;( else )
+      .send.fail:
+    ;{
+      echo_put                          symbols.msgEpicFail
+      xor                               lib0ret,                                lib0ret
+      ret
+    ;}
+  .recv:
+  ret
+

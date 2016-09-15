@@ -1,0 +1,131 @@
+O_CREAT                                 =                                       000100o
+O_EXCL                                  =                                       000200o
+O_NOCTTY                                =                                       000400o
+O_TRUNC                                 =                                       001000o
+O_APPEND                                =                                       002000o
+O_NONBLOCK                              =                                       004000o
+O_NONDELAY                              =                                       O_NONBLOCK
+O_SYNC                                  =                                       010000o
+O_ASYNC                                 =                                       020000o
+O_DIRECT                                =                                       040000o
+O_LARGEFILE                             =                                       100000o
+O_DIRECTORY                             =                                       200000o
+O_NOFOLLOW                              =                                       400000o
+
+AT_FDCWD                                =                                       ( 0 - 100 )
+
+file_modeR                              =                                       0x00000000
+file_modeW                              =                                       0x00000001
+file_modeRW                             =                                       0x00000002
+file_modeA                              =                                       0x00000442
+file_modeC                              =                                       0x00000242
+
+file_DirRDF                             =                                       ( 1 shl 9 )
+file_groupID                            =                                       ( 2 shl 9 )
+
+file_ownerID                            =                                       ( 4 shl 9 )
+
+file_ownerRWX                           =                                       ( 7 shl 6 )
+file_ownerRW                            =                                       ( 6 shl 6 )
+file_ownerRX                            =                                       ( 5 shl 6 )
+file_ownerR                             =                                       ( 4 shl 6 )
+file_ownerWX                            =                                       ( 3 shl 6 )
+file_ownerW                             =                                       ( 2 shl 6 )
+file_ownerX                             =                                       ( 1 shl 6 )
+file_owner                              =                                       0
+
+file_groupRWX                           =                                       ( 7 shl 3 )
+file_groupRW                            =                                       ( 6 shl 3 )
+file_groupRX                            =                                       ( 5 shl 3 )
+file_groupR                             =                                       ( 4 shl 3 )
+file_groupWX                            =                                       ( 3 shl 3 )
+file_groupW                             =                                       ( 2 shl 3 )
+file_groupX                             =                                       ( 1 shl 3 )
+file_group                              =                                       0
+
+file_otherRWX                           =                                       7
+file_otherRW                            =                                       6
+file_otherRX                            =                                       5
+file_otherR                             =                                       4
+file_otherWX                            =                                       3
+file_otherW                             =                                       2
+file_other                              =                                       0
+
+dir_inode                               =                                       0x00
+dir_next                                =                                       0x08
+dir_length                              =                                       0x10
+dir_type                                =                                       0x12
+dir_name                                =                                       0x13
+
+dir_tUnknown                            =                                       0
+dir_tNamedPipe                          =                                       1
+dir_tCharDevice                         =                                       2
+dir_tDirectory                          =                                       4
+dir_tBlockDevice                        =                                       6
+dir_tFile                               =                                       8
+dir_tLink                               =                                       10
+dir_tSocket                             =                                       12
+dir_tWHT                                =                                       14
+
+;:  rdx sys2arg flags               flags               flags               NULL                NULL                NULL                NULL                unknown             unknown
+;:  rdi sys0arg file-name           file-name           file-name\0         *content\0          unknown             *file               file-handler        unknown             file-name
+;:  rsi sys1arg *last-file          *last-file          *last-file          flags               NULL                NULL                *file + .stat       unknown             *last-file
+macro file_open                         name,                                   flags,                                  last
+{
+  if ( flags eq )
+    null                                sys2arg
+  else if ( flags eq NULL )
+    null                                sys2arg
+  else
+    mov                                 sys2arg,                                flags
+  end if
+  if ( last eq )
+    null                                sys1arg
+  else if ( last eq NULL )
+    null                                sys1arg
+  else
+    mov                                 sys1arg,                                last
+  end if
+  if ( name eq )
+    display '[files] missing filename!', 10
+  else
+    lea                                 sys0arg,                                [ name ]
+  end if
+  call                                  files.open
+}
+macro file_debug                        _file_
+{
+  if ( _file_ eq )
+  else
+    mov                                 __file__,                               _file_
+  end if
+  call                                  files.debug
+}
+macro getB@__file__
+{
+  call                                  files.getByte
+}
+macro getW@__file__
+{
+  call                                  files.getWord
+}
+macro getD@__file__
+{
+  call                                  files.getDWord
+}
+macro getQ@__file__
+{
+  call                                  files.getQWord
+}
+macro getL@__file__
+{
+  call                                  files.getLength
+}
+macro getS@__file__
+{
+  call                                  files.getString
+}
+macro get@__file__
+{
+  call                                  files.getObject
+}

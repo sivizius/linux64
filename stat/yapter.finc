@@ -1,0 +1,518 @@
+myBase                                  =                                       0                                       ;offset in memory
+myOffset                                =                                       0                                       ;offset in memory in yapter-table
+myPointerOffset                         =                                       0                                       ;offset in memory of current pointer-yapter
+myFile                                  =                                       0                                       ;offset in file
+myCount                                 =                                       0                                       ;count yapters
+myPointers                              =                                       0                                       ;count pointer-yapters
+myMain                                  =                                       0                                       ;cuid of main-code
+sizeBody                                =                                       0
+aPointers                               =                                       0
+_head_                                  equ                                     '<none>'                                ;current yapter
+_code_                                  =                                       0x0000                                  ;machine
+_magic_                                 =                                       0x0000                                  ;machine magic
+;( yapter-types )
+;{
+  sbaYapter_tFinal                      =                                       0x0000
+  sbaYapter_tNote                       =                                       0x0001
+  sbaYapter_tData                       =                                       0x0002
+  sbaYapter_tStack                      =                                       0x0003
+  sbaYapter_tConst                      =                                       0x0004
+  sbaYapter_tBuffers                    =                                       0x0005
+  sbaYapter_tRandom                     =                                       0x0006
+  sbaYapter_tInclude                    =                                       0x0008
+  sbaYapter_tSymbols                    =                                       0x000b
+  sbaYapter_tPointers                   =                                       0x000c
+  sbaYapter_tModule                     =                                       0x0011
+  sbaYapter_tx86_16                     =                                       0x0019
+  sbaYapter_tx86_32                     =                                       0x001a
+  sbaYapter_tx86_64                     =                                       0x001b
+;}
+;( yapter-modes )
+;{
+  sbaYapter_mMaskType                   =                                       0x00f0
+  sbaYapter_mInitialization             =                                       0x0000
+  sbaYapter_mError                      =                                       0x0001
+  sbaYapter_mExecutable                 =                                       0x0010
+  sbaYapter_mBuildExecutable            =                                       0x0011
+  sbaYapter_mLoadExecutable             =                                       0x0012
+  sbaYapter_mModule                     =                                       0x0020
+  sbaYapter_mBuildModule                =                                       0x0021
+  sbaYapter_mLoadModule                 =                                       0x0022
+  sbaYapter_mSetup                      =                                       0x0030
+  sbaYapter_mBuildSetup                 =                                       0x0031
+  sbaYapter_mLoadSetup                  =                                       0x0032
+;}
+virtual at 0
+  vPointers::
+  times 0x00010000                      dq                                      ( 0 )
+  vYapters::
+  times 0x00000200                      dq                                      ( 0 )
+end virtual
+macro yapter_assign                     relation
+{
+  local stop
+  local done
+  done                                  equ                                     false
+  display                               'func *0x'
+  displayHex                            ( mPointers + ( oPointers * 8 ))
+  display                               ' -> *0x'
+  match x=-=>y,relation
+  \{
+    displayHex                          ( x )
+    display                             ' »', y, '«', 10
+    dw ( stop - $ - 2 )
+    db y
+    stop:
+    store                               qword ( x )                             at vPointers:( aPointers * 8 )
+    oPointers                           =                                       ( oPointers + 1 )
+    aPointers                           =                                       ( aPointers + 1 )
+    done                                equ                                     true
+  \}
+  match =false,done
+  \{
+    display                             '*var *0x'
+    displayHex                          ( mPointers + ( oPointers * 8 ))
+    display                             ' -> 0x1996100323421337 »', relation, '«', 10
+    dw ( stop - $ - 2 )
+    db relation
+    stop:
+    store                               qword ( 0x1996100323421337 )            at vPointers:( aPointers * 8 )
+    oPointers                           =                                       ( oPointers + 1 )
+    aPointers                           =                                       ( aPointers + 1 )
+  \}
+}
+struc yapter_symbol                     relation,                               [ stuff ]
+{
+  local                                 stop
+  display                               'symb *0x'
+  if ( _offs_ )
+    displayHex                          ( mPointers +          ( oPointers * 8 ))
+    display                             ' -> *0x'
+  end if
+  displayHex                            ( mPointers + _offs_ + ( oPointers * 8 ))
+  .                                     =                                       ( mPointers + _offs_ + ( oPointers * 8 ))
+  dw                                    ( stop - $ - 2 )
+  db                                    stuff
+  display ' -> »', stuff, '«', 10
+  stop:
+  oPointers                             =                                       ( oPointers + 1 )
+}
+macro yapter_symbol                     relation,                               [ stuff ]
+{
+  common
+    local                               stop
+    local                               done
+    done                                equ                                     false
+    dw                                  ( stop - $ - 2 )
+    display                             'symb *0x'
+    if ( _offs_ )
+      displayHex                        ( mPointers +          ( oPointers * 8 ))
+      display                           ' -> *0x'
+    end if
+    displayHex                          ( mPointers + _offs_ + ( oPointers * 8 ))
+    match x=-=>y, relation
+    \{
+      display                           ' -> »', y
+      x                                 =                                       ( mPointers + _offs_ + ( oPointers * 8 ))
+      db                                y
+      done                              equ                                     true
+    \}
+    match =false, done
+    \{
+      display                           ' -> »', relation
+      db                                relation
+    \}
+  forward
+    match any, stuff
+    \{
+      display                           stuff
+      db                                stuff
+    \}
+  common
+    display                             '«', 10
+    stop:
+    oPointers                           =                                       ( oPointers + 1 )
+}
+struc yapter_buffer                     addr
+{
+  .                                     =                                       ( mPointers + ( oPointers * 8 ))
+  .length                               =                                       ( addr - $ - 2 )
+  .size                                 dw                                      ( addr - $ - 2 )
+  .base:
+  display                               '*buf *0x'
+  displayHex                            ( mPointers + ( oPointers * 8 ))
+  display                               ' -> ', `., 10
+  oPointers                             =                                       ( oPointers + 1 )
+  match +,+
+}
+macro yapter_buffer                     relation
+{
+  local                                 done
+  done                                  equ                                     false
+  match x=-=>y,relation
+  \{
+    y                                   =                                       ( mPointers + ( oPointers * 8 ))
+    dw                                  ( x - $ - 2 )
+    done                                equ                                     true
+  \}
+  match =false,done
+  \{
+    dw                                  ( relation - $ - 2 )
+  \}
+  oPointers                             =                                       ( oPointers + 1 )
+  match +,+
+}
+struc yapter_pointer                    x
+{
+  .ptr                                  =                                       ( mPointers + ( oPointers * 8 ))
+  .                                     equ                                     qword [ .ptr ]
+  display                               '*ptr *0x'
+  displayHex                            ( .ptr )
+  display                               ' -> ', `., 10
+  match ,x
+  \{
+    store                               qword ( 0 )                             at vPointers:( oPointers * 8 )
+  \}
+  match any,x
+  \{
+    store                               qword ( x )                             at vPointers:( oPointers * 8 )
+  \}
+  org                                   ( $ + 8 )
+  oPointers                             =                                       ( oPointers + 1 )
+  aPointers                             =                                       ( aPointers + 1 )
+}
+macro yapter_pointer                    x
+{
+  display                               '*ptr *0x'
+  displayHex                            ( mPointers + ( oPointers * 8 ))
+  display                               ' -> 0x'
+  match ,x
+  \{
+    displayHex                          ( 0 )
+    store                               qword ( 0 )                             at vPointers:( oPointers * 8 )
+  \}
+  match any,x
+  \{
+    displayHex                          ( x )
+    store                               qword ( x )                             at vPointers:( oPointers * 8 )
+  \}
+  display                               10
+  org                                   ( $ + 8 )
+  oPointers                             =                                       ( oPointers + 1 )
+  aPointers                             =                                       ( aPointers + 1 )
+}
+macro yapter_tblPointer
+{
+  display 'pointers: #0x'
+  displayHex myBase
+  display 10
+  rPointers                             =                                       ( $ )
+  mPointers                             =                                       myBase
+  times aPointers                       dq                                      ( 0 )
+  repeat                                ( aPointers )
+    load                                a qword                                 from vPointers:( % * 8 - 8 )
+    display                             '*ptr: *0x'
+    displayHex                          ( a )
+    display                             10
+    store                               qword a                                 at ( rPointers - 8 + ( % * 8 ))
+  end repeat
+}
+macro yapter_tblYapter
+{
+  local                                 temp
+  local                                 type
+  local                                 size
+  local                                 a
+  rYapters                              =                                       ( $ )
+  times ( oYapters )                    db                                      ( 0 )
+  write_here                            =                                       ( 16 )
+  repeat                                ( oYapters / 16 )
+    load                                type word                               from vYapters:( ( % * 16 ) - 16 )
+    if ( type = sbaYapter_tPointers )
+    else if ( type = sbaYapter_tSymbols )
+    else if ( type = sbaYapter_tBuffers )
+    else if ( type = sbaYapter_tModule )
+    else if ( type = sbaYapter_tCompile )
+    else if ( type = sbaYapter_tParse )
+    else
+      load                              a qword                                 from vYapters:( ( % * 16 ) - 16 )
+      store                             qword a                                 at ( rYapters + write_here - 16 )
+      load                              a qword                                 from vYapters:( ( % * 16 ) -  8 )
+      store                             qword a                                 at ( rYapters + write_here -  8 )
+      write_here                        =                                       ( write_here + 16 )
+    end if
+  end repeat
+  myPointerOffset                       =                                       mPointers
+  myCountPointers                       =                                       myCount
+  repeat                                ( oYapters / 16 )
+    load                                type word                               from vYapters:( ( % * 16 ) - 16 )
+    if ( type = sbaYapter_tPointers )
+      load                              temp word                               from vYapters:( ( % * 16 ) - 14 )
+      load                              a dword                                 from vYapters:( ( % * 16 ) - 16 )
+      store                             dword a                                 at ( rYapters + write_here - 16 )
+      load                              size dword                              from vYapters:( ( % * 16 ) - 12 )
+      store                             dword '*ptr'                            at ( rYapters + write_here - 12 )
+      load                              a qword                                 from vYapters:( ( % * 16 ) -  8 )
+      display                           '[asm:sba] <pointers>     (2016-02-09) %'
+      displayHex2                       ( myCount )
+      display                           ' '
+      displayHex2                       sbaYapter_tPointers
+      display                           ' '
+      displayHex2                       temp
+      display                           ' »*p« »tr« *0x'
+      displayHex                        ( a )
+      display                           ' -> *0x'
+      displayHex                        ( myPointerOffset )
+      display                           ' #0x'
+      displayHex2                       ( size )
+      display                           ' ( #0x'
+      displayHex2                       size
+      display                           ' )', 10
+      store                             qword a                                 at ( rYapters + write_here -  8 )
+      write_here                        =                                       ( write_here + 16 )
+      myCount                           =                                       ( myCount + 1 )
+      myPointerOffset                   =                                       ( myPointerOffset + size )
+      sizeBody                          =                                       ( sizeBody + size )
+    else if ( type = sbaYapter_tSymbols )
+      load                              a dword                                 from vYapters:( ( % * 16 ) - 16 )
+      load                              temp word                               from vYapters:( ( % * 16 ) - 14 )
+      load                              size dword                              from vYapters:( ( % * 16 ) - 12 )
+      store                             dword a                                 at ( rYapters + write_here - 16 )
+      store                             dword 'symb'                            at ( rYapters + write_here - 12 )
+      load                              a qword                                 from vYapters:( ( % * 16 ) -  8 )
+      display                           '[asm:sba] <symbols>      (2016-02-09) %'
+      displayHex2                       myCount
+      display                           ' '
+      displayHex2                       sbaYapter_tSymbols
+      display                           ' '
+      displayHex2                       temp
+      display                           ' »sy« »mb« *0x'
+      displayHex                        a
+      display                           ' -> *0x'
+      displayHex                        myPointerOffset
+      display                           ' #0x'
+      displayHex2                       ( temp * 8 )
+      display                           ' ( #0x'
+      displayHex2                       size
+      display                           ' )', 10
+      store                             qword a                                 at ( rYapters + write_here -  8 )
+      write_here                        =                                       ( write_here + 16 )
+      myCount                           =                                       ( myCount + 1 )
+      myPointerOffset                   =                                       ( myPointerOffset + ( temp * 8 ))
+      sizeBody                          =                                       ( sizeBody + size )
+    else if ( type = sbaYapter_tBuffers )
+      load                              a dword                                 from vYapters:( ( % * 16 ) - 16 )
+      load                              temp word                               from vYapters:( ( % * 16 ) - 14 )
+      load                              size dword                              from vYapters:( ( % * 16 ) - 12 )
+      store                             dword a                                 at ( rYapters + write_here - 16 )
+      store                             dword '*buf'                            at ( rYapters + write_here - 12 )
+      load                              a qword                                 from vYapters:( ( % * 16 ) -  8 )
+      display                           '[asm:sba] <buffers>      (2016-02-09) %'
+      displayHex2                       myCount
+      display                           ' '
+      displayHex2                       sbaYapter_tBuffers
+      display                           ' '
+      displayHex2                       temp
+      display                           ' »*b« »uf« *0x'
+      displayHex                        a
+      display                           ' -> *0x'
+      displayHex                        myPointerOffset
+      display                           ' #0x'
+      displayHex2                       ( temp * 8 )
+      display                           ' ( #0x'
+      displayHex2                       size
+      display                           ' )', 10
+      store                             qword a                                 at ( rYapters + write_here -  8 )
+      write_here                        =                                       ( write_here + 16 )
+      myCount                           =                                       ( myCount + 1 )
+      myPointerOffset                   =                                       ( myPointerOffset + ( temp * 8 ))
+      sizeBody                          =                                       ( sizeBody + size )
+    else if ( type = sbaYapter_tModule )
+      load                              a dword                                 from vYapters:( ( % * 16 ) - 16 )
+      load                              cuid word                               from vYapters:( ( % * 16 ) - 14 )
+      load                              temp word                               from vYapters:( ( % * 16 ) - 10 )
+      load                              size dword                              from vYapters:( ( % * 16 ) - 12 )
+      store                             dword a                                 at ( rYapters + write_here - 16 )
+      store                             dword 'load'                            at ( rYapters + write_here - 12 )
+      load                              a qword                                 from vYapters:( ( % * 16 ) -  8 )
+      display                           '[asm:sba] <module>       (2016-02-09) %'
+      displayHex2                       myCount
+      display                           ' '
+      displayHex2                       sbaYapter_tModule
+      display                           ' '
+      displayHex2                       cuid
+      display                           ' »lo« »ad« *0x'
+      displayHex                        a
+      display                           ' -> *0x'
+      displayHex                        myPointerOffset
+      display                           ' #0x'
+      displayHex2                       ( temp * 8 )
+      display                           ' ( #0x'
+      displayHex2                       size
+      display                           ' )', 10
+      store                             qword a                                 at ( rYapters + write_here -  8 )
+      write_here                        =                                       ( write_here + 16 )
+      myCount                           =                                       ( myCount + 1 )
+      myPointerOffset                   =                                       ( myPointerOffset + ( temp * 8 ))
+      sizeBody                          =                                       ( sizeBody + size )
+    end if
+  end repeat
+  if ( myPointerOffset and 0x0000000000000fff )
+    myPointerOffset                     =                                       (( myPointerOffset + 4096 ) and  0xfffffffffffff000 )
+  end if
+}
+macro yapter_return                     [ definition ]
+{
+  local count
+  local need
+  local done
+  count                                 =                                       0
+  forward
+    count                               =                                       count + 1
+    done                                equ                                     false
+    match [addr], definition
+    \{
+      done                              equ                                     true
+      if      ( count =  1 )
+        lea                             rax,                                    [ addr ]
+      else if ( count =  2 )
+        lea                             rbx,                                    [ addr ]
+      else if ( count =  3 )
+        lea                             rcx,                                    [ addr ]
+      else if ( count =  4 )
+        lea                             rdx,                                    [ addr ]
+      else if ( count =  5 )
+        lea                             rdi,                                    [ addr ]
+      else if ( count =  6 )
+        lea                             rsi,                                    [ addr ]
+      else if ( count =  7 )
+        lea                             rbp,                                    [ addr ]
+      else if ( count =  8 )
+        lea                             rsp,                                    [ addr ]
+      else if ( count =  9 )
+        lea                             r8,                                     [ addr ]
+      else if ( count = 10 )
+        lea                             r9,                                     [ addr ]
+      else if ( count = 11 )
+        lea                             r10,                                    [ addr ]
+      else if ( count = 12 )
+        lea                             r11,                                    [ addr ]
+      else if ( count = 13 )
+        lea                             r12,                                    [ addr ]
+      else if ( count = 14 )
+        lea                             r13,                                    [ addr ]
+      else if ( count = 15 )
+        lea                             r14,                                    [ addr ]
+      else if ( count = 16 )
+        lea                             r15,                                    [ addr ]
+      end if
+    \}
+    match =true,done
+    \{
+      if      ( count =  1 )
+        mov                             rax,                                    definition
+      else if ( count =  2 )
+        mov                             rbx,                                    definition
+      else if ( count =  3 )
+        mov                             rcx,                                    definition
+      else if ( count =  4 )
+        mov                             rdx,                                    definition
+      else if ( count =  5 )
+        mov                             rdi,                                    definition
+      else if ( count =  6 )
+        mov                             rsi,                                    definition
+      else if ( count =  7 )
+        mov                             rbp,                                    definition
+      else if ( count =  8 )
+        mov                             rsp,                                    definition
+      else if ( count =  9 )
+        mov                             r8,                                     definition
+      else if ( count = 10 )
+        mov                             r9,                                     definition
+      else if ( count = 11 )
+        mov                             r10,                                    definition
+      else if ( count = 12 )
+        mov                             r11,                                    definition
+      else if ( count = 13 )
+        mov                             r12,                                    definition
+      else if ( count = 14 )
+        mov                             r13,                                    definition
+      else if ( count = 15 )
+        mov                             r14,                                    definition
+      else if ( count = 16 )
+        mov                             r15,                                    definition
+      end if
+    \}
+  common
+    ret
+}
+macro yapter_load                       thefile
+{
+  if ( thefile eq )
+  else
+    mov                                 __file__,                               thefile
+  end if
+  call                                  yapter.open
+}
+macro yapter_init                       filename,                               size,                                   jump
+{
+  local                                 done
+  if ( size eq )
+    mov                                 sys1arg,                                page_size
+  else
+    mov                                 sys1arg,                                size
+  end if
+  if ( filename eq )
+    display '[asm:yapter] fail: need a filename!'
+    err
+  else
+    done                                equ                                     false
+    match =[addr=],filename
+    \{
+      lea                               sys0arg,                                [ addr ]
+      done                              equ                                     true
+    \}
+    match =false,done
+    \{
+      mov                               sys0arg,                                filename
+    \}
+  end if
+  call                                  yapter.init
+  if ( jump eq )
+  else
+    jc                                  jump
+  end if
+}
+                                     ; _________________________________________________________________________________________________________________________________________________________________
+sbaChapter_tInternal          = 0x13 ;| 0x2           symbols                   cuid(symbols)                           | should not be used by a foreign file to include this as a module,             |
+sbaChapter_tInternal.do       =    0 ;| 0x4           pointers                  cuid(pointer-table)                     | but to find variables while debugging this file (pointers->symbols).          |
+                                     ;|_________________________________________________________________________________|_______________________________________________________________________________|
+
+                                     ; _________________________________________________________________________________________________________________________________________________________________
+sbaChapter_tFBBC_0            = 0x18 ;| 0x2           *code                     *byte[size]                             | compile FBBC_0-code *code to machine-code *output,                            |
+sbaChapter_tFBBC_0.do         =    0 ;| 0xa           size                      word                                    | allocate #resv bytes as executable                                            |
+                                     ;| 0x2     local *output                   *byte[resv]                             | and load length bytes from *output there.                                     |
+                                     ;| 0xa     local length                    word                                    |                                                                               |
+                                     ;| 0xc     local resv                      word                                    | FBBC_0: fruitbot bytecode v0.9.1                                              |
+                                     ;|_________________________________________________________________________________|_______________________________________________________________________________|
+                                     ; _________________________________________________________________________________________________________________________________________________________________
+
+include                                 '../linux64/stat/yapter/buffers.finc'
+include                                 '../linux64/stat/yapter/builder.finc'
+include                                 '../linux64/stat/yapter/chapter.finc'
+include                                 '../linux64/stat/yapter/code.finc'
+include                                 '../linux64/stat/yapter/compile.finc'
+include                                 '../linux64/stat/yapter/data.finc'
+include                                 '../linux64/stat/yapter/final.finc'
+include                                 '../linux64/stat/yapter/include.finc'
+include                                 '../linux64/stat/yapter/interface.finc'
+include                                 '../linux64/stat/yapter/module.finc'
+include                                 '../linux64/stat/yapter/note.finc'
+include                                 '../linux64/stat/yapter/parser.finc'
+include                                 '../linux64/stat/yapter/pointers.finc'
+include                                 '../linux64/stat/yapter/random.finc'
+include                                 '../linux64/stat/yapter/setup.finc'
+include                                 '../linux64/stat/yapter/stack.finc'
+include                                 '../linux64/stat/yapter/symbolinfo.finc'
+include                                 '../linux64/stat/yapter/symbols.finc'
+include                                 '../linux64/stat/yapter/typeinfo.finc'

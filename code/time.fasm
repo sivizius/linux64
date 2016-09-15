@@ -1,0 +1,11 @@
+time:
+  .nanosleep: ;rax nanosec
+    mov                                 rdi,                                    ( 1000 * 1000 * 1000 )
+    null                                rdx
+    div                                 rdi
+    lea                                 sys0arg,                                [ time.s ]
+    null                                sys1arg
+    mov                                 qword [ time.s ],                       rax
+    mov                                 qword [ time.n ],                       rdx
+    sys_call                            sys_nanosleep
+    ret

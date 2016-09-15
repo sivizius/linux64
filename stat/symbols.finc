@@ -1,0 +1,12 @@
+symbols_SymbolFound                     =                                       0
+symbols_EndOfPage                       =                                       1
+symbols_LastSymbol                      =                                       2
+symbols_SizeError                       =                                       3
+symbols_argStart                        equ                                     rdi
+symbols_argString                       equ                                     rsi
+symbols_argStringSize                   equ                                     dx
+symbols_argStop                         equ                                     rbx
+symbols_retUID                          equ                                     eax
+symbols_retValue                        equ                                     rax
+symbols_retPointer                      equ                                     rax
+symbols_retError                        equ                                     rdx

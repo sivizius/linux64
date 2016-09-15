@@ -1,0 +1,376 @@
+echo:
+  .error: ;rax errno -> rax/lib0ret errno
+    ;( if no error )
+      onError_fail                      @f
+    ;{
+      clc
+      ret
+    ;}
+    ;( else if unknown error )
+      @@:
+      push                              rax
+      mov                               rbx,                                    rax
+      cmp                               rax,                                    ( 0 - 132 )
+      ja                                @f
+    ;{
+      ;echo_put                          msgNewline
+      movzx                             sys2arg,                                word  [ .failEpic.len ]
+      lea                               sys1arg,                                [ .failEpic ]
+      mov                               sys0arg,                                STDOUT
+      sys_call                          sys_write
+      stc
+      ret
+    ;}
+    ;( else )
+      @@:
+    ;{
+      ;( echo »FAIL: « )
+        movzx                           sys2arg,                                word  [ .fail.len ]                     ;size = word  [ .fail.len ]
+        lea                             sys1arg,                                [ .fail ]                               ;text = [ .fail ]
+        mov                             sys0arg,                                STDOUT
+        sys_call                        sys_write
+      ;( echo error )
+        not                             rbx                                                                             ;index = ( errno - 1 )
+        null                            rax
+        mov                             eax,                                    dword [ ( 4 * rbx ) + .msgTable ]       ;entry = *base + 4 * index
+        lea                             sys1arg,                                [ .fail + rax ]                         ;*base = [ .fail ]
+        movzx                           sys2arg,                                word  [ sys1arg - 2 ]                   ;size = word  [ *entry.len ]
+        mov                             sys0arg,                                STDOUT
+        sys_call                        sys_write
+        pop                             rax
+        stc
+        ret
+    ;}
+    .print: ;rsi strMessage, rdx lenMessage               -> rax errno
+      mov                               sys0arg,                                STDOUT
+      sys_call                          sys_write
+      ret
+    .print.error: ;rsi strMessage, rdx lenMessage         -> rax errno
+      mov                               sys0arg,                                STDERR
+      sys_call                          sys_write
+      ret
+    .hexBuffer: ;lib1arg bufNumber, lib0arg lenNumber, local ( sys2arg, rax )
+      ;( while lib0arg > 0 )
+        .hex0While:
+          or                            lib0arg,                                lib0arg
+          jz                            .hexFinal
+      ;{
+        lodsb
+        mov                             ah,                                     al
+        shr                             ah,                                     4
+        and                             ax,                                     0x0f0f
+        .hex0Low:
+        ;{
+          ;( if al > 9 )
+            cmp                         al,                                     10
+            jb                          @f
+          ;{
+            add                         al,                                     ( 'A' - 10 )
+            jmp                         .hex0High
+          ;}
+          ;( else )
+            @@:
+          ;{
+            add                         al,                                     '0'
+          ;}
+        ;}
+        .hex0High:
+        ;{
+          ;( if ah > 9 )
+            cmp                         ah,                                     10
+            jb                          @f
+            ;{
+              add                       ah,                                     ( 'A' - 10 )
+              jmp                       .hex0Echo
+            ;}
+            ;( else )
+            ;{
+              @@:
+              add                       ah,                                     '0'
+            ;}
+            .hex0Echo:
+              mov                       byte [ .hexByte ],                      ah
+              mov                       byte [ .hexByte + 1 ],                  al
+            ;( echo hex-value )
+              push                      lib0arg
+              push                      lib1arg
+                mov                     sys2arg,                                2
+                lea                     sys1arg,                                [ .hexByte ]
+                mov                     sys0arg,                                STDOUT
+                sys_call                sys_write
+              pop                       lib1arg
+              pop                       lib0arg
+              dec                       lib0arg
+            jmp                         .hex0While
+      .hexValue: ;lib1arg bufNumber, lib0arg lenNumber, local ( sys2arg, rax )
+        add                             lib1arg,                                lib0arg
+        ;( while lib0arg > 0 )
+          .hex1While:
+            flags                       lib0arg
+            jz                          .hexFinal
+          ;( do )
+            dec                         lib1arg
+            mov                         al,                                     byte [ lib1arg ]
+            mov                         ah,                                     al
+            shr                         ah,                                     4
+            and                         ax,                                     0x0f0f
+            ;( if al > 9 )
+              cmp                       al,                                     10
+              jb                        @f
+            ;{
+              add                       al,                                     ( 'A' - 10 )
+              jmp                       .hex1High
+            ;}
+            ;( else )
+            ;{
+              @@:
+              add                       al,                                     '0'
+            ;}
+            .hex1High:
+            ;( if ah > 9 )
+              cmp                       ah,                                     10
+              jb                        @f
+            ;{
+              add                       ah,                                     ( 'A' - 10 )
+              jmp                       .hex1Echo
+            ;}
+            ;( else )
+            ;{
+              @@:
+              add                       ah,                                     '0'
+            ;}
+            .hex1Echo:
+              mov                       byte [ .hexByte ],                      ah
+              mov                       byte [ .hexByte + 1 ],                  al
+            ;( echo hex-value )
+              push                      lib0arg
+              push                      lib1arg
+                mov                     sys2arg,                                2
+                lea                     sys1arg,                                [ .hexByte ]
+                mov                     sys0arg,                                STDOUT
+                sys_call                sys_write
+              pop                       lib1arg
+              pop                       lib0arg
+              dec                       lib0arg
+            jmp                         .hex1While
+        ;( exit )
+          .hexFinal:
+            ret
+  .state:
+    push                                rax
+    push                                rbx
+    push                                rcx
+    push                                rdx
+    push                                rdi
+    push                                rsi
+    push                                rbp
+    push                                rsp
+    push                                r8
+    push                                r9
+    push                                r10
+    push                                r11
+    push                                r12
+    push                                r13
+    push                                r14
+    push                                r15
+    pushfq
+    ;remark
+    ;{
+    echo_put                            echo.msgRAX
+    echo_hexValue                       ( rsp + 0x80 ),                         8
+    echo_put                            echo.msgSys0ret
+    echo_put                            echo.nEcho
+    echo_put                            echo.msgRBX
+    echo_hexValue                       ( rsp + 0x78 ),                         8
+    echo_put                            echo.nEcho
+    echo_put                            echo.msgRCX
+    echo_hexValue                       ( rsp + 0x70 ),                         8
+    echo_put                            echo.nEcho
+    echo_put                            echo.msgRDX
+    echo_hexValue                       ( rsp + 0x68 ),                         8
+    echo_put                            echo.msgSys2arg
+    ;}
+    echo_put                            echo.nEcho
+    echo_put                            echo.msgRDI
+    echo_hexValue                       ( rsp + 0x60 ),                         8
+    echo_put                            echo.msgSys0arg
+    echo_put                            echo.nEcho
+    ;remark
+    ;{
+    echo_put                            echo.msgRSI
+    echo_hexValue                       ( rsp + 0x58 ),                         8
+    echo_put                            echo.msgSys1arg
+    echo_put                            echo.nEcho
+    echo_put                            echo.msgRBP
+    echo_hexValue                       ( rsp + 0x50 ),                         8
+    echo_put                            echo.nEcho
+    echo_put                            echo.msgRSP
+    echo_hexValue                       ( rsp + 0x48 ),                         8
+    echo_put                            echo.msgStack
+    echo_put                            echo.nEcho
+    ;}
+    echo_put                            echo.msgR8
+    echo_hexValue                       ( rsp + 0x40 ),                         8
+    echo_put                            echo.msgSys4arg
+    echo_put                            echo.nEcho
+    echo_put                            echo.msgR9
+    echo_hexValue                       ( rsp + 0x38 ),                         8
+    echo_put                            echo.msgSys5arg
+    echo_put                            echo.nEcho
+    ;remark
+    ;{
+    echo_put                            echo.msgR10
+    echo_hexValue                       ( rsp + 0x30 ),                         8
+    echo_put                            echo.msgSys3arg
+    echo_put                            echo.nEcho
+    echo_put                            echo.msgR11
+    echo_hexValue                       ( rsp + 0x28 ),                         8
+    echo_put                            echo.nEcho
+    echo_put                            echo.msgR12
+    echo_hexValue                       ( rsp + 0x20 ),                         8
+    echo_put                            echo.msgTemp2
+    echo_put                            echo.nEcho
+    echo_put                            echo.msgR13
+    echo_hexValue                       ( rsp + 0x18 ),                         8
+    echo_put                            echo.msgTemp3
+    echo_put                            echo.nEcho
+    echo_put                            echo.msgR14
+    echo_hexValue                       ( rsp + 0x10 ),                         8
+    echo_put                            echo.msgTemp4
+    echo_put                            echo.nEcho
+    ;}
+    echo_put                            echo.msgR15
+    echo_hexValue                       ( rsp + 0x08 ),                         8
+    echo_put                            echo.nEcho
+    ;remark
+    ;{
+    echo_put                            echo.msgRIP
+    echo_hexValue                       ( rsp + 0x88 ),                         8
+    echo_put                            echo.nEcho
+    echo_put                            echo.msgRFLAGS
+    ;}
+    pop                                 r15
+    remark
+    {
+    echo_hexRegister                    r15
+  test                                  r15,                                    ( 1 shl  0 )
+  jz                                    @f
+    echo_put                            echo.nEchoSub
+    echo_put                            echo.msgF0
+  @@:
+  test                                  r15,                                    ( 1 shl  2 )
+  jz                                    @f
+    echo_put                            echo.nEchoSub
+    echo_put                            echo.msgF2
+  @@:
+  test                                  r15,                                    ( 1 shl  4 )
+  jz                                    @f
+    echo_put                            echo.nEchoSub
+    echo_put                            echo.msgF4
+  @@:
+  test                                  r15,                                    ( 1 shl  6 )
+  jz                                    @f
+    echo_put                            echo.nEchoSub
+    echo_put                            echo.msgF6
+  @@:
+  test                                  r15,                                    ( 1 shl  7 )
+  jz                                    @f
+    echo_put                            echo.nEchoSub
+    echo_put                            echo.msgF7
+  @@:
+  test                                  r15,                                    ( 1 shl  8 )
+  jz                                    @f
+    echo_put                            echo.nEchoSub
+    echo_put                            echo.msgF8
+  @@:
+  test                                  r15,                                    ( 1 shl  9 )
+  jz                                    @f
+    echo_put                            echo.nEchoSub
+    echo_put                            echo.msgF9
+  @@:
+  test                                  r15,                                    ( 1 shl 10 )
+  jz                                    @f
+    echo_put                            echo.nEchoSub
+    echo_put                            echo.msgF10
+  @@:
+  test                                  r15,                                    ( 1 shl 11 )
+  jz                                    @f
+    echo_put                            echo.nEchoSub
+    echo_put                            echo.msgF11
+  @@:
+  test                                  r15,                                    ( 1 shl 14 )
+  jz                                    @f
+    echo_put                            echo.nEchoSub
+    echo_put                            echo.msgF14
+  @@:
+  test                                  r15,                                    ( 1 shl 16 )
+  jz                                    @f
+    echo_put                            echo.nEchoSub
+    echo_put                            echo.msgF16
+  @@:
+  test                                  r15,                                    ( 1 shl 17 )
+  jz                                    @f
+    echo_put                            echo.nEchoSub
+    echo_put                            echo.msgF17
+  @@:
+  test                                  r15,                                    ( 1 shl 18 )
+  jz                                    @f
+    echo_put                            echo.nEchoSub
+    echo_put                            echo.msgF18
+  @@:
+  test                                  r15,                                    ( 1 shl 19 )
+  jz                                    @f
+    echo_put                            echo.nEchoSub
+    echo_put                            echo.msgF19
+  @@:
+  test                                  r15,                                    ( 1 shl 20 )
+  jz                                    @f
+    echo_put                            echo.nEchoSub
+    echo_put                            echo.msgF20
+  @@:
+  test                                  r15,                                    ( 1 shl 21 )
+  jz                                    @f
+    echo_put                            echo.nEchoSub
+    echo_put                            echo.msgF21
+  @@:
+  and                                   r15,                                    ( 3 shl 12 )
+  flags                                 r15
+  jnz                                   @f
+    echo_put                            echo.nEchoSub
+    echo_put                            echo.msgRING3
+    jmp                                 .state.stop
+  @@:
+  cmp                                   r15,                                    1
+  jne                                   @f
+    echo_put                            echo.nEchoSub
+    echo_put                            echo.msgRING2
+    jmp                                 .state.stop
+  @@:
+  cmp                                   r15,                                    2
+  jne                                   @f
+    echo_put                            echo.nEchoSub
+    echo_put                            echo.msgRING1
+    jmp                                 .state.stop
+  @@:
+    echo_put                            echo.nEchoSub
+    echo_put                            echo.msgRING0
+  .state.stop:
+  }
+  echo_n
+  pop                                   r15
+  pop                                   r14
+  pop                                   r13
+  pop                                   r12
+  pop                                   r11
+  pop                                   r10
+  pop                                   r9
+  pop                                   r8
+  pop                                   rsp
+  pop                                   rbp
+  pop                                   rsi
+  pop                                   rdi
+  pop                                   rdx
+  pop                                   rcx
+  pop                                   rbx
+  pop                                   rax
+  ret

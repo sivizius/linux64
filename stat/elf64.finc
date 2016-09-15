@@ -1,0 +1,76 @@
+macro sbaExec64
+{
+  local e_ehsize
+  format binary
+  use64
+  if ( addr eq )
+    org                                 0x0000000100000000
+  else
+    org                                 addr
+  end if
+  ;( elf-header )
+  ;{
+    db                                  0x7f, 'ELF'                             ;EI_MAGIC       magic number
+    db                                  2                                       ;EI_CLASS       (1 for 32-bit, 2 for 64-bit objects)
+    db                                  1                                       ;EI_DATA        encoding (1 little-endian, 2 big-endian)
+    db                                  1                                       ;EI_VERSION     there is only version 1
+    db                                  0                                       ;EI_OSABI       (system-v)
+    dq                                  0                                       ;EI_ABIVERSION  and some padding
+    dw                                  2                                       ;e_type         Object file type (ET_EXEC 2 Executable file)
+    dw                                  0x3e                                    ;e_machine      Machine type
+    dd                                  1                                       ;e_version      Object file version
+    dq                                  e_entry                                 ;e_entry        Entry point address
+    dq                                  ( e_phoff - $$ )                        ;e_phoff        Program header offset
+    dq                                  0                                       ;e_shoff        Section header offset
+    dd                                  0                                       ;e_flags        Processor-specific flags
+    dw                                  e_ehsize                                ;e_ehsize       ELF header size
+    dw                                  e_phsize                                ;e_phentsize    Size of program header entry
+    dw                                  1                                       ;e_phnum        Number of program header entries
+		                                		                                        ;               we have 1 entry only: program header
+    dw                                  0x40                                    ;e_shentsize    Size of section header entry
+    dw                                  0                                       ;e_shnum        Number of section header entries
+    dw                                  0                                       ;e_shstrndx     Section name string table index
+  ;}
+  e_ehsize                              =                                       ( $ - $$ )
+  e_phoff:
+}
+macro sbaCode
+{
+  local _content_
+  local _addr_, _size_
+  dd                                    1                                       ;p_typePT_LOAD 1 Loadable segment
+  dd                                    111b                                    ;p_flags
+;			RWE			;Read,Write,Exec
+; PF_X 001b Execute permission, PF_W 010b Write permission, PF_R 100b Read permission
+; in old 32 bit it was EWR: Execute 100b, Write 010b, Read 001b and flags are at the end of program header
+; We use data segment and code segment mixed together.
+; So if we want to make datasegment writeable, we must make the whole segment
+; (code+data) readable + writeable + executable.
+; This has the feature that self modifying is possible (doesn't make
+; segmentation error)
+; Another way is to change segment flags by syscall sys_mprotect, see:
+; http://linuxassembly.org/articles/smc.html
+; man mprotect
+
+		dq	beg_of_work - $$	;   p_offset
+		dq	beg_of_work		;   p_vaddr
+		dq	beg_of_work		;   p_paddr
+		dq	filesize		;   p_filesz
+		dq	memsize			;   p_memsz
+
+		dq	1000h			;   p_align
+  postpone
+  \{
+    if ( ~ defined e_entry )
+      e_entry                           =                                       ( $ )
+    end if
+    _file_                              =                                       ( $ )
+    _content_
+    _size_                              =                                       ( $ - _file_ )
+  \}
+  macro _content_
+}
+macro sbaFinal
+{
+  e_phsize                              =                                       ( $ - e_phoff )
+}

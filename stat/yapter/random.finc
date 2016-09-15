@@ -1,0 +1,60 @@
+struc sbaRandom                         addr,                                   size
+{
+  .                                     =                                       myCount
+  .offs                                 =                                       myOffset
+  sbaRandom                             addr,                                   size
+}
+macro sbaRandom                         addr,                                   size
+{
+  ;( random )
+  ;{
+  ;:  allocate page-aligned #resv bytes as read- and writeable
+  ;:  fill it with random junk for cryptographic purposes
+  ;:  0x00  word                        <random>                                <random>
+  ;:  0x02  word                        resv                                    resv
+  ;:  0x04  magic                       'rand'                                  unused
+  ;:  0x08  *string                     23 42 1337 1996 10 03                   *data
+  ;}
+  if ( _head_ eq '<none>' )
+    display                             '[asm:sba] an error occured while processing yapter <random>: headless file!'
+    err
+  end if
+  if ( size and 0x0000000000000fff )
+    size                                =                                       (( size + 4096 ) and 0xfffffffffffff000 )
+  end if
+  if ( size and 0xffffffff00000000 )
+    display                             '[asm:sba] an error occured while processing yapter <random>: _size_ too large!'
+    err
+  end if
+  store word                            sbaYapter_tRandom                       at vYapters:( oYapters + 0x00 )
+  store word                            size                                    at vYapters:( oYapters + 0x02 )         ;size
+  store dword                           'rand'                                  at vYapters:( oYapters + 0x04 )         ;magic
+  store qword                           0x0310961937134223                      at vYapters:( oYapters + 0x08 )         ;very magic
+  oYapters                              =                                       ( oYapters + 0x10 )
+  display                               '[asm:sba] <random>       (2016-02-09) %'
+  displayHex2                           ( myCount + 0 )
+  display                               ' '
+  displayHex2                           sbaYapter_tRandom
+  display                               ' '
+  displayHex2                           size
+  display                               ' »rand 23 42 1337 1996-10-03«  -> *0x'
+  displayHex                            myOffset
+  display                               ' #0x'
+  displayHex2                           _load_
+  display                               ' ( #0x0000 )', 10
+  myCount                               =                                       ( myCount + 1 )
+  mySize                                =                                       ( size )
+  if ( mySize and 0x0000000000000fff )
+    mySize                              =                                       (( mySize + 4096 ) and 0xfffffffffffff000 )
+  end if
+  if ( mySize and 0xffffffff00000000 )
+    display                           '[asm:sba] an error occured while processing yapter <random>: size too large!'
+    err
+  end if
+  _load_                                =                                       mySize
+  postpone
+  \{
+    addr                                =                                       myBase
+    myBase                              =                                       myBase + mySize
+  \}
+}

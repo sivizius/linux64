@@ -1,0 +1,58 @@
+struc sbaBuffers
+{
+  .                                     =                                       ( myPointers + myCountPointers )
+  .offs                                 =                                       ( mPointers + myPointerOffset )
+  sbaBuffers
+}
+macro sbaBuffers
+{
+  ;( buffers )
+  ;{
+  ;:  0x00  word                        <buffers>                               <buffers>
+  ;:  0x02  word                        size                                    size
+  ;:  0x04  magic/word                  '*b'                                    resv
+  ;:  0x06  magic                       'uf'                                    count
+  ;:  0x08  *string[?]                  @buffers                                *buffers
+  ;}
+  local                                 _content_                               ;content of yapter
+  local                                 _load_                                  ;length  of yapter in file   for yapter-table
+  local                                 myLoad                                  ;length  of yapter in file
+  local                                 _file_                                  ;offset  of yapter in file
+  local                                 _size_                                  ;length  of yapter in memory for yapter-table
+  local                                 mySize                                  ;length  of yapter in memory
+  local                                 _base_                                  ;offset  of yapter in memory
+  local                                 tPointers                               ;offset  of yapter in virtual
+  local                                 sPointers                               ;size    of yapter in virtual
+  if ( _head_ eq '<none>' )
+    display                             '[asm:sba] an error occured while processing yapter <buffers>: headless file!'
+    err
+  end if
+  store word                            sbaYapter_tBuffers                      at vYapters:( oYapters + 0x00 )
+  store word                            sPointers                               at vYapters:( oYapters + 0x02 )         ;count buffers in file
+  store dword                           _load_                                  at vYapters:( oYapters + 0x04 )         ;size (virtual), magic in file
+  store qword                           _file_                                  at vYapters:( oYapters + 0x08 )         ;offset in file
+  oYapters                              =                                       ( oYapters + 0x10 )
+  myPointers                            =                                       ( myPointers + 1 )
+  myPointerOffset                       =                                       ( myPointerOffset + ( 8 * sPointers ))
+  postpone
+  \{
+    display '*buf base: *0x:'
+    displayHex _base_
+    display 10
+    myFile                              =                                       $
+    org                                 myBase
+    buffer                              fix                                     yapter_buffer
+    _offs_                              =                                       0
+    string                              fix                                     yapter_symbol
+    tPointers                           =                                       oPointers
+    _content_                           sbaYapter_tBuffers, _base_, _size_, _file_, _load_
+    sPointers                           =                                       ( oPointers - tPointers )
+    _base_                              =                                       ( mPointers + ( tPointers * 8 ))
+    _file_                              =                                       myFile
+    _load_                              =                                       ( $ - myBase )
+    _size_                              =                                       ( sPointers * 8 )
+    myFile                              =                                       ( myFile + _load_ )
+    org                                 myFile
+  \}
+  macro _content_                       yType, yBase, yResv, yFile, ySize
+}

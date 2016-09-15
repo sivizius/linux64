@@ -1,0 +1,27 @@
+                                     ; _________________________________________________________________________________________________________________________________________________________________
+sbaChapter_tSetup             = 0x10 ;| 0x8           *filename                 *string                                 | load file *filename as sba-file and, if valid, execute it first.              |
+sbaChapter_tSetup.do          =    0 ;|                                                                                 |                                                                               |
+                                     ;|_________________________________________________________________________________|_______________________________________________________________________________|
+macro sbaSetup                          filename
+{
+  local                                 name
+  local                                 size
+  if ( _head_ eq '<none>' )
+    display                             'headless file!'
+    err
+  end if
+  store word                            sbaChapter_tSetup                       at vYapters:( oYapters + 0x00 )
+  store word                            0                                       at vYapters:( oYapters + 0x02 )
+  store word                            0                                       at vYapters:( oYapters + 0x04 )
+  store word                            0                                       at vYapters:( oYapters + 0x06 )
+  store qword                           name                                    at vYapters:( oYapters + 0x08 )
+  oYapters                              =                                       ( oYapters + 0x10 )
+  myCount                               =                                       ( myCount + 1 )
+  postpone
+  \{
+    dw                                  length
+    name:
+      db                                filename
+    length                              =                                       ( $ - name - 2 )
+  \}
+}

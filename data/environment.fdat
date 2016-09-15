@@ -1,0 +1,2 @@
+environment.mask0                       dq                                      0x00000000ffffffff
+environment.mask1                       dq                                      0x000000ffffffffff

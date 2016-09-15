@@ -1,0 +1,32 @@
+                                     ; _________________________________________________________________________________________________________________________________________________________________
+sbaYapter_tParse              = 0x0f ;| 0x8           *filename                 *string                                 | parse file *filename with parser #cparser,                                    |
+sbaYapter_tParse.do           =    0 ;| 0x2           symbols                   cuid(symbols)                           |   while using #symbols->#pointers as identifiers,                             |
+                                     ;| 0x4           pointers                  cuid(pointer-table)                     | store length of *output as #size,                                             |
+                                     ;| 0x6           parser                    cuid(builder)                           | set #resv to page-aligned #size,                                              |
+                                     ;| 0x8     local *output                   *byte[size]                             | allocate #resv bytes as read- and writeable                                   |
+                                     ;| 0x8     local size                      word                                    | and load #size bytes from *output there.                                      |
+                                     ;| 0x8     local resv                      word                                    |                                                                               |
+                                     ;|_________________________________________________________________________________|_______________________________________________________________________________|
+macro sbaParse                          filename,                               symbols,            pointers,           parser
+{
+  local                                 name
+  local                                 length
+  if ( _head_ eq '<none>' )
+    display                             'headless file!'
+    err
+  end if
+  store word                            sbaYapter_tParse                        at vYapters:( oYapters + 0x00 )
+  store word                            symbols                                 at vYapters:( oYapters + 0x02 )
+  store word                            pointers                                at vYapters:( oYapters + 0x04 )
+  store word                            parser                                  at vYapters:( oYapters + 0x06 )
+  store qword                           name                                    at vYapters:( oYapters + 0x08 )
+  oYapters                              =                                       ( oYapters + 0x10 )
+  myCount                               =                                       ( myCount + 1 )
+  postpone
+  \{
+    dw                                  length
+    name:
+      db                                filename
+    length                              =                                       ( $ - name - 2 )
+  \}
+}
