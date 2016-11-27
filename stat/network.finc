@@ -23,73 +23,136 @@
   SOCKET_PACKET                         =                                       10                                      ;linux specific way of getting packets at the dev level.
                                                                                                                         ;For writing rarp and other similar things on the user level.
 ;}
-macro tcp_socket                        domain,                                 type
+af_port@network                         equ                                     dword [ network.socket.af ]
+ip@network                              equ                                     dword [ network.socket.ip ]
+struc@network                           equ                                     ( network.socket )
+struc@network.size                      =                                       16
+macro socket@network                    domain,                                 type
 {
   null                                  sys2arg
   mov                                   sys1arg,                                type
   mov                                   sys0arg,                                domain
   sys_call                              sys_socket
 }
-macro tcp_connect                       addr,                                   socket
+macro connect@network                   addr,                                   socket
 {
-  mov                                   sys2arg,                                ( addr#.size )
-  lea                                   sys1arg,                                [ addr ]
-  if ( socket eq )
+  match , addr
+  \{
+    mov                                 sys2arg,                                ( 16 )
+    lea                                 sys1arg,                                [ network.socket ]
+  \}
+  match any, addr
+  \{
+    mov                                 sys2arg,                                ( addr#.size )
+    lea                                 sys1arg,                                [ addr ]
+  \}
+  match , socket
+  \{
     mov                                 sys0arg,                                sys0ret
-  else
+  \}
+  match any, socket
+  \{
     mov                                 sys0arg,                                socket
-  end if
+  \}
   sys_call                              sys_connect
 }
-macro tcp_send                          socket,                                 message,                                size
+macro send@network                      socket,                                 message,                                size
 {
   local done
-  done                                  equ                                     false
+  done                                  equ
   null                                  sys5arg
   null                                  sys4arg
   null                                  sys3arg
-  if ( size eq )
-    mov                                 sys2arg,                                ( message#.size )
+  if ( sys1arg eq message )
   else
-    match =[addr=], size
+    match =[addr=], message
     \{
+      match , size
+      \\{
+        mov                             sys2arg,                                ( addr\#.size )
+        done                            equ                                     true
+      \\}
+      match =sys2arg, size
+      \\{
+        done                            equ                                     true
+      \\}
+      match , done
+      \\{
+        done                            equ
+        match =[addr=], size
+        \\\{
+          done                          equ                                     true
+          lea                           sys2arg,                                [ addr ]
+        \\\}
+        match , done
+        \\\{
+          mov                           sys2arg,                                size
+        \\\}
+      \\}
       done                              equ                                     true
-      lea                               sys2arg,                                [ addr ]
+      lea                               sys1arg,                                [ addr ]
     \}
-    match =false, done
+    match , done
     \{
-      mov                               sys2arg,                                size
+      if ( size eq sys2arg )
+      else
+        mov                             sys2arg,                                size
+      end if
+      mov                               sys1arg,                                message
     \}
   end if
-  lea                                   sys1arg,                                [ message ]
   mov                                   sys0arg,                                socket
   sys_call                              sys_sendto
 }
-macro tcp_recv                          socket,                                 message,                                size
+macro recv@network                      socket,                                 message,                                size
 {
   local done
-  done                                  equ                                     false
+  done                                  equ
   null                                  sys5arg
   null                                  sys4arg
   null                                  sys3arg
-  if ( size eq )
-    mov                                 sys2arg,                                ( message#.size )
+  if ( sys1arg eq message )
   else
-    match =[addr=], size
+    match =[addr=], message
     \{
+      match , size
+      \\{
+        mov                             sys2arg,                                ( addr\#.size )
+        done                            equ                                     true
+      \\}
+      match =sys2arg, size
+      \\{
+        done                            equ                                     true
+      \\}
+      match , done
+      \\{
+        done                            equ
+        match =[addr=], size
+        \\\{
+          done                          equ                                     true
+          lea                           sys2arg,                                [ addr ]
+        \\\}
+        match , done
+        \\\{
+          mov                           sys2arg,                                size
+        \\\}
+      \\}
       done                              equ                                     true
-      lea                               sys2arg,                                [ addr ]
+      lea                               sys1arg,                                [ addr ]
     \}
-    match =false, done
+    match , done
     \{
-      mov                               sys2arg,                                size
+      if ( size eq sys2arg )
+      else
+        mov                             sys2arg,                                size
+      end if
+      mov                               sys1arg,                                message
     \}
   end if
-  lea                                   sys1arg,                                [ message ]
   mov                                   sys0arg,                                socket
   sys_call                              sys_recvfrom
 }
-struc socketaddr                        af,                                     addr
+struc address@network                   af,                                     addr
 {
   .                                     =                                       $
   match a=:b=:c=:d=/port, addr

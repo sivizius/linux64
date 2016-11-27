@@ -250,8 +250,8 @@ echo:
     echo_put                            echo.msgRFLAGS
     ;}
     pop                                 r15
-    remark
-    {
+;    remark
+;    {
     echo_hexRegister                    r15
   test                                  r15,                                    ( 1 shl  0 )
   jz                                    @f
@@ -355,7 +355,7 @@ echo:
     echo_put                            echo.nEchoSub
     echo_put                            echo.msgRING0
   .state.stop:
-  }
+;  }
   echo_n
   pop                                   r15
   pop                                   r14

@@ -10,6 +10,7 @@ aPointers                               =                                       
 _head_                                  equ                                     '<none>'                                ;current yapter
 _code_                                  =                                       0x0000                                  ;machine
 _magic_                                 =                                       0x0000                                  ;machine magic
+__yapter__                              equ                                     true
 ;( yapter-types )
 ;{
   sbaYapter_tFinal                      =                                       0x0000
@@ -509,6 +510,7 @@ include                                 '../linux64/stat/yapter/interface.finc'
 include                                 '../linux64/stat/yapter/module.finc'
 include                                 '../linux64/stat/yapter/note.finc'
 include                                 '../linux64/stat/yapter/parser.finc'
+include                                 '../linux64/stat/yapter/partition.finc'
 include                                 '../linux64/stat/yapter/pointers.finc'
 include                                 '../linux64/stat/yapter/random.finc'
 include                                 '../linux64/stat/yapter/setup.finc'

@@ -1,248 +1,457 @@
-op_tImmediat                            =                                       0x00
-op_tMemory                              =                                       0x01
-op_tAddress                             =                                       0x02
-op_tPointer                             =                                       0x03
-op_tIndirect                            =                                       0x04
-op_tRegister                            =                                       0x05
-op_tUnknown                             =                                       0xff
+op@@tNothing                            =                                       0x00                                    ;empty operant
+op@@tConstant                           =                                       0x01                                    ;value                is a constant value
+op@@tString                             =                                       0x02                                    ;operant              is a constant string
+op@@tAddress                            =                                       0x03                                    ;value                is at address=value
+op@@tBuffer                             =                                       0x04                                    ;buffer/string        may lie at address=value
+op@@tPointer                            =                                       0x05                                    ;value/buffer/string  is at an address pointed by address
+op@@tVariable                           =                                       0x06                                    ;operant              is some kind of highlevel variable of fixed size
+op@@tRegister                           =                                       0x07                                    ;operant              is a register
 
-rax@type                                =                                       op_tRegister
-rax@size                                =                                       8
-rax@value                               =                                       0
-eax@type                                =                                       op_tRegister
-eax@size                                =                                       4
-eax@value                               =                                       0
-ax@type                                 =                                       op_tRegister
-ax@size                                 =                                       2
-ax@value                                =                                       0
-al@type                                 =                                       op_tRegister
-al@size                                 =                                       1
-al@value                                =                                       0
-ah@type                                 =                                       op_tRegister
-ah@size                                 =                                       1
-ah@value                                =                                       4
-rcx@type                                =                                       op_tRegister
-rcx@size                                =                                       8
-rcx@value                               =                                       1
-ecx@type                                =                                       op_tRegister
-ecx@size                                =                                       4
-ecx@value                               =                                       1
-cx@type                                 =                                       op_tRegister
-cx@size                                 =                                       2
-cx@value                                =                                       1
-cl@type                                 =                                       op_tRegister
-cl@size                                 =                                       1
-cl@value                                =                                       1
-ch@type                                 =                                       op_tRegister
-ch@size                                 =                                       1
-ch@value                                =                                       5
-rdx@type                                =                                       op_tRegister
-rdx@size                                =                                       8
-rdx@value                               =                                       2
-edx@type                                =                                       op_tRegister
-edx@size                                =                                       4
-edx@value                               =                                       2
-dx@type                                 =                                       op_tRegister
-dx@size                                 =                                       2
-dx@value                                =                                       2
-dl@type                                 =                                       op_tRegister
-dl@size                                 =                                       1
-dl@value                                =                                       2
-dh@type                                 =                                       op_tRegister
-dh@size                                 =                                       1
-dh@value                                =                                       6
-rbx@type                                =                                       op_tRegister
-rbx@size                                =                                       8
-rbx@value                               =                                       3
-ebx@type                                =                                       op_tRegister
-ebx@size                                =                                       4
-ebx@value                               =                                       3
-bx@type                                 =                                       op_tRegister
-bx@size                                 =                                       2
-bx@value                                =                                       3
-bl@type                                 =                                       op_tRegister
-bl@size                                 =                                       1
-bl@value                                =                                       3
-bh@type                                 =                                       op_tRegister
-bh@size                                 =                                       1
-bh@value                                =                                       7
+op@@tUnknown                            =                                       0xff                                    ;unknown operant, should cause an fatal error!
 
-struc optype operant
+op@@regA                                =                                       0
+op@@regB                                =                                       3
+op@@regC                                =                                       1
+op@@regD                                =                                       2
+op@@regH                                =                                       4
+
+struc op@@object                        type,               size,               value
 {
-  local done
-  done equ
-  match =[that=], operant
-  \{
-    done equ true
-    .type = op_tAddress
-    .size = 0
-  \}
-  match =*that, operant
-  \{
-    done equ true
-    .type = op_tPointer
-    .size = 0
-  \}
+  .#@@type                              =                                       type
+  .#@@size                              =                                       size
+  .#@@value                             =                                       value
+}
+rax   op@@object                        op@@tRegister,      __qword__,          op@@regA
+eax   op@@object                        op@@tRegister,      __dword__,          op@@regA
+ax    op@@object                        op@@tRegister,      __word__,           op@@regA
+al    op@@object                        op@@tRegister,      __byte__,           op@@regA
+ah    op@@object                        op@@tRegister,      __byte__,           op@@regA + op@@regH
+rcx   op@@object                        op@@tRegister,      __qword__,          op@@regC
+ecx   op@@object                        op@@tRegister,      __dword__,          op@@regC
+cx    op@@object                        op@@tRegister,      __word__,           op@@regC
+cl    op@@object                        op@@tRegister,      __byte__,           op@@regC
+ch    op@@object                        op@@tRegister,      __byte__,           op@@regC + op@@regH
+rdx   op@@object                        op@@tRegister,      __qword__,          op@@regD
+edx   op@@object                        op@@tRegister,      __dword__,          op@@regD
+dx    op@@object                        op@@tRegister,      __word__,           op@@regD
+dl    op@@object                        op@@tRegister,      __byte__,           op@@regD
+dh    op@@object                        op@@tRegister,      __byte__,           op@@regD + op@@regH
+rbx   op@@object                        op@@tRegister,      __qword__,          op@@regB
+ebx   op@@object                        op@@tRegister,      __dword__,          op@@regB
+bx    op@@object                        op@@tRegister,      __word__,           op@@regB
+bl    op@@object                        op@@tRegister,      __byte__,           op@@regB
+bh    op@@object                        op@@tRegister,      __byte__,           op@@regB + op@@regH
+
+newList                                 op@@strlst
+macro op@@stradd                        object
+{
+  local size, buffer
+  if ( object#@@type eq )
+    display '[asm:op] stradd() wants an object!', 10
+    err
+  else if ( object#@@type = op@@tString )
+    if ( object#@@string eq )
+      display '[asm:op] stradd() gets an invalid string!', 10
+      err
+    else
+      virtual                           at null
+        db                              object#@@string
+        size                            =                                       ( $ )
+      end virtual
+      if ( size = object#@@size )
+        ;display 'add string!', 10
+        object#@@value                  =                                       ( buffer + 2 )
+        ;displayValue 'string  = 0x', ( buffer + 2 )
+        addList                         op@@strlst,                             < buffer db ( size and 0xff ), (( size shr 8 ) and 0xff ), object#@@string >
+      else
+        display '[asm:op] stradd() gets an corrupt string!', 10
+        err
+      end if
+    end if
+  else
+    display '[asm:op] stradd() wants an object of type string!', 10
+    err
+  end if
+}
+struc op@@type operant
+{
+  local done, size, tmp, theoperant
+  done                                  equ
   match ==that, operant
   \{
-    display '=operant', 10
-    done equ true
-    .type = op_tUnknown
-    .size = 0
+    display '=operant, idk, what to do :/', 10
+    err
+    done                                equ                                     true
+    . op@@object                        op@@tUnknown,       null,               null
   \}
   match =|that, operant
   \{
-    display '|operant', 10
-    done equ true
-    .type = op_tUnknown
-    .size = 0
+    display '|operant, idk, what to do :/', 10
+    err
+    done                                equ                                     true
+    . op@@object                        op@@tUnknown,       null,               null
   \}
   match =~that, operant
   \{
-    display '~operant', 10
-    done equ true
-    .type = op_tUnknown
-    .size = 0
-  \}
-  match <that>, operant
-  \{
-    display '^operant', 10
-    done equ true
-    .type = op_tUnknown
-    .size = 0
-  \}
-  match =&that, operant
-  \{
-    display '&operant', 10
-    done equ true
-    .type = op_tUnknown
-    .size = 0
+    display '~operant, idk, what to do :/', 10
+    err
+    done                                equ                                     true
+    . op@@object                        op@@tUnknown,       null,               null
   \}
   match =+that, operant
   \{
-    display '+operant', 10
-    done equ true
-    .type = op_tUnknown
-    .size = 0
+    display '+operant, idk, what to do :/', 10
+    err
+    done                                equ                                     true
+    . op@@object                        op@@tUnknown,       null,               null
+  \}
+  match , operant
+  \{
+    done                                equ                                     true
+    . op@@object                        op@@tNothing,       null,               null
+  \}
+  match =*that, operant
+  \{
+    done                                equ                                     true
+    . op@@object                        op@@tBuffer,        null,               null
+  \}
+  match =&that, operant
+  \{
+    done                                equ                                     true
+    virtual                             at null
+      db                                that
+      size                              =                                       ( $ )
+    end virtual
+    . op@@object                        op@@tString,        size,               null
+    .#@@string                          equ                                     that
   \}
   match =*=[that=], operant
   \{
-    done equ true
-    .type = op_tIndirect
-    .size = 0
+    done                                equ                                     true
+    . op@@object                        op@@tPointer,       null,               null
+  \}
+  match =[that=], operant
+  \{
+    done                                equ                                     true
+    . op@@object                        op@@tAddress,       null,               null
   \}
   match size =[that=], operant
   \{
     match =byte, size
     \\{
-      done equ true
-      .type                             =                                       op_tMemory
-      .size                             =                                       1
+      done                              equ                                     true
+      . op@@object                      op@@tAddress,       __byte__,           null
     \\}
     match =word, size
     \\{
-      done equ true
-      .type                             =                                       op_tMemory
-      .size                             =                                       2
+      done                              equ                                     true
+      . op@@object                      op@@tAddress,       __word__,           null
     \\}
     match =dword, size
     \\{
-      done equ true
-      .type                             =                                       op_tMemory
-      .size                             =                                       4
+      done                              equ                                     true
+      . op@@object                      op@@tAddress,       __dword__,          null
     \\}
     match =fword, size
     \\{
-      done equ true
-      .type                             =                                       op_tMemory
-      .size                             =                                       6
+      done                              equ                                     true
+      . op@@object                      op@@tAddress,       6,                  null
     \\}
     match =pword, size
     \\{
-      done equ true
-      .type                             =                                       op_tMemory
-      .size                             =                                       6
+      done                              equ                                     true
+      . op@@object                      op@@tAddress,       6,                  null
     \\}
     match =qword, size
     \\{
-      done equ true
-      .type                             =                                       op_tMemory
-      .size                             =                                       8
+      done                              equ                                     true
+      . op@@object                      op@@tAddress,       __qword__,          null
     \\}
     match =tbyte, size
     \\{
-      done equ true
-      .type                             =                                       op_tMemory
-      .size                             =                                       10
+      done                              equ                                     true
+      . op@@object                      op@@tAddress,       10,                 null
     \\}
     match =tword, size
     \\{
-      done equ true
-      .type                             =                                       op_tMemory
-      .size                             =                                       10
+      done                              equ                                     true
+      . op@@object                      op@@tAddress,       10,                 null
     \\}
     match =dqword, size
     \\{
-      done equ true
-      .type                             =                                       op_tMemory
-      .size                             =                                       16
+      done                              equ                                     true
+      . op@@object                      op@@tAddress,       16,                 null
     \\}
     match =xword, size
     \\{
-      done equ true
-      .type                             =                                       op_tMemory
-      .size                             =                                       16
+      done                              equ                                     true
+      . op@@object                      op@@tAddress,       16,                 null
     \\}
     match =qqword, size
     \\{
-      done equ true
-      .type                             =                                       op_tMemory
-      .size                             =                                       32
+      done                              equ                                     true
+      . op@@object                      op@@tAddress,       32,                 null
     \\}
     match =yword, size
     \\{
-      done equ true
-      .type                             =                                       op_tMemory
-      .size                             =                                       32
+      done                              equ                                     true
+      . op@@object                      op@@tAddress,       32,                 null
     \\}
     match , done
     \\{
-      done equ true
-      .type                             =                                       op_tUnknown
-      .size                             =                                       0
+      done                              equ                                     true
+      . op@@object                      op@@tAddress,       null,               null
     \\}
   \}
   match , done
   \{
      if ( operant in <rax,eax,ax,al,ah,rcx,ecx,cx,cl,ch,rdx,edx,dx,dl,dh,rbx,ebx,bx,bl,bh> )
-      .type                             =                                       operant#@type
-      .size                             =                                       operant#@size
-      .val                              =                                       operant#@value
+      . op@@object                      operant#@@type,     operant#@@size,     operant#@@value
     else
-      .type                             =                                       op_tImmediat
-      .size                             =                                       0
-      .val                              =                                       operant
-      if      ( .val = 0 )
-        .length                         =                                       0
-      else if (( .val < ( 1 shl   8 )) & (( 0 - .val ) <= ( 1 shl   7 )))
-        .length                         =                                       1
-      else if (( .val < ( 1 shl  16 )) & (( 0 - .val ) <= ( 1 shl  15 )))
-        .length                         =                                       2
-      else if (( .val < ( 1 shl  32 )) & (( 0 - .val ) <= ( 1 shl  31 )))
-        .length                         =                                       4
-      else if (( .val < ( 1 shl  48 )) & (( 0 - .val ) <= ( 1 shl  47 )))
-        .length                         =                                       6
-      else if (( .val < ( 1 shl  64 )) & (( 0 - .val ) <= ( 1 shl  63 )))
-        .length                         =                                       8
-      else if (( .val < ( 1 shl  80 )) & (( 0 - .val ) <= ( 1 shl  79 )))
-        .length                         =                                       10
-      else if (( .val < ( 1 shl 128 )) & (( 0 - .val ) <= ( 1 shl 127 )))
-        .length                         =                                       16
-      else if (( .val < ( 1 shl 256 )) & (( 0 - .val ) <= ( 1 shl 255 )))
-        .length                         =                                       32
-      else if (( .val < ( 1 shl 512 )) & (( 0 - .val ) <= ( 1 shl 511 )))
-        .length                         =                                       64
+      virtual                           at null
+        theoperant::
+          db `operant
+      end virtual
+      load tmp                          from                                    theoperant:( 0 )
+      if ( tmp >= '0' & tmp <= '9' )
+        tmp                             =                                       operant
+        if      ( tmp = 0 )
+          size                          =                                       0
+        else if (( tmp < ( 1 shl   8 )) & (( 0 - tmp ) <= ( 1 shl   7 )))
+          size                          =                                       1
+        else if (( tmp < ( 1 shl  16 )) & (( 0 - tmp ) <= ( 1 shl  15 )))
+          size                          =                                       2
+        else if (( tmp < ( 1 shl  32 )) & (( 0 - tmp ) <= ( 1 shl  31 )))
+          size                          =                                       4
+        else if (( tmp < ( 1 shl  48 )) & (( 0 - tmp ) <= ( 1 shl  47 )))
+          size                          =                                       6
+        else
+          size                          =                                       8
+;        else if (( tmp < ( 1 shl  64 )) & (( 0 - tmp ) <= ( 1 shl  63 )))
+;          size                          =                                       8
+;        else if (( tmp < ( 1 shl  80 )) & (( 0 - tmp ) <= ( 1 shl  79 )))
+;          size                          =                                       10
+;        else if (( tmp < ( 1 shl 128 )) & (( 0 - tmp ) <= ( 1 shl 127 )))
+;          size                          =                                       16
+;        else if (( tmp < ( 1 shl 256 )) & (( 0 - tmp ) <= ( 1 shl 255 )))
+;          size                          =                                       32
+;        else if (( tmp < ( 1 shl 512 )) & (( 0 - tmp ) <= ( 1 shl 511 )))
+;          size                          =                                       64
+;        else
+;         display '???'
+;         err
+        end if
+        . op@@object                    op@@tConstant,      size,               tmp
+      else if ( defined operant )
+        . op@@object                    op@@tConstant,      size,               tmp
+      else if ( defined operant\#@@type )
+        . op@@object                    operant\#@@type,    operant\#@@size,    operant\#@@value
+        if ( defined operant\#@@string )
+          .#@@string                    equ                                     operant\#@@string
+        end if
+      else
+        err
       end if
     end if
+  \}
+}
+
+macro var@@dlist {}
+macro var@@rlist {}
+macro var@@type                         type,     ddef,     rdef,     size,     vartype
+{
+  var@@#type#_type                      =                                       vartype
+  ;var@@d_#type#_ptr                     =                                       ( var@@d_#type#s )
+  newList                               var@@d_#type#_value
+  var@@d_#type#_count                   =                                       ( null )
+  var@@r_#type#_ptr                     =                                       ( var@@r_#type#s )
+  var@@r_#type#_count                   =                                       ( null )
+  match any0, ddef
+  \{
+    macro var@@dlist
+    \\{
+      var@@dlist
+      if ( var@@d_#type#_value@@ctr + 1 )
+        k                               =                                       ((( $ + size - 1 ) and ( 0 - size )) - $ )
+        while ( k )
+          tmp                           __random__
+          if      ( k >= __qword__ )
+            k                           =                                       ( k - __qword__ )
+            dq                          tmp
+          else if ( k >= __dword__ )
+            k                           =                                       ( k - __dword__ )
+            dd                          ( tmp and 0xffffffff )
+          else if ( k >= __word__ )
+            k                           =                                       ( k - __word__ )
+            dw                          ( tmp and 0xffff )
+          else if ( k >= __byte__ )
+            k                           =                                       ( k - __byte__ )
+            db                          ( tmp and 0xff )
+          end if
+        end while
+        var@@d_#type#s:
+          rndList                       var@@d_#type#_value
+      else
+        var@@d_#type#s:
+      end if
+      var@@d_#type#_count@final         =                                       ( var@@d_#type#_count )
+    \\}
+  \}
+  match any0, rdef
+  \{
+    macro var@@rlist
+    \\{
+      var@@rlist
+      if ( var@@r_#type#_count )
+        rb                              ((( $ + size - 1 ) and ( 0 - size )) - $ )
+        var@@r_#type#s:
+          rdef                          var@@r_#type#_count
+      else
+        var@@r_#type#s:
+      end if
+      var@@r_#type#_count@final         =                                       ( var@@r_#type#_count )
+    \\}
+  \}
+  macro type [ operant ]
+  \{
+    \common
+      \local done, buffer
+    \forward
+      done                              equ
+      match var==val, operant
+      \\{
+        if ( defined var\\#@@type )
+          display '[asm:op:', `type, '] variable »', \\`var, '« already defined!', 10
+          err
+        else
+          ;display 'add »', \\`var, '«', 10
+        end if
+        done                            equ                                     true
+        addList                         var@@d_#type#_value,                    < buffer ddef val >
+        var\\#@@type                    equ                                     var@@#type#_type
+        var\\#@@size                    =                                       size
+        var\\#@@value                   =                                       buffer
+        var@@d_#type#_count             =                                       ( var@@d_#type#_count + 1 )
+      \\}
+      match , done
+      \\{
+        if ( defined operant\\#@@type )
+          display '[asm:op:', `type, '] variable »', \\`operant, '« already defined!', 10
+          err
+        else
+          display 'add »', \\`operant, '«', 10
+        end if
+        operant\#@@type                 equ                                     var@@#type#_type
+        operant\#@@size                 =                                       size
+        operant\#@@value                =                                       var@@r_#type#_ptr
+        var@@r_#type#_ptr               =                                       ( var@@r_#type#_ptr + size )
+        var@@r_#type#_count             =                                       ( var@@r_#type#_count + 1 )
+      \\}
+  \}
+}
+done                                    equ
+match =amd64, __machine__
+{
+  var@@type                             pointer,  dq,       rq,       __qword__,          op@@tPointer
+  done                                  equ                                     true
+}
+match =x86protected, __machine__
+{
+  var@@type                             pointer,  dd,       rd,       __dword__,          op@@tPointer
+  done                                  equ                                     true
+}
+match =x86real, __machine__
+{
+  var@@type                             pointer,  dw,       rw,       __word__,           op@@tPointer
+  done                                  equ                                     true
+}
+match , done
+{
+  display '[asm:op] unknown pointer-size!', 10
+  err
+}
+macro do@@init
+{
+  local loooop
+  if ( defined do@@init )
+    do@@init
+  end if
+  if ( var@@d_pointer_count@final = null )
+  else
+    lea                                 rax,                                    [ __init__ ]
+    lea                                 rsi,                                    [ var@@d_pointers ]
+    mov                                 rdx,                                    var@@d_pointer_count@final
+    loooop:
+    ;{
+      add                               qword [ rsi + __qword__ * ( rdx - 1 )], rax
+      dec                               rdx
+      jnz                               loooop
+    ;}
+  end if
+}
+
+var@@type                               qword,    dq,       rq,       __qword__,          op@@tVariable
+var@@type                               dword,    dd,       rd,       __dword__,          op@@tVariable
+var@@type                               word,     dw,       rw,       __word__,           op@@tVariable
+var@@type                               byte,     db,       rb,       __byte__,           op@@tVariable
+
+macro var@@dlist
+{
+  op@@stroff:
+    rndList                             op@@strlst
+;  var@@d_strings:
+;    rndList                             var@@d_string_value
+  var@@dlist
+}
+macro string operant, [ rest ]
+{
+  local done, size, buffer
+  done                                  equ
+  match var==val, operant
+  \{
+    if ( defined var\#@@type )
+      display '[asm:op:string] variable »', \`var, '« already defined!', 10
+      err
+    else
+      ;display 'add »', \`var, '«', 10
+    end if
+    done                                equ                                     true
+    virtual                             at null
+      db                                val
+      match any, rest
+      \\{
+        db                              rest
+      \\}
+      size                              =                                       ( $ )
+    end virtual
+    match , rest
+    \\{
+      addList                           op@@strlst,                             < buffer db ( size and 0xff ), (( size shr 8 ) and 0xff ), val >
+    \\}
+    match any, rest
+    \\{
+      addList                           op@@strlst,                             < buffer db ( size and 0xff ), (( size shr 8 ) and 0xff ), val, rest >
+    \\}
+    pointer var\#@@pointer = ( buffer + 2 - __init__ )
+    var\#@@type                         equ                                     op@@tBuffer
+    var\#@@size                         =                                       size
+    var\#@@value                        =                                       var\#@@pointer@@value
+
+    displayValue '*string = 0x', ( buffer + 2 - __init__ + __init__ * 1 )
+    displayValue 'string  = 0x', var\#@@pointer@@value
+ ;   var@@d_pointer_ptr                  =                                       ( var@@d_pointer_ptr + __qword__ )
+    ;var@@d_pointer_ptr                  =                                       ( var@@d_pointer_ptr + __dword__ )
+;    var@@d_string_ptr                   =                                       ( var@@d_string_ptr + 2 + size )
+  \}
+  match , done
+  \{
+    if ( defined operant\#@@type )
+      display '[asm:op:string] variable »', \`operant, '« already defined!', 10
+      err
+    else
+      display 'add »', \`operant, '«', 10
+    end if
+    pointer var\#@@pointer
+;    qword operant\#@@pointer
   \}
 }

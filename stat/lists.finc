@@ -1,0 +1,84 @@
+macro newList                           list
+{
+  macro list                            arg
+  \{
+    if      ( arg < 0 )
+      display '[asm:lists] negative index!', 10
+      err
+    else if ( arg > list#@@ctr )
+      display '[asm:lists] index out of bounds!', 10
+      err
+    end if
+  \}
+  list#@@ctr                            =                                       ( 0 - 1 )
+}
+macro addList                           list,                                   item
+{
+  match , item
+  \{
+    display '[asm:list] nothing to add!', 10
+    err
+  \}
+  local y
+  list#@@ctr                            =                                       ( list#@@ctr + 1 )
+  y                                     =                                       ( list#@@ctr )
+  macro list                            arg
+  \{
+    list arg
+    if ( defined y )
+      if ( arg = y )
+        item
+      end if
+    end if
+  \}
+}
+struc ctrList                           list
+{
+  .                                     =                                       ( list#@@ctr + 1 )
+}
+macro rndList                           list
+{
+  local modulo, k, size
+  local lfsrseed, random, prime
+  modulo                                ctrList                                 list
+  k                                     =                                       ( modulo + 1 )
+  size                                  =                                       0
+  while ( k )
+    k                                   =                                       ( k shr 1 )
+    size                                =                                       ( size + 1 )
+  end while
+  while ( k = 0 )
+    lfsrseed                            __random__
+    k                                   =                                       ( lfsrseed and (( 1 shl size ) - 1 ))
+  end while
+  random                                __random__
+  k                                     __random__
+  k                                     __modulo__                              k,                                      __prime@@max__
+  prime                                 __prime__                               k
+  if ( prime = modulo )
+    k                                   __modulo__                              ( k + 1 ),                              __prime@@max__
+    prime                               __prime__                               k
+  end if
+;  lfsrseed = 0x3432271ab9aeb4db
+;  random = 0xabe56f14ffb6cf49
+;  prime = 0x0000000000009101
+  ;displayValue 'mod:    0x', modulo
+  ;displayValue 'len:    0x', size
+  ;displayValue 'max:    0x', ( 1 shl size )
+  ;displayValue 'seed:   0x', lfsrseed
+  ;displayValue 'random: 0x', random
+  ;displayValue 'prime:  0x', prime
+  repeat (( 1 shl size ) - 1 )
+    lfsrseed                            __LFSR__                                lfsrseed,                               ( size - 1 )
+    if ( lfsrseed <= modulo )
+      ;displayValue '#: 0x', ( lfsrseed - 1 )
+      k                                 __modulo__                              (( lfsrseed * prime ) + random ),       modulo
+      ;display     `list, '( 0x'
+      ;displayHex  ( k )
+      ;display     ' )', 10
+      list                                k
+    ;else
+      ;displayValue '_: 0x', ( lfsrseed - 1 )
+    end if
+  end repeat
+}

@@ -7,7 +7,7 @@ __word__                                =                                       
 __dword__                               =                                       4
 __qword__                               =                                       8
 __pointer__                             =                                       __qword__
-
+__machine__                             equ                                     amd64
 ;( functions parameter (when linked with external libraries) )
 ;call @function()
 lib0arg                                 equ                                     rdi
@@ -120,6 +120,10 @@ CLONE_fFS                               =                                       
 CLONE_fFiles                            =                                       0x0000000000000400  ;share file descriptors.
 CLONE_fSigHand                          =                                       0x0000000000000800  ;both processes share the same signal handlers.
 CLONE_fThread                           =                                       0x0000000000010000  ;this tells the kernel, that both processes would belong to the same thread group (be threads within the same process).
+CLONE_fSysVSem                          =                                       0x0000000000040000  ;share system V SEM_UNDO semantics
+CLONE_fSetTLS                           =                                       0x0000000000080000  ;create a new TLS for the child
+CLONE_fParent_SetTID                    =                                       0x0000000000100000  ;set the TID in the parent
+CLONE_fChild_ClearTID                   =                                       0x0000000000200000  ;clear the TID in the child
 
 MMAP_pNone                              =                                       0x00
 MMAP_pReadable                          =                                       0x01
@@ -164,6 +168,12 @@ macro exit                              status
   end if
   sys_call                              sys_exit_group
 }
+NANOSECONDS                             =                                       ( 1 )
+MICROSECONDS                            =                                       ( 1000 * NANOSECONDS )
+MILLISECONDS                            =                                       ( 1000 * MICROSECONDS )
+SECONDS                                 =                                       ( 1 )
+MINUTES                                 =                                       ( 60 * SECONDS )
+HOURS                                   =                                       ( 60 * HOURS )
 macro nanosleep                         sec,                                    nsec
 {
   if ( sec eq )
@@ -182,11 +192,12 @@ macro nanosleep                         sec,                                    
 }
 macro clone                             func,                                   stck
 {
+  clone_flags = CLONE_fVM + CLONE_fFS + CLONE_fFiles + CLONE_fSigHand + CLONE_fThread + CLONE_fSysVSem
   null                                  sys4arg
   null                                  sys3arg
   null                                  sys2arg
   lea                                   sys1arg,                                [ stck ]
-  mov                                   sys0arg,                                CLONE_sChild + CLONE_fVM + CLONE_fFS + CLONE_fSigHand + CLONE_fThread
+  mov                                   sys0arg,                                clone_flags
   sys_call                              sys_clone
   flags                                 sys0ret
   jz                                    func
@@ -253,7 +264,7 @@ sys_fork                                =                                       
 sys_vfork                               =                                       58
 sys_execve                              =                                       59
 sys_exit                                =                                       60
-sys_wait                                =                                       61
+sys_wait4                               =                                       61
 sys_kill                                =                                       62
 sys_uname                               =                                       63
 sys_semget                              =                                       64
@@ -909,6 +920,7 @@ virtual                                 at null
   db 0xE1, 0xF8, 0x98, 0x11, 0x69, 0xD9, 0x8E, 0x94, 0x9B, 0x1E, 0x87, 0xE9, 0xCE, 0x55, 0x28, 0xDF ;;0xe#
   db 0x8C, 0xA1, 0x89, 0x0D, 0xBF, 0xE6, 0x42, 0x68, 0x41, 0x99, 0x2D, 0x0F, 0xB0, 0x54, 0xBB, 0x16 ;;0xf#
 end virtual
+
 struc __hash_char__                     seed,                                   char
 {
   local temp, hash
@@ -936,6 +948,16 @@ struc __hash__                          seed,                                   
   end repeat
   .                                     =                                       hash
 }
+random@@seed                            =                                       ( %t )
+struc __random__
+{
+  random@@seed                          __hash_char__                           random@@seed,                           0x2342
+  random@@seed                          __hash_char__                           random@@seed,                           0x1337
+  random@@seed                          __hash_char__                           random@@seed,                           0x19961003
+  random@@seed                          __hash_char__                           random@@seed,                           0xc0ffee
+  .                                     =                                       random@@seed
+}
+random@@seed                            __random__
 macro __save__                          save,                                   temp
 {
   if ( save eq )
@@ -949,6 +971,58 @@ macro __save__                          save,                                   
     else
       display                           '[asm] __save__: ', save ' != ', temp, 10
     end if
+  end if
+}
+virtual                                 at null
+  __prime@@list__::
+    dw    2,    3,    5,    7,   11,   13,   17,   19,   23,   29,   31,   37,   41,   43,   47,   53,   59,   61,   67,   71
+    dw   73,   79,   83,   89,   97,  101,  103,  107,  109,  113,  127,  131,  137,  139,  149,  151,  157,  163,  167,  173
+    dw  179,  181,  191,  193,  197,  199,  211,  223,  227,  229,  233,  239,  241,  251,  257,  263,  269,  271,  277,  281
+    dw  283,  293,  307,  311,  313,  317,  331,  337,  347,  349,  353,  359,  367,  373,  379,  383,  389,  397,  401,  409
+    dw  419,  421,  431,  433,  439,  443,  449,  457,  461,  463,  467,  479,  487,  491,  499,  503,  509,  521,  523,  541
+    dw  547,  557,  563,  569,  571,  577,  587,  593,  599,  601,  607,  613,  617,  619,  631,  641,  643,  647,  653,  659
+    dw  661,  673,  677,  683,  691,  701,  709,  719,  727,  733,  739,  743,  751,  757,  761,  769,  773,  787,  797,  809
+    dw  811,  821,  823,  827,  829,  839,  853,  857,  859,  863,  877,  881,  883,  887,  907,  911,  919,  929,  937,  941
+    dw  947,  953,  967,  971,  977,  983,  991,  997, 1009, 1013, 1019, 1021, 1031, 1033, 1039, 1049, 1051, 1061, 1063, 1069
+    dw 1087, 1091, 1093, 1097, 1103, 1109, 1117, 1123, 1129, 1151, 1153, 1163, 1171, 1181, 1187, 1193, 1201, 1213, 1217, 1223
+    dw 1223, 1229, 1231, 1237, 1249, 1259, 1277, 1279, 1283, 1289, 1291, 1297, 1301, 1303, 1307, 1319, 1321, 1327, 1361, 1367
+    dw 1373, 1381, 1399, 1409, 1423, 1427, 1429, 1433, 1439, 1447, 1451, 1453, 1459, 1471, 1481, 1483, 1487, 1489, 1493, 1499
+    dw 1511, 1523, 1531, 1543, 1549, 1553, 1559, 1567, 1571, 1579, 1583, 1597, 1601, 1607, 1609, 1613, 1619, 1621, 1627, 1637
+    dw 1657, 1663, 1667, 1669, 1693, 1697, 1699, 1709, 1721, 1723, 1733, 1741, 1747, 1753, 1759, 1777, 1783, 1787, 1789, 1801
+    dw 1811, 1823, 1831, 1847, 1861, 1867, 1871, 1873, 1877, 1879, 1889, 1901, 1907, 1913, 1931, 1933, 1949, 1951, 1973, 1979
+    dw 1987, 1993, 1997, 1999, 2003, 2011, 2017, 2027, 2029, 2039, 2053, 2063, 2069, 2081, 2083, 2087, 2089, 2099, 2111, 2113
+    dw 2129, 2131, 2137, 2141, 2143, 2153, 2161, 2179, 2203, 2207, 2213, 2221, 2237, 2239, 2243, 2251, 2267, 2269, 2273, 2281
+    dw 2287, 2293, 2297, 2309, 2311, 2333, 2339, 2341, 2347, 2351, 2357, 2371, 2377, 2381, 2383, 2389, 2393, 2399, 2411, 2417
+    dw 2423, 2437, 2441, 2447, 2459, 2467, 2473, 2477, 2503, 2521, 2531, 2539, 2543, 2549, 2551, 2557, 2579, 2591, 2593, 2609
+    dw 2617, 2621, 2633, 2647, 2657, 2659, 2663, 2671, 2677, 2683, 2687, 2689, 2693, 2699, 2707, 2711, 2713, 2719, 2729, 2731
+  __prime@@max__                        =                                       ( $ / __word__ )
+end virtual
+struc __prime__                         arg
+{
+  local tmp
+  if ( arg < __prime@@max__ )
+    load                                tmp word                                from __prime@@list__:( arg * __word__ )
+    .                                   =                                       tmp
+  else
+    display '[asm:primes] there are only ... primes implemented yet :/', 10
+    err
+  end if
+}
+struc __modulo__                        value,                                  modulo
+{
+  .                                     =                                       (( value ) - (( value )/( modulo ) * ( modulo )))
+}
+struc __LFSR__                          state,                                  length
+{
+  local a, b, tmp
+  local c
+  tmp                                   =                                       (( state shr 1 ) and (( 1 shl length ) - 1 ))
+  a                                     =                                       ( state and 1 )
+  b                                     =                                       ( tmp and 1 )
+  .                                     =                                       ( tmp + (( a xor b ) shl length ))
+  if ( . = 0 )
+    display '[asm:lfsr] fail: next state is null!', 10
+    ;err
   end if
 }
 macro __load__                          save,                                   temp
@@ -976,9 +1050,9 @@ macro displayHex                        value
 {
   local                                 char
   repeat 16
-    char                                =                                       ( '0' + ((( value ) shr ( 64 - ( % * 4 ))) and 0x0F ))
+    char                                =                                       ( '0' + ((( value ) shr ( 64 - ( % * 4 ))) and 0x0f ))
     if ( char > '9' )
-      char                              =                                       ( char + 'A' - '9' - 1 )
+      char                              =                                       ( char + 'a' - '9' - 1 )
     end if
     display                             char
   end repeat
@@ -987,9 +1061,9 @@ macro displayHex4                       value
 {
   local                                 char
   repeat 8
-    char                                =                                       ( '0' + ((( value ) shr ( 32 - ( % * 4 ))) and 0x0F ))
+    char                                =                                       ( '0' + ((( value ) shr ( 32 - ( % * 4 ))) and 0x0f ))
     if ( char > '9' )
-      char                              =                                       ( char + 'A' - '9' - 1 )
+      char                              =                                       ( char + 'a' - '9' - 1 )
     end if
     display                             char
   end repeat
@@ -998,9 +1072,9 @@ macro displayHex2                       value
 {
   local                                 char
   repeat 4
-    char                                =                                       ( '0' + ((( value ) shr ( 16 - ( % * 4 ))) and 0x0F ))
+    char                                =                                       ( '0' + ((( value ) shr ( 16 - ( % * 4 ))) and 0x0f ))
     if ( char > '9' )
-      char                              =                                       ( char + 'A' - '9' - 1 )
+      char                              =                                       ( char + 'a' - '9' - 1 )
     end if
     display                             char
   end repeat
@@ -1009,9 +1083,9 @@ macro displayHex1                       value
 {
   local                                 char
   repeat 2
-    char                                =                                       ( '0' + ((( value ) shr (  8 - ( % * 4 ))) and 0x0F ))
+    char                                =                                       ( '0' + ((( value ) shr (  8 - ( % * 4 ))) and 0x0f ))
     if ( char > '9' )
-      char                              =                                       ( char + 'A' - '9' - 1 )
+      char                              =                                       ( char + 'a' - '9' - 1 )
     end if
     display                             char
   end repeat

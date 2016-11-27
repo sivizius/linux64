@@ -1,0 +1,5 @@
+network.socket:
+network.socket.af                       rw                                      1
+network.socket.port                     rw                                      1
+network.socket.ip                       rd                                      1
+network.socket.null                     rq                                      1
