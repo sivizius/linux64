@@ -1,0 +1,74 @@
+macro encryptCode                       encryption,                             charsize
+{
+  match , encryption
+  \{
+    display '[asm:enc] need encryption method!', 10
+    err
+  \}
+  match , charsize
+  \{
+    display '[asm:enc] need character size!', 10
+    err
+  \}
+  if ( charsize < 1 )
+    display '[asm:enc] charsize must be positive!', 10
+    err
+  end if
+  local _content_, content, size, char, k, rand
+  postpone
+  \{
+    virtual                             at null
+      content::
+        _content_
+        k                               =                                       (( $ + charsize - 1 ) and ( 0 - charsize ))
+        while ( k )
+          if      ( k >= __qword__ )
+            k                           =                                       ( k - __qword__ )
+            rand                        __random__
+            dq                          ( rand )
+          else if ( k >= __dword__ )
+            k                           =                                       ( k - __dword__ )
+            rand                        __random__
+            dd                          ( rand and 0xffffffff )
+          else if ( k >= __word__ )
+            k                           =                                       ( k - __word__ )
+            rand                        __random__
+            dw                          ( rand and 0xffff )
+          else if ( k >= __byte__ )
+            k                           =                                       ( k - __byte__ )
+            rand                        __random__
+            db                          ( rand and 0xff )
+          end if
+        end while
+        size                            =                                       ( $ )
+    end virtual
+    repeat ( size / charsize )
+      if      ( charsize = __byte__ )
+        load                            char byte                               from content:(( % - 1 ) * __byte__ )
+      else if ( charsize = __word__ )
+        load                            char word                               from content:(( % - 1 ) * __word__ )
+      else if ( charsize = __dword__ )
+        load                            char dword                              from content:(( % - 1 ) * __dword__ )
+      else if ( charsize = __qword__ )
+        load                            char qword                              from content:(( % - 1 ) * __qword__ )
+      else
+        display '[asm:enc] invalid character size!', 10
+        err
+      end if
+      encryption                        char,     charsize
+    end repeat
+  \}
+  macro _content_
+}
+macro encryptXORseed                    seed,                                   char,     charsize
+{
+  if      ( charsize = __byte__ )
+    db                                  ( char xor seed )
+  else if ( charsize = __word__ )
+    dw                                  ( char xor seed )
+  else if ( charsize = __dword__ )
+    dd                                  ( char xor seed )
+  else if ( charsize = __qword__ )
+    dq                                  ( char xor seed )
+  end if
+}

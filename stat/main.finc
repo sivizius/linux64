@@ -898,6 +898,56 @@ struc adq                               count
   label . at _alloc_
   _alloc_                               =                                       ( _alloc_ + ( 16 * count ))
 }
+macro displayValue                      string,                                 value
+{
+  display                               string
+  displayHex                            ( value )
+  display                               10
+}
+macro displayHex                        value
+{
+  local                                 char
+  repeat 16
+    char                                =                                       ( '0' + ((( value ) shr ( 64 - ( % * 4 ))) and 0x0f ))
+    if ( char > '9' )
+      char                              =                                       ( char + 'a' - '9' - 1 )
+    end if
+    display                             char
+  end repeat
+}
+macro displayHex4                       value
+{
+  local                                 char
+  repeat 8
+    char                                =                                       ( '0' + ((( value ) shr ( 32 - ( % * 4 ))) and 0x0f ))
+    if ( char > '9' )
+      char                              =                                       ( char + 'a' - '9' - 1 )
+    end if
+    display                             char
+  end repeat
+}
+macro displayHex2                       value
+{
+  local                                 char
+  repeat 4
+    char                                =                                       ( '0' + ((( value ) shr ( 16 - ( % * 4 ))) and 0x0f ))
+    if ( char > '9' )
+      char                              =                                       ( char + 'a' - '9' - 1 )
+    end if
+    display                             char
+  end repeat
+}
+macro displayHex1                       value
+{
+  local                                 char
+  repeat 2
+    char                                =                                       ( '0' + ((( value ) shr (  8 - ( % * 4 ))) and 0x0f ))
+    if ( char > '9' )
+      char                              =                                       ( char + 'a' - '9' - 1 )
+    end if
+    display                             char
+  end repeat
+}
 
 ;( special macros )
 virtual                                 at null
@@ -948,7 +998,6 @@ struc __hash__                          seed,                                   
   end repeat
   .                                     =                                       hash
 }
-random@@seed                            =                                       ( %t )
 struc __random__
 {
   random@@seed                          __hash_char__                           random@@seed,                           0x2342
@@ -957,6 +1006,18 @@ struc __random__
   random@@seed                          __hash_char__                           random@@seed,                           0xc0ffee
   .                                     =                                       random@@seed
 }
+struc __weak_random__
+{
+  ;random@@seed                          __hash_char__                           random@@seed,                           'weakweak'
+  .                                     __random__
+  ;.                                     =                                       random@@seed
+}
+if ( defined __random_seed__ )
+  displayValue '[asm:random] haz randomseed: 0x', (( __random_seed__ ) and 0xffffffffffffffff )
+  random@@seed                          =                                       ( %t and ((( __random_seed__ ))) and 0xffffffffffffffff )
+else
+  random@@seed                          =                                       ( %t )
+end if
 random@@seed                            __random__
 macro __save__                          save,                                   temp
 {
@@ -1039,56 +1100,6 @@ macro __load__                          save,                                   
       display                           '[asm] __load__: ', save ' != ', temp, 10
     end if
   end if
-}
-macro displayValue                      string,                                 value
-{
-  display                               string
-  displayHex                            ( value )
-  display                               10
-}
-macro displayHex                        value
-{
-  local                                 char
-  repeat 16
-    char                                =                                       ( '0' + ((( value ) shr ( 64 - ( % * 4 ))) and 0x0f ))
-    if ( char > '9' )
-      char                              =                                       ( char + 'a' - '9' - 1 )
-    end if
-    display                             char
-  end repeat
-}
-macro displayHex4                       value
-{
-  local                                 char
-  repeat 8
-    char                                =                                       ( '0' + ((( value ) shr ( 32 - ( % * 4 ))) and 0x0f ))
-    if ( char > '9' )
-      char                              =                                       ( char + 'a' - '9' - 1 )
-    end if
-    display                             char
-  end repeat
-}
-macro displayHex2                       value
-{
-  local                                 char
-  repeat 4
-    char                                =                                       ( '0' + ((( value ) shr ( 16 - ( % * 4 ))) and 0x0f ))
-    if ( char > '9' )
-      char                              =                                       ( char + 'a' - '9' - 1 )
-    end if
-    display                             char
-  end repeat
-}
-macro displayHex1                       value
-{
-  local                                 char
-  repeat 2
-    char                                =                                       ( '0' + ((( value ) shr (  8 - ( % * 4 ))) and 0x0f ))
-    if ( char > '9' )
-      char                              =                                       ( char + 'a' - '9' - 1 )
-    end if
-    display                             char
-  end repeat
 }
 macro __value__                         this,                                   value
 {
