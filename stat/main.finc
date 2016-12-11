@@ -1081,8 +1081,10 @@ macro __pad__                           size,                                   
         db                              ( tmp and 0xff )
       end if
     end while
-  else
+  else if ( mode = 1 )
     times ( k )                         nop
+  else if ( mode = 2 )
+    times ( k )                         db                                      0
   end if
 }
 virtual                                 at null

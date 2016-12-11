@@ -1,25 +1,35 @@
-macro var@@dlist
+macro var@@dlist                                                                                                        ;var = value
 {
   local k
 }
-macro var@@rlist
+macro var@@rlist                                                                                                        ;var = 0
 {
   local k
 }
-macro var@@flist                        mode
+macro var@@flist                        mode                                                                            ;var()
 {
   if ( var@@functions@@ctr + 1 )
     rndList                             var@@functions
   end if
 }
+macro var@@llist {}                                                                                                     ;local var
 macro var@@type                         type,     ddef,     rdef,     size,     vartype
 {
   var@@#type#_type                      =                                       vartype
-  ;var@@d_#type#_ptr                     =                                       ( var@@d_#type#s )
   newList                               var@@d_#type#_value
-  var@@d_#type#_count                   =                                       ( null )
-  var@@r_#type#_ptr                     =                                       ( var@@r_#type#s )
-  var@@r_#type#_count                   =                                       ( null )
+  newList                               var@@r_#type#_value
+  newList                               var@@l_#type#_value
+  macro var@@llist
+  \{
+;    var@@llist
+;    __pad__                             size,                                   2
+;    if ( var@@l_#type#_value@@ctr + 1 )
+;      ;virtual                           at null
+;        rndList                         var@@l_#type#_value
+;      ;end virtual
+;    end if
+;    newList                             var@@l_#type#_value
+  \}
   match any0, ddef
   \{
     macro var@@dlist
@@ -32,7 +42,7 @@ macro var@@type                         type,     ddef,     rdef,     size,     
       else
         var@@d_#type#s:
       end if
-      var@@d_#type#_count@final         =                                       ( var@@d_#type#_count )
+      var@@d_#type#_count@final         =                                       ( var@@d_#type#_value@@ctr + 1 )
     \\}
   \}
   match any0, rdef
@@ -40,14 +50,14 @@ macro var@@type                         type,     ddef,     rdef,     size,     
     macro var@@rlist
     \\{
       var@@rlist
-      if ( var@@r_#type#_count )
-        rb                              ((( $ + size - 1 ) and ( 0 - size )) - $ )
+      if ( var@@r_#type#_value@@ctr + 1 )
+        __pad__                         size
         var@@r_#type#s:
-          rdef                          var@@r_#type#_count
+          rndList                       var@@r_#type#_value
       else
         var@@r_#type#s:
       end if
-      var@@r_#type#_count@final         =                                       ( var@@r_#type#_count )
+      var@@r_#type#_count@final         =                                       ( var@@r_#type#_value@@ctr + 1 )
     \\}
   \}
   macro type [ operant ]
@@ -65,11 +75,13 @@ macro var@@type                         type,     ddef,     rdef,     size,     
           ;display 'add »', \\`var, '«', 10
         end if
         done                            equ                                     true
-        addList                         var@@d_#type#_value,                    < buffer ddef val >
+;        match ==, __isGlobal__
+;        \\\{
+          addList                       var@@d_#type#_value,                    < buffer ddef val >
+          var\#@@value                  equ                                     buffer
+;        \\\}
         var\\#@@type                    equ                                     var@@#type#_type
         var\\#@@size                    =                                       size
-        var\\#@@value                   =                                       buffer
-        var@@d_#type#_count             =                                       ( var@@d_#type#_count + 1 )
       \\}
       match , done
       \\{
@@ -79,11 +91,13 @@ macro var@@type                         type,     ddef,     rdef,     size,     
         else
           display 'add »', \\`operant, '«', 10
         end if
+;        match ==, __isGlobal__
+;        \\\{
+          addList                       var@@d_#type#_value,                    < buffer rdef 1 >
+          operant\#@@value              equ                                     buffer
+;        \\\}
         operant\#@@type                 equ                                     var@@#type#_type
         operant\#@@size                 =                                       size
-        operant\#@@value                =                                       var@@r_#type#_ptr
-        var@@r_#type#_ptr               =                                       ( var@@r_#type#_ptr + size )
-        var@@r_#type#_count             =                                       ( var@@r_#type#_count + 1 )
       \\}
   \}
 }
@@ -209,6 +223,7 @@ macro return                            value
   \}
 }
 newList var@@functions
+var@@functions_count                    =                                       null
 macro function                          name,                                   argumente
 {
   if ( defined name#@@type )
@@ -225,9 +240,8 @@ macro function                          name,                                   
 ;    dq                                  size
     __address__:
       __isGlobal__                      equ
-      __stackframe__                    =                                       null
       __content__
-      displayValue 'stackframesize 0x', __stackframe__
+      var@@llist
       __isGlobal__                      equ                                     =
     size                                =                                       ( $ - __address__ )
   \}
@@ -235,6 +249,7 @@ macro function                          name,                                   
   name#@@type                           equ                                     op@@tFunction
   name#@@value                          =                                       ( __address__ )
   name#@@size                           =                                       size
+  var@@functions_count                  =                                       ( var@@functions_count + 1 )
   displayValue 'funtion()     = @0x', name#@@value
   displayValue 'funtion.size  =  0x', name#@@size
   macro name                            argumente
@@ -266,6 +281,8 @@ macro function                          name,                                   
             mov                         lib4arg\#,                              __item__
           else if ( __count__ = 5 )
             mov                         lib5arg\#,                              __item__
+          else if ( __count__ = 6 )
+            mov                         rax,                                    __item__
           else
             display '[asm:function] cannot handle so many arguments yet! :(', 10
             err
