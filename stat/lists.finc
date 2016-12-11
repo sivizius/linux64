@@ -22,7 +22,7 @@ macro addList                           list,                                   
   local y
   list#@@ctr                            =                                       ( list#@@ctr + 1 )
   y                                     =                                       ( list#@@ctr )
-  displayValue 'add: 0x', y
+;  displayValue 'add: 0x', y
   macro list                            arg
   \{
     list arg
@@ -58,13 +58,16 @@ macro rndList                           list
     lfsrseed                            __random__
     lfsrseed                            __modulo__                              lfsrseed,                               (( 1 shl size ) - 1 )
   end while
-  displayValue 'modulo    = 0x', modulo
-  displayValue 'size      = 0x', size
-  displayValue 'max:        0x', ( 1 shl size )
-  displayValue 'lfsrseed  = 0x', lfsrseed
-  displayValue 'random0   = 0x', random0
-  displayValue 'random1   = 0x', random1
-  displayValue 'random2   = 0x', random2
+  match +,-
+  \{
+    displayValue 'modulo    = 0x', modulo
+    displayValue 'size      = 0x', size
+    displayValue 'max:        0x', ( 1 shl size )
+    displayValue 'lfsrseed  = 0x', lfsrseed
+    displayValue 'random0   = 0x', random0
+    displayValue 'random1   = 0x', random1
+    displayValue 'random2   = 0x', random2
+  \}
   repeat (( 1 shl size ) - 1 )
     lfsrseed                            __GLFSR__                               lfsrseed,                               ( size )
     lfsrseed                            __GLFSR__                               lfsrseed,                               ( size )
@@ -78,7 +81,7 @@ macro rndList                           list
       k                                 =                                       ((( lfsrseed * 2711 ) + random3 ))
       k                                 __modulo__                              k,                                      modulo
 ;      k                                 =                                       lfsrseed
-      displayValue '#0x', k
+      ;displayValue '#0x', k
       list                              k
     end if
   end repeat

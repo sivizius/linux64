@@ -1,7 +1,7 @@
 page_size                               =                                       4096
 null                                    =                                       0
-false                                   =                                       0
-true                                    =                                       1
+false                                   fix                                     0
+true                                    fix                                     1
 __byte__                                =                                       1
 __word__                                =                                       2
 __dword__                               =                                       4
@@ -1058,6 +1058,31 @@ macro __save__                          save,                                   
     else
       display                           '[asm] __save__: ', save ' != ', temp, 10
     end if
+  end if
+}
+macro __pad__                           size,                                   mode
+{
+  local k
+  k                                     =                                       ((( $ + size - 1 ) and ( 0 - size )) - $ )
+  if ( mode eq | mode = 0 )
+    while ( k )
+      tmp                               __random__
+      if      ( k >= __qword__ )
+        k                               =                                       ( k - __qword__ )
+        dq                              tmp
+      else if ( k >= __dword__ )
+        k                               =                                       ( k - __dword__ )
+        dd                              ( tmp and 0xffffffff )
+      else if ( k >= __word__ )
+        k                               =                                       ( k - __word__ )
+        dw                              ( tmp and 0xffff )
+      else if ( k >= __byte__ )
+        k                               =                                       ( k - __byte__ )
+        db                              ( tmp and 0xff )
+      end if
+    end while
+  else
+    times ( k )                         nop
   end if
 }
 virtual                                 at null
