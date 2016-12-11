@@ -22,11 +22,13 @@ macro addList                           list,                                   
   local y
   list#@@ctr                            =                                       ( list#@@ctr + 1 )
   y                                     =                                       ( list#@@ctr )
+  displayValue 'add: 0x', y
   macro list                            arg
   \{
     list arg
     if ( defined y )
       if ( arg = y )
+;        displayValue 'item: 0x', arg
         item
       end if
     end if
@@ -39,46 +41,92 @@ struc ctrList                           list
 macro rndList                           list
 {
   local modulo, k, size
-  local lfsrseed, random, prime
+  local lfsrseed, random
   modulo                                ctrList                                 list
-  k                                     =                                       ( modulo + 1 )
-  size                                  =                                       0
+  k                                     =                                       ( modulo )
+  size                                  =                                       2
+  lfsrseed                              =                                       null
+  random0                               __random__
+  random1                               __random__
+  random2                               __random__
+  random3                               __random__
   while ( k )
     k                                   =                                       ( k shr 1 )
     size                                =                                       ( size + 1 )
   end while
-  while ( k = 0 )
+  while ( lfsrseed = 0 )
     lfsrseed                            __random__
-    k                                   =                                       ( lfsrseed and (( 1 shl size ) - 1 ))
+    lfsrseed                            __modulo__                              lfsrseed,                               (( 1 shl size ) - 1 )
   end while
-  random                                __random__
-  k                                     __random__
-  k                                     __modulo__                              k,                                      __prime@@max__
-  prime                                 __prime__                               k
-  if ( prime = modulo )
-    k                                   __modulo__                              ( k + 1 ),                              __prime@@max__
-    prime                               __prime__                               k
-  end if
-;  lfsrseed = 0x3432271ab9aeb4db
-;  random = 0xabe56f14ffb6cf49
-;  prime = 0x0000000000009101
-  ;displayValue 'mod:    0x', modulo
-  ;displayValue 'len:    0x', size
-  ;displayValue 'max:    0x', ( 1 shl size )
-  ;displayValue 'seed:   0x', lfsrseed
-  ;displayValue 'random: 0x', random
-  ;displayValue 'prime:  0x', prime
+  displayValue 'modulo    = 0x', modulo
+  displayValue 'size      = 0x', size
+  displayValue 'max:        0x', ( 1 shl size )
+  displayValue 'lfsrseed  = 0x', lfsrseed
+  displayValue 'random0   = 0x', random0
+  displayValue 'random1   = 0x', random1
+  displayValue 'random2   = 0x', random2
   repeat (( 1 shl size ) - 1 )
-    lfsrseed                            __LFSR__                                lfsrseed,                               ( size - 1 )
+    lfsrseed                            __GLFSR__                               lfsrseed,                               ( size )
+    lfsrseed                            __GLFSR__                               lfsrseed,                               ( size )
     if ( lfsrseed <= modulo )
-      ;displayValue '#: 0x', ( lfsrseed - 1 )
-      k                                 __modulo__                              (( lfsrseed * prime ) + random ),       modulo
-      ;display     `list, '( 0x'
-      ;displayHex  ( k )
-      ;display     ' )', 10
-      list                                k
-    ;else
-      ;displayValue '_: 0x', ( lfsrseed - 1 )
+      k                                 =                                       ((( lfsrseed * 2719 ) + random0 ))
+      k                                 __modulo__                              k,                                      modulo
+      k                                 =                                       ((( lfsrseed * 2729 ) + random1 ))
+      k                                 __modulo__                              k,                                      modulo
+      k                                 =                                       ((( lfsrseed * 2731 ) + random2 ))
+      k                                 __modulo__                              k,                                      modulo
+      k                                 =                                       ((( lfsrseed * 2711 ) + random3 ))
+      k                                 __modulo__                              k,                                      modulo
+;      k                                 =                                       lfsrseed
+      displayValue '#0x', k
+      list                              k
     end if
   end repeat
+}
+macro newQueque                         queque
+{
+  macro queque
+  \{
+    if      ( queque\#@@ptr < ( 0 - 1 ))
+      display '[asm:queque] negative index of »', `queque, '«!', 10
+      err
+    else if ( queque\#@@ptr >= queque\#@@ctr )
+      display '[asm:queque] index of »', `queque, '« out of bounds!', 10
+      displayValue 'pointer: 0x', queque\#@@ptr
+      displayValue 'counter: 0x', queque\#@@ctr
+      err
+    else
+    end if
+    queque\#@@ptr                        =                                       ( queque\#@@ptr + 1 )
+  \}
+  queque#@@ptr                          =                                       ( 0 - 1 )
+  queque#@@ctr                          =                                       ( 0 - 1 )
+}
+macro addQueque                         queque,                                 item
+{
+  match , item
+  \{
+    display '[asm:queque] nothing to add!', 10
+    err
+  \}
+  local y
+  queque#@@ctr                          =                                       ( queque#@@ctr + 1 )
+  y                                     =                                       ( queque#@@ctr )
+  macro queque
+  \{
+    queque
+    if ( defined y )
+      if ( y = queque#@@ptr )
+        item
+      end if
+    end if
+  \}
+}
+struc ctrQueque                         queque
+{
+  .                                     =                                       ( queque#@@ctr + 1 )
+}
+struc ptrQueque                         queque
+{
+  .                                     =                                       ( queque#@@ptr )
 }

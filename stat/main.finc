@@ -670,7 +670,33 @@ macro null                              [ register ]
 }
 macro flags                             register
 {
-  or                                    register,                               register
+  local rand, comp
+  rand                                  __weak_random__
+  comp                                  equ
+  match , comp                          ;5 different opcodes, 3 bytes in size, still optimized
+  \{
+    rand                                __modulo__                              rand,                                   3
+    if      ( rand = 0 )
+      or                                register,                               register
+    else if ( rand = 1 )
+      and                               register,                               register
+    else
+      test                              register,                               register
+    end if
+  \}
+  match any, comp                       ;7 different opcodes, up to 7 bytes in size, not so optimized
+  \{
+    rand                                =                                       ( rand and 3 )
+    if      ( rand = 0 )
+      or                                register,                               register
+    else if ( rand = 1 )
+      and                               register,                               register
+    else if ( rand = 2 )
+      cmp                               register,                               0
+    else
+      test                              register,                               register
+    end if
+  \}
 }
 
 dqVars fix
@@ -1073,18 +1099,61 @@ struc __modulo__                        value,                                  
 {
   .                                     =                                       (( value ) - (( value )/( modulo ) * ( modulo )))
 }
-struc __LFSR__                          state,                                  length
+virtual                                 at null
+  polylist@@glfsr::
+    dq                                  0x00000003                              ;2
+    dq                                  0x00000006                              ;3
+    dq                                  0x00000009                              ;4
+    dq                                  0x00000014                              ;5
+    dq                                  0x00000033                              ;6
+    dq                                  0x00000055                              ;7
+    dq                                  0x000000b2                              ;8
+    dq                                  0x0000013e                              ;9
+    dq                                  0x000003a6                              ;10
+    dq                                  0x000004fb                              ;11
+    dq                                  0x00000965                              ;12
+    dq                                  0x00001166                              ;13
+    dq                                  0x00002106                              ;14
+    dq                                  0x000040ae                              ;15
+    dq                                  0x00008634                              ;16
+    dq                                  0x0001019a                              ;17
+    dq                                  0x000201f0                              ;18
+    dq                                  0x00040150                              ;19
+    dq                                  0x000802f9                              ;20
+    dq                                  0x00100169                              ;21
+    dq                                  0x00200287                              ;22
+    dq                                  0x0040041e                              ;23
+    dq                                  0x00800853                              ;24
+    dq                                  0x01000444                              ;25
+    dq                                  0x020006d5                              ;26
+    dq                                  0x04000112                              ;27
+    dq                                  0x0800025a                              ;28
+    dq                                  0x10000218                              ;29
+    dq                                  0x20000b7d                              ;30
+    dq                                  0x40000007                              ;31
+    dq                                  0x800003e9                              ;32
+  polysize@@glfsr                       =                                       ( $ / __qword__ )
+end virtual
+struc __LFSR__                          state,                                  size
 {
-  local a, b, tmp
-  local c
-  tmp                                   =                                       (( state shr 1 ) and (( 1 shl length ) - 1 ))
-  a                                     =                                       ( state and 1 )
-  b                                     =                                       ( tmp and 1 )
-  .                                     =                                       ( tmp + (( a xor b ) shl length ))
-  if ( . = 0 )
-    display '[asm:lfsr] fail: next state is null!', 10
-    ;err
+  if ( state = null )
+    display '[asm:lfsr] state is null!', 10
+    err
   end if
+  .                                     =                                       (( state shr 1 ) and (( 1 shl ( size )) - 1 )) + ((( state and 1 ) xor (( state shr 1 ) and 1 )) shl ( size - 1 ))
+}
+struc __GLFSR__                         state,                                  size
+{
+  if ( state = null )
+    display '[asm:glfsr] state is null!', 10
+    err
+  else if (( size < 2 ) & ( size >= polysize@@glfsr ))
+    display '[asm:glfsr] invalid size!', 10
+    err
+  end if
+  local polynom
+  load                                  polynom qword                           from polylist@@glfsr:(( size - 2 ) * __qword__ )
+  .                                     =                                       ((( state shr 1 ) and (( 1 shl ( size )) - 1 )) xor (( state and 1 ) * polynom ))
 }
 macro __load__                          save,                                   temp
 {

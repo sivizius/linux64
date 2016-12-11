@@ -1,4 +1,5 @@
 macro var@@dlist {}
+macro var@@flist {}
 macro var@@rlist {}
 macro var@@type                         type,     ddef,     rdef,     size,     vartype
 {
