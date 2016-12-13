@@ -12,23 +12,72 @@ macro var@@flist                        mode                                    
     rndList                             var@@functions
   end if
 }
-macro var@@llist {}                                                                                                     ;local var
+macro var@@llist                                                                                                        ;local var
+{
+  local k, length, lfsrseed, random
+}
+macro var@@llist_reset {}
 macro var@@type                         type,     ddef,     rdef,     size,     vartype
 {
   var@@#type#_type                      =                                       vartype
   newList                               var@@d_#type#_value
   newList                               var@@r_#type#_value
-  newList                               var@@l_#type#_value
+  __local_#type#__                      =                                       null
+  macro var@@llist_reset
+  \{
+    var@@llist_reset
+    var@@#type#_ctr                     =                                       null
+  \}
   macro var@@llist
   \{
-;    var@@llist
-;    __pad__                             size,                                   2
-;    if ( var@@l_#type#_value@@ctr + 1 )
-;      ;virtual                           at null
-;        rndList                         var@@l_#type#_value
-;      ;end virtual
-;    end if
-;    newList                             var@@l_#type#_value
+    __pad__                             size,                                   1
+    .@@#type:
+      rdef                              __local_#type#__
+    var@@llist
+      k                                 =                                       ( __local_#type#__ )
+      length                            =                                       2
+      lfsrseed                          =                                       null
+      random0                           __random__
+      random1                           __random__
+      random2                           __random__
+      random3                           __random__
+      while ( k )
+        k                               =                                       ( k shr 1 )
+        length                          =                                       ( length + 1 )
+      end while
+      while ( lfsrseed = 0 )
+        lfsrseed                        __random__
+        lfsrseed                        __modulo__                              lfsrseed,                               (( 1 shl length ) - 1 )
+      end while
+      match +,-
+      \\{
+        displayValue 'modulo    = 0x', __local_#type#__
+        displayValue 'size      = 0x', length
+        displayValue 'max:        0x', ( 1 shl length )
+        displayValue 'lfsrseed  = 0x', lfsrseed
+        displayValue 'random0   = 0x', random0
+        displayValue 'random1   = 0x', random1
+        displayValue 'random2   = 0x', random2
+      \\}
+    .@@#type#_ptr:
+      repeat (( 1 shl length ) - 1 )
+        lfsrseed                        __GLFSR__                               lfsrseed,                               ( length )
+        if ( lfsrseed <= __local_#type#__ )
+          k                             =                                       ((( lfsrseed * 2719 ) + random0 ))
+          k                             __modulo__                              k,                                      __local_#type#__
+          k                             =                                       ((( lfsrseed * 2729 ) + random1 ))
+          k                             __modulo__                              k,                                      __local_#type#__
+          k                             =                                       ((( lfsrseed * 2731 ) + random2 ))
+          k                             __modulo__                              k,                                      __local_#type#__
+          k                             =                                       ((( lfsrseed * 2711 ) + random3 ))
+          k                             __modulo__                              k,                                      __local_#type#__
+          k                             =                                       lfsrseed
+          dq                            ( .@@#type + (( k - 1 ) * size ))
+          ;displayValue '#0x', k
+        end if
+      end repeat
+      ;displayValue <`type, '_size: 0x'>, ( $ - .@@#type#_ptr )
+    __local_#type#__                    =                                       null
   \}
   match any0, ddef
   \{
@@ -63,7 +112,8 @@ macro var@@type                         type,     ddef,     rdef,     size,     
   macro type [ operant ]
   \{
     \common
-      \local done, buffer
+      \local done, buffer, ptr
+      ptr = 0
     \forward
       done                              equ
       match var==val, operant
@@ -75,11 +125,26 @@ macro var@@type                         type,     ddef,     rdef,     size,     
           ;display 'add »', \\`var, '«', 10
         end if
         done                            equ                                     true
-;        match ==, __isGlobal__
-;        \\\{
+        match ==, __isGlobal__
+        \\\{
           addList                       var@@d_#type#_value,                    < buffer ddef val >
           var\#@@value                  equ                                     buffer
-;        \\\}
+        \\\}
+        match , __isGlobal__
+        \\\{
+          macro var@@llist_vars
+          \\\\{
+            var@@llist_vars
+            load                        ptr qword                               from ( .@@#type#_ptr + ( var@@#type#_ctr * __qword__ ))
+            var\\\\#@@value             =                                       ptr
+            var@@#type#_ctr             =                                       ( var@@#type#_ctr + 1 )
+            ;display 'local data ', `type, ' ', \\\`var, ':', 10
+            ;displayValue '  id:   0x', ( __local_#type#__ )
+            ;displayValue '  *ptr: 0x', ( ptr )
+          \\\\}
+          mov                           type [ rsp + var\\#@@value ],           val
+          __local_#type#__              =                                       ( __local_#type#__ + 1 )
+        \\\}
         var\\#@@type                    equ                                     var@@#type#_type
         var\\#@@size                    =                                       size
       \\}
@@ -91,11 +156,25 @@ macro var@@type                         type,     ddef,     rdef,     size,     
         else
           display 'add »', \\`operant, '«', 10
         end if
-;        match ==, __isGlobal__
-;        \\\{
+        match ==, __isGlobal__
+        \\\{
           addList                       var@@d_#type#_value,                    < buffer rdef 1 >
           operant\#@@value              equ                                     buffer
-;        \\\}
+        \\\}
+        match , __isGlobal__
+        \\\{
+          macro var@@llist_vars
+          \\\\{
+            var@@llist_vars
+            load                        ptr qword                               from ( .@@#type#_ptr + ( var@@#type#_ctr * __qword__ ))
+            operant\\\\#@@value         =                                       ptr
+            var@@#type#_ctr             =                                       ( var@@#type#_ctr + 1 )
+            ;display 'local data ', `type, ' ', \\\`var, ':', 10
+            ;displayValue '  id:   0x', ( __local_#type#__ )
+            ;displayValue '  *ptr: 0x', ( ptr )
+          \\\\}
+          __local_#type#__              =                                       ( __local_#type#__ + 1 )
+        \\\}
         operant\#@@type                 equ                                     var@@#type#_type
         operant\#@@size                 =                                       size
       \\}
@@ -210,6 +289,33 @@ macro string operant, [ rest ]
 }
 
 __isGlobal__                            equ                                     =
+macro global                            something,                              [ rest ]
+{
+  match ==, __isGlobal__
+  \{
+    match any, rest
+    \\{
+      something rest
+    \\}
+    match , rest
+    \\{
+      something
+    \\}
+  \}
+  match , __isGlobal__
+  \{
+    __isGlobal__                        equ                                     =
+    match any, rest
+    \\{
+      something rest
+    \\}
+    match , rest
+    \\{
+      something
+    \\}
+    __isGlobal__                        equ
+  \}
+}
 macro return                            value
 {
   match , __isGlobal__
@@ -232,22 +338,30 @@ macro function                          name,                                   
   else
     display 'function ', `name, '()', 10
   end if
-  local size, __content__, __function__, __address__
+  local size, __content__, __function__
   macro __function__
   \{
+    local length, k, lfsrseed, random0, random1, random2, random3, ptr
     __pad__                             16,                                     1
 ;    dq                                  __address__
 ;    dq                                  size
-    __address__:
+    name\#@@address:
       __isGlobal__                      equ
+      macro var@@llist_vars
+      \\{
+        var@@llist_reset
+      \\}
       __content__
-      var@@llist
+      virtual                           at null
+        var@@llist
+        var@@llist_vars
+      end virtual
       __isGlobal__                      equ                                     =
-    size                                =                                       ( $ - __address__ )
+    size                                =                                       ( $ - name#@@address )
   \}
   addList                               var@@functions,                         < __function__ >
   name#@@type                           equ                                     op@@tFunction
-  name#@@value                          =                                       ( __address__ )
+  name#@@value                          =                                       ( name#@@address )
   name#@@size                           =                                       size
   var@@functions_count                  =                                       ( var@@functions_count + 1 )
   displayValue 'funtion()     = @0x', name#@@value
@@ -291,7 +405,7 @@ macro function                          name,                                   
         \\\\}
       \\\}
     \\}
-    call                                __address__
+    call                                name\#@@address
   \}
   macro __content__
 }
