@@ -6,6 +6,7 @@ op@@tBuffer                             =                                       
 op@@tPointer                            =                                       0x05                                    ;value/buffer/string  is at an address pointed by address
 op@@tVariable                           =                                       0x06                                    ;operant              is some kind of highlevel variable of fixed size
 op@@tRegister                           =                                       0x07                                    ;operant              is a register
+;op@@tFunction                           =                                       0x08                                    ;operant              is a function
 
 op@@tUnknown                            =                                       0xff                                    ;unknown operant, should cause an fatal error!
 
@@ -123,16 +124,6 @@ struc op@@type operant
     done                                equ                                     true
     . op@@object                        op@@tBuffer,        null,               null
   \}
-  match =&that, operant
-  \{
-    done                                equ                                     true
-    virtual                             at null
-      db                                that
-      size                              =                                       ( $ )
-    end virtual
-    . op@@object                        op@@tString,        size,               null
-    .#@@string                          equ                                     that
-  \}
   match =*=[that=], operant
   \{
     done                                equ                                     true
@@ -213,53 +204,77 @@ struc op@@type operant
   \}
   match , done
   \{
-     if ( operant in <rax,eax,ax,al,ah,rcx,ecx,cx,cl,ch,rdx,edx,dx,dl,dh,rbx,ebx,bx,bl,bh> )
+    display 'else', 10
+    if ( operant eqtype rax )
+      display 'register', 10
       . op@@object                      operant#@@type,     operant#@@size,     operant#@@value
-    else
-      virtual                           at null
-        theoperant::
-          db `operant
-      end virtual
-      load tmp                          from                                    theoperant:( 0 )
-      if ( tmp >= '0' & tmp <= '9' )
-        tmp                             =                                       operant
-        if      ( tmp = 0 )
-          size                          =                                       0
-        else if (( tmp < ( 1 shl   8 )) & (( 0 - tmp ) <= ( 1 shl   7 )))
-          size                          =                                       1
-        else if (( tmp < ( 1 shl  16 )) & (( 0 - tmp ) <= ( 1 shl  15 )))
-          size                          =                                       2
-        else if (( tmp < ( 1 shl  32 )) & (( 0 - tmp ) <= ( 1 shl  31 )))
-          size                          =                                       4
-        else if (( tmp < ( 1 shl  48 )) & (( 0 - tmp ) <= ( 1 shl  47 )))
-          size                          =                                       6
-        else
-          size                          =                                       8
-;        else if (( tmp < ( 1 shl  64 )) & (( 0 - tmp ) <= ( 1 shl  63 )))
-;          size                          =                                       8
-;        else if (( tmp < ( 1 shl  80 )) & (( 0 - tmp ) <= ( 1 shl  79 )))
-;          size                          =                                       10
-;        else if (( tmp < ( 1 shl 128 )) & (( 0 - tmp ) <= ( 1 shl 127 )))
-;          size                          =                                       16
-;        else if (( tmp < ( 1 shl 256 )) & (( 0 - tmp ) <= ( 1 shl 255 )))
-;          size                          =                                       32
-;        else if (( tmp < ( 1 shl 512 )) & (( 0 - tmp ) <= ( 1 shl 511 )))
-;          size                          =                                       64
-;        else
-;         display '???'
-;         err
-        end if
-        . op@@object                    op@@tConstant,      size,               tmp
-      else if ( defined operant )
-        . op@@object                    op@@tConstant,      size,               tmp
-      else if ( defined operant\#@@type )
-        . op@@object                    operant\#@@type,    operant\#@@size,    operant\#@@value
-        if ( defined operant\#@@string )
-          .#@@string                    equ                                     operant\#@@string
-        end if
+    else if ( operant eqtype 0 )
+      if      ( operant = 0 )
+        size                            =                                       0
+      else if (( operant < ( 1 shl   8 )) & (( 0 - operant ) <= ( 1 shl   7 )))
+        size                            =                                       1
+      else if (( operant < ( 1 shl  16 )) & (( 0 - operant ) <= ( 1 shl  15 )))
+        size                            =                                       2
+      else if (( operant < ( 1 shl  32 )) & (( 0 - operant ) <= ( 1 shl  31 )))
+        size                            =                                       4
+      else if (( operant < ( 1 shl  48 )) & (( 0 - operant ) <= ( 1 shl  47 )))
+        size                            =                                       6
       else
-        err
+        size                            =                                       8
+;      else if (( operant < ( 1 shl  64 )) & (( 0 - operant ) <= ( 1 shl  63 )))
+;        size                            =                                       8
+;      else if (( operant < ( 1 shl  80 )) & (( 0 - operant ) <= ( 1 shl  79 )))
+;        size                            =                                       10
+;      else if (( operant < ( 1 shl 128 )) & (( 0 - operant ) <= ( 1 shl 127 )))
+;        size                            =                                       16
+;      else if (( operant < ( 1 shl 256 )) & (( 0 - operant ) <= ( 1 shl 255 )))
+;        size                            =                                       32
+;      else if (( operant < ( 1 shl 512 )) & (( 0 - operant ) <= ( 1 shl 511 )))
+;        size                            =                                       64
+;      else
+;       display '???'
+;       err
       end if
+      . op@@object                      op@@tConstant,      size,               tmp
+    else if ( operant eqtype '' )
+      display 'string', 10
+      virtual                           at null
+        db                              operant
+        size                            =                                       ( $ )
+      end virtual
+      . op@@object                      op@@tString,        size,               null
+      .#@@string                        equ                                     operant
+    else if ( defined operant )
+      . op@@object                      op@@tConstant,      size,               tmp
+    else if ( defined operant\#@@type )
+      display 'hello world', 10
+      . op@@object                      operant\#@@type,    operant\#@@size,    operant\#@@value
+      if ( defined operant\#@@string )
+        .#@@string                      equ                                     operant\#@@string
+      end if
+    else
+      irp item, operant
+      \\{
+        done                            equ
+        match =hex=: num, item
+        \\\{
+          done                          equ                                     true
+          displayValue 'hex:', num
+        \\\}
+        match =dec=: num, item
+        \\\{
+          done                          equ                                     true
+          displayValue 'dec:', num
+        \\\}
+        match , done
+        \\\{
+          if      ( item eqtype '' )
+            display 'str: »', item, '«.', 10
+          else if ( item eqtype 0)
+            displayValue 'chr: 0x', item
+          end if
+        \\\}
+      \\}
     end if
   \}
 }

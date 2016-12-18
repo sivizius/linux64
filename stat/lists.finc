@@ -22,7 +22,7 @@ macro addList                           list,                                   
   local y
   list#@@ctr                            =                                       ( list#@@ctr + 1 )
   y                                     =                                       ( list#@@ctr )
-;  displayValue 'add: 0x', y
+  ;displayValue 'add: 0x', y
   macro list                            arg
   \{
     list arg
@@ -38,6 +38,7 @@ struc ctrList                           list
 {
   .                                     =                                       ( list#@@ctr + 1 )
 }
+
 macro rndList                           list
 {
   local modulo, size
@@ -100,7 +101,7 @@ macro newQueque                         queque
       err
     else
     end if
-    queque\#@@ptr                        =                                       ( queque\#@@ptr + 1 )
+    queque\#@@ptr                       =                                       ( queque\#@@ptr + 1 )
   \}
   queque#@@ptr                          =                                       ( 0 - 1 )
   queque#@@ctr                          =                                       ( 0 - 1 )
