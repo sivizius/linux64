@@ -6,9 +6,36 @@ op@@tBuffer                             =                                       
 op@@tPointer                            =                                       0x05                                    ;value/buffer/string  is at an address pointed by address
 op@@tVariable                           =                                       0x06                                    ;operant              is some kind of highlevel variable of fixed size
 op@@tRegister                           =                                       0x07                                    ;operant              is a register
-;op@@tFunction                           =                                       0x08                                    ;operant              is a function
-
+op@@tFunction                           =                                       0x08                                    ;operant              is a function
+op@@tTreeNode                           =                                       0x09                                    ;its a tree-node
+op@@tOperator                           =                                       0x0a                                    ;its a operator
 op@@tUnknown                            =                                       0xff                                    ;unknown operant, should cause an fatal error!
+struc op@@tName type
+{
+  if      ( type = op@@tNothing )
+    . 'nothing'
+  else if ( type = op@@tConstant )
+    . 'constant'
+  else if ( type = op@@tString )
+    . 'string'
+  else if ( type = op@@tAddress )
+    . 'address'
+  else if ( type = op@@tBuffer )
+    . 'buffer'
+  else if ( type = op@@tPointer )
+    . 'pointer'
+  else if ( type = op@@tVariable )
+    . 'variable'
+  else if ( type = op@@tRegister )
+    . 'register'
+  else if ( type = op@@tFunction )
+    . 'function'
+  else if ( type = op@@tTreeNode )
+    . 'tree-node'
+  else
+    . 'unknown'
+  end if
+}
 
 op@@regA                                =                                       0
 op@@regB                                =                                       3
@@ -22,26 +49,35 @@ struc op@@object                        type,               size,               
   .#@@size                              =                                       size
   .#@@value                             =                                       value
 }
-rax   op@@object                        op@@tRegister,      __qword__,          op@@regA
-eax   op@@object                        op@@tRegister,      __dword__,          op@@regA
-ax    op@@object                        op@@tRegister,      __word__,           op@@regA
-al    op@@object                        op@@tRegister,      __byte__,           op@@regA
-ah    op@@object                        op@@tRegister,      __byte__,           op@@regA + op@@regH
-rcx   op@@object                        op@@tRegister,      __qword__,          op@@regC
-ecx   op@@object                        op@@tRegister,      __dword__,          op@@regC
-cx    op@@object                        op@@tRegister,      __word__,           op@@regC
-cl    op@@object                        op@@tRegister,      __byte__,           op@@regC
-ch    op@@object                        op@@tRegister,      __byte__,           op@@regC + op@@regH
-rdx   op@@object                        op@@tRegister,      __qword__,          op@@regD
-edx   op@@object                        op@@tRegister,      __dword__,          op@@regD
-dx    op@@object                        op@@tRegister,      __word__,           op@@regD
-dl    op@@object                        op@@tRegister,      __byte__,           op@@regD
-dh    op@@object                        op@@tRegister,      __byte__,           op@@regD + op@@regH
-rbx   op@@object                        op@@tRegister,      __qword__,          op@@regB
-ebx   op@@object                        op@@tRegister,      __dword__,          op@@regB
-bx    op@@object                        op@@tRegister,      __word__,           op@@regB
-bl    op@@object                        op@@tRegister,      __byte__,           op@@regB
-bh    op@@object                        op@@tRegister,      __byte__,           op@@regB + op@@regH
+
+struc op@@register                      type,               size,               value
+{
+  .#@@type                              =                                       type
+  .#@@size                              =                                       size
+  .#@@value                             =                                       value
+  .#@@register                          equ                                     .
+}
+
+rax   op@@register                      op@@tRegister,      __qword__,          op@@regA
+eax   op@@register                      op@@tRegister,      __dword__,          op@@regA
+ax    op@@register                      op@@tRegister,      __word__,           op@@regA
+al    op@@register                      op@@tRegister,      __byte__,           op@@regA
+ah    op@@register                      op@@tRegister,      __byte__,           op@@regA + op@@regH
+rcx   op@@register                      op@@tRegister,      __qword__,          op@@regC
+ecx   op@@register                      op@@tRegister,      __dword__,          op@@regC
+cx    op@@register                      op@@tRegister,      __word__,           op@@regC
+cl    op@@register                      op@@tRegister,      __byte__,           op@@regC
+ch    op@@register                      op@@tRegister,      __byte__,           op@@regC + op@@regH
+rdx   op@@register                      op@@tRegister,      __qword__,          op@@regD
+edx   op@@register                      op@@tRegister,      __dword__,          op@@regD
+dx    op@@register                      op@@tRegister,      __word__,           op@@regD
+dl    op@@register                      op@@tRegister,      __byte__,           op@@regD
+dh    op@@register                      op@@tRegister,      __byte__,           op@@regD + op@@regH
+rbx   op@@register                      op@@tRegister,      __qword__,          op@@regB
+ebx   op@@register                      op@@tRegister,      __dword__,          op@@regB
+bx    op@@register                      op@@tRegister,      __word__,           op@@regB
+bl    op@@register                      op@@tRegister,      __byte__,           op@@regB
+bh    op@@register                      op@@tRegister,      __byte__,           op@@regB + op@@regH
 
 registers@@l8                           equ                                     al, bl, cl, dl
 registers@@h8                           equ                                     ah, bh, ch, dh
@@ -204,10 +240,10 @@ struc op@@type operant
   \}
   match , done
   \{
-    display 'else', 10
     if ( operant eqtype rax )
       display 'register', 10
       . op@@object                      operant#@@type,     operant#@@size,     operant#@@value
+      .#@@register                      equ                                     operant
     else if ( operant eqtype 0 )
       if      ( operant = 0 )
         size                            =                                       0
@@ -235,7 +271,7 @@ struc op@@type operant
 ;       display '???'
 ;       err
       end if
-      . op@@object                      op@@tConstant,      size,               tmp
+      . op@@object                      op@@tConstant,      size,               operant
     else if ( operant eqtype '' )
       display 'string', 10
       virtual                           at null

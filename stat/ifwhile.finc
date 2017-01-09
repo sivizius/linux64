@@ -1,1 +1,259 @@
+ifwhile@@gt                             equ                                     >
+ifwhile@@ge                             equ                                     >=
+ifwhile@@eq                             equ                                     =
+ifwhile@@ne                             equ                                     <>
+ifwhile@@le                             equ                                     <=
+ifwhile@@ls                             equ                                     <
+
+jnne                                    equ                                     je
+struc ifwhile@@cmpjmp                   jmp_if_not,         cc,       debug,    ccc,      arg1,     arg2
+{
+  display debug, 10
+  local op1, op2
+  op1                                   op@@type                                arg1
+  op2                                   op@@type                                arg2
+  if      ( op1#@@type = op@@tConstant )
+    if      ( op2#@@type = op@@tConstant )
+      if ~( op1#@@value ccc op2#@@value )
+        jmp                         jmp_if_not
+      end if
+    end if
+  else if ( op1#@@type = op@@tRegister )
+    if      ( op2#@@type = op@@tConstant )
+      cmp                               op1#@@register,                         op2#@@value
+      jn#cc                             jmp_if_not
+    end if
+  else if ( op1#@@type = op@@tMemory )
+    if      ( op2#@@type = op@@tConstant )
+      cmp                               arg1,                                   op2#@@value
+      jn#cc                             jmp_if_not
+    end if
+  end if
+  .                                     equ                                     true
+}
+macro ifwhile@@cond                     jmp_if_not,                             arg
+{
+  local hazCarry, hazOverflow, hazParity, hazSign, hazZero
+  local done, op1, op2, operant, ccc, arg1, arg2
+  hazCarry                              equ
+  hazOverflow                           equ
+  hazParity                             equ
+  hazSign                               equ
+  hazZero                               equ
+  display 'parse...', 10
+  done                                  equ
+  match =CARRY?, arg
+  \{
+    match any, hazCarry
+    \\{
+      display '[asm:ifwhile] carry-flag already checked!', 10
+      err
+    \\}
+    hazCarry                            equ                                     =
+    jnc                                 jmp_if_not
+    done                                equ                                     true
+  \}
+  match =!CARRY?, arg
+  \{
+    match any, hazCarry
+    \\{
+      display '[asm:ifwhile] carry-flag already checked!', 10
+      err
+    \\}
+    hazCarry                            equ                                     =
+    jc                                  jmp_if_not
+    done                                equ                                     true
+  \}
+  match =OVERFLOW?, arg
+  \{
+    match any, hazOverflow
+    \\{
+      display '[asm:ifwhile] overflow-flag already checked!', 10
+      err
+    \\}
+    hazOverflow                         equ                                     =
+    jno                                 jmp_if_not
+    done                                equ                                     true
+  \}
+  match =!OVERFLOW?, arg
+  \{
+    match any, hazOverflow
+    \\{
+      display '[asm:ifwhile] overflow-flag already checked!', 10
+      err
+    \\}
+    hazOverflow                         equ                                     =
+    jo                                  jmp_if_not
+    done                                equ                                     true
+  \}
+  match =PARITY?, arg
+  \{
+    match any, hazParity
+    \\{
+      display '[asm:ifwhile] parity-flag already checked!', 10
+      err
+    \\}
+    hazParity                           equ                                     =
+    jnp                                 jmp_if_not
+    done                                equ                                     true
+  \}
+  match =!PARITY?, arg
+  \{
+    match any, hazParity
+    \\{
+      display '[asm:ifwhile] parity-flag already checked!', 10
+      err
+    \\}
+    hazParity                           equ                                     =
+    jp                                  jmp_if_not
+    done                                equ                                     true
+  \}
+  match =SIGN=?, arg
+  \{
+    match any, hazSign
+    \\{
+      display '[asm:ifwhile] sign-flag already checked!', 10
+      err
+    \\}
+    hazSign                             equ                                     =
+    jns                                 jmp_if_not
+    done                                equ                                     true
+  \}
+  match =!SIGN=?, arg
+  \{
+    match any, hazSign
+    \\{
+      display '[asm:ifwhile] sign-flag already checked!', 10
+      err
+    \\}
+    hazSign                             equ                                     =
+    js                                  jmp_if_not
+    done                                equ                                     true
+  \}
+  match =ZERO=?, arg
+  \{
+    match any, hazZero
+    \\{
+      display '[asm:ifwhile] zero-flag already checked!', 10
+      err
+    \\}
+    hazZero                             equ                                     =
+    jnz                                 jmp_if_not
+    done                                equ                                     true
+  \}
+  match =!ZERO=?, arg
+  \{
+    match any, hazZero
+    \\{
+      display '[asm:ifwhile] zero-flag already checked!', 10
+      err
+    \\}
+    hazZero                             equ                                     =
+    jz                                  jmp_if_not
+    done                                equ                                     true
+  \}
+  done                                  equ                                     xxx
+  match =xxx arg1 <>   arg2, done arg \{ done ifwhile@@cmpjmp                   jmp_if_not,         ne,       '<>',     ifwhile@@ne,        arg1,     arg2 \}
+  match =xxx arg1 <==  arg2, done arg \{ done ifwhile@@cmpjmp                   jmp_if_not,         be,       '<=',     ifwhile@@le,        arg1,     arg2 \}
+  match =xxx arg1 <<== arg2, done arg \{ done ifwhile@@cmpjmp                   jmp_if_not,         le,       '<<=',    ifwhile@@le,        arg1,     arg2 \}
+  match =xxx arg1 <<   arg2, done arg \{ done ifwhile@@cmpjmp                   jmp_if_not,         l,        '<<',     ifwhile@@ls,        arg1,     arg2 \}
+  match =xxx arg1 <    arg2, done arg \{ done ifwhile@@cmpjmp                   jmp_if_not,         b,        '<',      ifwhile@@ls,        arg1,     arg2 \}
+  match =xxx arg1 ==== arg2, done arg \{ done ifwhile@@cmpjmp                   jmp_if_not,         e,        '==',     ifwhile@@eq,        arg1,     arg2 \}
+  match =xxx arg1 =!== arg2, done arg \{ done ifwhile@@cmpjmp                   jmp_if_not,         ne,       '!=',     ifwhile@@ne,        arg1,     arg2 \}
+  match =xxx arg1 >==  arg2, done arg \{ done ifwhile@@cmpjmp                   jmp_if_not,         ae,       '>=',     ifwhile@@ge,        arg1,     arg2 \}
+  match =xxx arg1 >>== arg2, done arg \{ done ifwhile@@cmpjmp                   jmp_if_not,         ge,       '>>=',    ifwhile@@ge,        arg1,     arg2 \}
+  match =xxx arg1 >>   arg2, done arg \{ done ifwhile@@cmpjmp                   jmp_if_not,         g,        '>>',     ifwhile@@gt,        arg1,     arg2 \}
+  match =xxx arg1 >    arg2, done arg \{ done ifwhile@@cmpjmp                   jmp_if_not,         a,        '>',      ifwhile@@gt,        arg1,     arg2 \}
+  match =xxx, done
+  \{
+    display '[asm:ifwhile] could not parse »', `arg, '«!', 10
+    err
+  \}
+}
+macro @if                               arg
+{
+  local ifwhile@@else, ifwhile@@fi
+  ..ifwhile@@IFIF                       equ
+  ..ifwhile@@ELSE                       equ                                     ifwhile@@else
+  ..ifwhile@@FIFI                       equ                                     ifwhile@@fi
+  ifwhile@@cond                         ..ifwhile@@ELSE,                        arg
+}
+macro @elif                             arg
+{
+  jmp                                   ..ifwhile@@FIFI
+  ..ifwhile@@ELSE:
+  restore                               ..ifwhile@@ELSE
+  local ifwhile@@else
+  ..ifwhile@@ELSE                       equ                                     ifwhile@@else
+  ifwhile@@cond                         ..ifwhile@@ELSE,                        arg
+}
+macro @else
+{
+  jmp                                   ..ifwhile@@FIFI
+  ..ifwhile@@ELSE:
+  restore                               ..ifwhile@@IFIF
+  ..ifwhile@@IFIF                       equ                                     ,
+}
+macro @fi
+{
+  if ( ..ifwhile@@IFIF eq )
+    ..ifwhile@@ELSE:
+  end if
+  ..ifwhile@@FIFI:
+  restore                               ..ifwhile@@ELSE
+  restore                               ..ifwhile@@FIFI
+  restore                               ..ifwhile@@IFIF
+}
+macro @while                            arg
+{
+  local ifwhile@@loop, ifwhile@@done
+  ..ifwhile@@LOOP                       equ                                     ifwhile@@loop
+  ..ifwhile@@DONE                       equ                                     ifwhile@@done
+  ..ifwhile@@LOOP:
+  ifwhile@@cond                         ..ifwhile@@DONE,                        arg
+}
+macro @repeat
+{
+  local ifwhile@@loop, ifwhile@@done
+  ..ifwhile@@LOOP                       equ                                     ifwhile@@loop
+  ..ifwhile@@DONE                       equ                                     ifwhile@@done
+  ..ifwhile@@LOOP:
+}
+macro @for                              init,     step,     stop
+{
+  local ifwhile@@loop, ifwhile@@done
+  ifwhile@@FORARG                       equ                                     init, step, stop
+  ..ifwhile@@LOOP                       equ                                     ifwhile@@loop
+  ..ifwhile@@DONE                       equ                                     ifwhile@@done
+  ..ifwhile@@LOOP:
+}
+macro @done
+{
+  jmp                                   ..ifwhile@@LOOP
+  ..ifwhile@@DONE:
+  restore                               ..ifwhile@@DONE
+  restore                               ..ifwhile@@LOOP
+}
+macro @until                            arg
+{
+  ifwhile@@cond                         ..ifwhile@@DONE,                        arg
+  ..ifwhile@@DONE:
+  restore                               ..ifwhile@@DONE
+  restore                               ..ifwhile@@LOOP
+}
+macro @next
+{
+  ;< ... >
+  ..ifwhile@@DONE:
+  restore                               ..ifwhile@@DONE
+  restore                               ..ifwhile@@LOOP
+  restore                               ifwhile@@FORARG
+}
+macro @break
+{
+  jmp                                   ..ifwhile@@DONE
+}
+macro @continue
+{
+  jmp                                   ..ifwhile@@LOOP
 }
