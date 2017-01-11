@@ -662,7 +662,6 @@ EOWNERDEAD                              =                                       
 ENOTRECOVERABLE                         =                                       0 -  131 ; State not recoverable
 EUSERDEFINED                            =                                       0 -  256 ; -> 1 - 2^63: User defined errors
 
-;( data macros )
 macro null                              [ register ]
 {
   forward
@@ -975,7 +974,16 @@ macro displayHex1                       value
   end repeat
 }
 
-;( special macros )
+macro enum init, [ arg ]
+{
+  common
+    local count
+    count                               =                                       init
+  forward
+    arg                                 =                                       count
+    count                               =                                       ( count + 1 )
+}
+
 virtual                                 at null
   virtual@sbox_rijndael::
   ;; 0x#0, 0x#1, 0x#2, 0x#3, 0x#4, 0x#5, 0x#6, 0x#7, 0x#8, 0x#9, 0x#a, 0x#b, 0x#c, 0x#d, 0x#e, 0x#f

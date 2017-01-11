@@ -7,33 +7,38 @@ op@@tPointer                            =                                       
 op@@tVariable                           =                                       0x06                                    ;operant              is some kind of highlevel variable of fixed size
 op@@tRegister                           =                                       0x07                                    ;operant              is a register
 op@@tFunction                           =                                       0x08                                    ;operant              is a function
-op@@tTreeNode                           =                                       0x09                                    ;its a tree-node
-op@@tOperator                           =                                       0x0a                                    ;its a operator
+op@@tArgument                           =                                       0x09                                    ;an argument comes after this
+op@@tTreeNode                           =                                       0x0a                                    ;its a tree-node
+op@@tOperator                           =                                       0x0b                                    ;its a operator
 op@@tUnknown                            =                                       0xff                                    ;unknown operant, should cause an fatal error!
-struc op@@tName type
+macro op@@tName type, func
 {
   if      ( type = op@@tNothing )
-    . 'nothing'
+    func 'nothing'
   else if ( type = op@@tConstant )
-    . 'constant'
+    func 'constant'
   else if ( type = op@@tString )
-    . 'string'
+    func 'string'
   else if ( type = op@@tAddress )
-    . 'address'
+    func 'address'
   else if ( type = op@@tBuffer )
-    . 'buffer'
+    func 'buffer'
   else if ( type = op@@tPointer )
-    . 'pointer'
+    func 'pointer'
   else if ( type = op@@tVariable )
-    . 'variable'
+    func 'variable'
   else if ( type = op@@tRegister )
-    . 'register'
+    func 'register'
   else if ( type = op@@tFunction )
-    . 'function'
+    func 'function'
   else if ( type = op@@tTreeNode )
-    . 'tree-node'
+    func 'tree-node'
+  else if ( type = op@@tOperator )
+    func 'operator'
+  else if ( type = op@@tArgument )
+    func 'argument'
   else
-    . 'unknown'
+    func 'unknown'
   end if
 }
 
@@ -56,6 +61,7 @@ struc op@@register                      type,               size,               
   .#@@size                              =                                       size
   .#@@value                             =                                       value
   .#@@register                          equ                                     .
+  .#@@name                              equ                                     `.
 }
 
 rax   op@@register                      op@@tRegister,      __qword__,          op@@regA

@@ -5,6 +5,309 @@ ifwhile@@ne                             equ                                     
 ifwhile@@le                             equ                                     <=
 ifwhile@@ls                             equ                                     <
 
+
+ifwhile@@lenQueque                      =                                       ( 1024 )
+ifwhile@@lenStack                       =                                       ( 1024 )
+
+virtual                                 at null
+  ifwhile@@theQueque::
+    rw                                  ifwhile@@lenQueque                      ;type
+    rw                                  ifwhile@@lenQueque                      ;op
+    rd                                  ifwhile@@lenQueque                      ;size
+    rq                                  ifwhile@@lenQueque                      ;value
+  ifwhile@@lenQueque                    =                                       ( $ )
+end virtual
+ifwhile@@newQueque                      =                                       null
+ifwhile@@ptrQueque                      =                                       null
+macro ifwhile@@addQueque                type, op, size, value
+{
+  if ( ifwhile@@newQueque >= ifwhile@@lenQueque )
+    display '[asm:ifwhile] ifwhile@@newQueque >= ifwhile@@lenQueque! adjust ifwhile@@lenQueque.', 10
+    err
+  end if
+  store                                 word  type                              at ifwhile@@theQueque:( ifwhile@@newQueque + 0 )
+  store                                 word  op                                at ifwhile@@theQueque:( ifwhile@@newQueque + 2 )
+  store                                 dword size                              at ifwhile@@theQueque:( ifwhile@@newQueque + 4 )
+  store                                 qword value                             at ifwhile@@theQueque:( ifwhile@@newQueque + 8 )
+  ifwhile@@newQueque                    =                                       ( ifwhile@@newQueque + 16 )
+}
+struc ifwhile@@enque                    type, op, size, value
+{
+  ifwhile@@addQueque                    type, op, size, value
+  .                                     =                                       ifwhile@@newQueque
+}
+struc ifwhile@@deque
+{
+  local temp
+  if ( ifwhile@@ptrQueque >= ifwhile@@newQueque )
+    display '[asm:ifwhile] queque is empty!', 10
+    err
+  end if
+  .                                     =                                       ifwhile@@ptrQueque
+  load                                  temp word                               from ifwhile@@theQueque:( ifwhile@@ptrQueque + 0 )
+  .type                                 =                                       temp
+  load                                  temp word                               from ifwhile@@theQueque:( ifwhile@@ptrQueque + 2 )
+  .op                                   =                                       temp
+  load                                  temp dword                              from ifwhile@@theQueque:( ifwhile@@ptrQueque + 4 )
+  .size                                 =                                       temp
+  load                                  temp qword                              from ifwhile@@theQueque:( ifwhile@@ptrQueque + 8 )
+  .value                                =                                       temp
+  ifwhile@@ptrQueque                    =                                       ( ifwhile@@ptrQueque + 16 )
+}
+virtual                                 at null
+  ifwhile@@theStack::
+    rw                                  ifwhile@@lenStack                       ;type
+    rw                                  ifwhile@@lenStack                       ;op
+    rd                                  ifwhile@@lenStack                       ;size
+    rq                                  ifwhile@@lenStack                       ;value
+  ifwhile@@lenStack                     =                                       ( $ )
+end virtual
+ifwhile@@newStack                       =                                       null
+macro ifwhile@@addStack                 type, op, size, value
+{
+  if ( ifwhile@@newStack >= ifwhile@@lenStack )
+    display '[asm:ifwhile] ifwhile@@newStack >= ifwhile@@lenStack! adjust ifwhile@@lenStack.', 10
+    err
+  end if
+  store                                 word  type                              at ifwhile@@theStack:( ifwhile@@newStack + 0 )
+  store                                 word  op                                at ifwhile@@theStack:( ifwhile@@newStack + 2 )
+  store                                 dword size                              at ifwhile@@theStack:( ifwhile@@newStack + 4 )
+  store                                 qword value                             at ifwhile@@theStack:( ifwhile@@newStack + 8 )
+  ifwhile@@newStack                     =                                       ( ifwhile@@newStack + 16 )
+}
+struc ifwhile@@push                     type, op, size, value
+{
+  ifwhile@@addStack                     type, op, size, value
+  .                                     =                                       ifwhile@@newStack
+}
+struc ifwhile@@peek
+{
+  local temp
+  if ( ifwhile@@newStack = 0 )
+    display '[asm:ifwhile] stack is empty!', 10
+    err
+  end if
+  .                                     =                                       ( ifwhile@@newStack - 16 )
+  load                                  temp word                               from ifwhile@@theStack:( ifwhile@@newStack + 0 - 16 )
+  .type                                 =                                       temp
+  load                                  temp word                               from ifwhile@@theStack:( ifwhile@@newStack + 2 - 16 )
+  .op                                   =                                       temp
+  load                                  temp dword                              from ifwhile@@theStack:( ifwhile@@newStack + 4 - 16 )
+  .size                                 =                                       temp
+  load                                  temp qword                              from ifwhile@@theStack:( ifwhile@@newStack + 8 - 16 )
+  .value                                =                                       temp
+}
+struc ifwhile@@pop
+{
+  . ifwhile@@peek
+  ifwhile@@newStack                     =                                       ( ifwhile@@newStack - 16 )
+}
+macro ifwhile@@ParseExpression arg&
+{
+  local item, type, size, value, void, operant, mode, temp
+  ifwhile@@newStack                     =                                       null
+  ifwhile@@newQueque                    =                                       null
+  operant                               =                                       true
+  mode                                  =                                       null
+  irps item, arg
+  \{
+    if ( \`item in < '!', '#', '%', '&', '*', '+', '-', '/', '<', '=', '>', '?', '|', '~'> )
+      value                             =                                       ( \`item and 0xffffffff )
+      display     'operator: ', \`item, 10
+      if      (( \`item in < 'not', '-', '+', '~'> )                            & operant = true )
+        size                            =                                       0
+      else if (( \`item in < '!', '|', '&'> )                                   & operant = false )
+        size                            =                                       1
+      else if (( \`item in < '!', '|', '&'> )                                   & operant = true )
+        temp ifwhile@@pop
+        if ( temp#.value = \`item )
+          value                         =                                       ( temp#.value or ( temp#.value shl 8 )
+          size                          =                                       7
+        else
+          display '[asm:ifwhile] unexpected or unused or not-yet-implemented operator: »', temp#.value, '<«!', 10
+          err
+        end if
+        size                            =                                       2
+      else if (( \`item in < '+', '-'> )                                        & operant = false )
+        size                            =                                       2
+      else if (( \`item in < '*', '/'> )                                        & operant = false )
+        size                            =                                       3
+      else if (( \`item eq '%' )                                                & operant = false )
+        size                            =                                       4
+      else if (( \`item in < '<', '>' > )                                       & operant = false )
+        size                            =                                       6
+      else if (( \`item eq '<' )                                                & operant = true )
+        temp ifwhile@@pop
+        if ( temp#.value = '<' )
+          value                         =                                       '<<'
+          size                          =                                       5
+        else
+          display '[asm:ifwhile] unexpected or unused or not-yet-implemented operator: »', temp#.value, '<«!', 10
+          err
+        end if
+      else if (( \`item eq '>' )                                                & operant = true )
+        temp ifwhile@@pop
+        if ( temp#.value = '>' )
+          value                         =                                       '>>'
+          size                          =                                       5
+        else
+          display '[asm:ifwhile] unexpected or unused or not-yet-implemented operator: »', temp#.value, '>«!', 10
+          err
+        end if
+      else if (( \`item eq '=' )                                                & operant = true )
+        temp ifwhile@@pop
+        if      ( temp#.value = '=' | temp#.value = '!' | temp#.value = '<' | temp#.value = '>' )
+          value                         =                                       ( temp#.value or ( '=' shl 8 )
+          size                          =                                       6
+        else
+          display '[asm:ifwhile] unexpected or unused or not-yet-implemented operator: »', temp#.value, '=«!', 10
+          err
+        end if
+      else if (( \`item eq '=' )                                                & operant = false )
+        size                            =                                       8
+      else if (( \`item in < 'and', 'or', 'xor'> )                              & operant = false )
+        size                            =                                       7
+      else
+        display '[asm:ifwhile] unexpected or unused or not-yet-implemented operator: »', \`item, '«!', 10
+        err
+      end if
+      if ( ifwhile@@newStack > 0 )
+        temp ifwhile@@pop
+        while (( temp#.type <> op@@tFunction ) & ( temp#.value <> '(' ) & ( temp#.size >= size ) & ( ifwhile@@newStack > 0 ))
+          void ifwhile@@enque           temp#.type, temp#.op, temp#.size, temp#.value
+          temp ifwhile@@pop
+        end while
+        void ifwhile@@push              temp#.type, temp#.op, temp#.size, temp#.value
+      end if
+      void ifwhile@@push                op@@tOperator, mode, size, value
+      operant                           =                                       true
+    else if ( \`item eq '(' )
+      display 'operator: (', 10
+      if      ( operant = true )
+        void ifwhile@@push              op@@tOperator, mode, null, '('
+        mode                            =                                       null
+      else if ( mode = op@@tFunction )
+        mode                            =                                       ( op@@tArgument )
+        void ifwhile@@enque             op@@tArgument, '(', null, null
+        operant                         =                                       true
+      else
+        display '[asm:ifwhile] unxpected »(«!', 10
+        err
+      end if
+    else if ( \`item eq ',' )
+      display 'operator: ,', 10
+      if ( operant = true )
+        display '[asm:ifwhile] unfinished expression!', 10
+        err
+      else if ( mode = op@@tArgument )
+        void ifwhile@@enque             op@@tArgument, ',', null, null
+        operant                         =                                       true
+      else
+        display '[asm:ifwhile] unxpected »,«!', 10
+        err
+      end if
+    else if ( \`item eq ')' )
+      display 'operator: )', 10
+      if ( operant = true )
+        display '[asm:ifwhile] unxpected »)«!', 10
+        err
+      else
+        temp ifwhile@@pop
+        while (( temp#.value <> '(' ) & ( temp#.type <> op@@tFunction ))
+          void ifwhile@@enque           temp#.type, temp#.op, temp#.size, temp#.value
+          temp ifwhile@@pop
+        end while
+        if ( temp#.type = op@@tFunction )
+          void ifwhile@@enque           op@@tFunction, temp#.op, temp#.size, temp#.value
+        end if
+        mode                            =                                       temp#.op
+        operant                         =                                       false
+      end if
+    else
+      operant                           =                                       false
+      if      ( item eqtype rax )
+        display   'register: ', \`item, 10
+        type                            =                                       op@@tRegister
+        value                           =                                       item\#@@name
+        size                            =                                       item\#@@size
+        void ifwhile@@enque             op@@tRegister, null, size, value
+      else if ( item eqtype 0 )
+        if ( defined item )
+          display 'constant: ', \`item, 10
+          value                         =                                       item
+          if      ( value = 0 )
+            size                        =                                       0
+          else if (( value < ( 1 shl   8 )) & (( 0 - value ) <= ( 1 shl   7 )))
+            size                        =                                       1
+          else if (( value < ( 1 shl  16 )) & (( 0 - value ) <= ( 1 shl  15 )))
+            size                        =                                       2
+          else if (( value < ( 1 shl  32 )) & (( 0 - value ) <= ( 1 shl  31 )))
+            size                        =                                       4
+          else
+            size                        =                                       8
+          end if
+          void ifwhile@@enque           op@@tConstant, null, size, value
+        else
+          if ( defined item\#@@type )
+            type                        =                                       item\#@@type
+            op@@tName type, display
+            display ': ', \`item, 10
+            size                        =                                       item\#@@size
+            value                       =                                       item\#@@value
+            if ( type = op@@tFunction )
+              void ifwhile@@push        op@@tFunction, mode, size, value
+              mode                      =                                       op@@tFunction
+            else
+              void ifwhile@@enque       type, null, size, value
+            end if
+          else
+            display 'unknown: ', \`item, 10
+            err
+          end if
+        end if
+      else
+        display 'unknown: ', \`item, 10
+        err
+      end if
+    end if
+  \}
+}
+macro ifwhile@@DisplayExpression
+{
+  local temp
+  ifwhile@@ptrQueque                    =                                       null
+  while ( ifwhile@@ptrQueque < ifwhile@@newQueque )
+    temp ifwhile@@deque
+    if      ( temp#.type = op@@tOperator )
+      display '[', temp#.value, ']'
+    else if ( temp#.type = op@@tConstant )
+      display '<0x'
+      displayHex ( temp#.value )
+      display '>'
+    else if ( temp#.type = op@@tRegister )
+      display '<'
+      display (( temp#.value shr  0 ) and 0xff )
+      display (( temp#.value shr  8 ) and 0xff )
+      display (( temp#.value shr 16 ) and 0xff )
+      display (( temp#.value shr 24 ) and 0xff )
+      display (( temp#.value shr 32 ) and 0xff )
+      display (( temp#.value shr 40 ) and 0xff )
+      display (( temp#.value shr 48 ) and 0xff )
+      display (( temp#.value shr 56 ) and 0xff )
+      display '>'
+    else if ( temp#.type = op@@tArgument )
+      display temp#.op
+    else if ( temp#.type = op@@tFunction )
+      display ')->@0x'
+      displayHex ( temp#.value )
+    else
+      display '<?>'
+    end if
+  end while
+  display 10
+}
+
+
 jnne                                    equ                                     je
 struc ifwhile@@cmpjmp                   jmp_if_not,         cc,       debug,    ccc,      arg1,     arg2
 {
