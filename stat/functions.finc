@@ -67,6 +67,10 @@ macro function                          name,                                   
   local size, __content__, __function__
   macro __function__
   \{
+    match , __used_#name#__
+    \\{
+      display 'unused function: »', `name, '«!', 10
+    \\}
     local length, k, lfsrseed, random0, random1, random2, random3, ptr
     __pad__                             16,                                     1
 ;    dq                                  __address__
@@ -137,6 +141,7 @@ macro function                          name,                                   
       \\\}
     \\}
     call                                name\#@@address
+    __used_#name#__                     equ                                     +
   \}
   macro __content__
 }

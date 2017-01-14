@@ -8,7 +8,33 @@ ifwhile@@ls                             equ                                     
 
 ifwhile@@lenQueque                      =                                       ( 1024 )
 ifwhile@@lenStack                       =                                       ( 1024 )
-
+ifwhile@@lenStrings                     =                                       ( 1024 * 1024 )
+virtual                                 at null
+  ifwhile@@theStrings::
+    rb                                  ifwhile@@lenStrings
+end virtual
+ifwhile@@newStrings                     =                                       null
+struc ifwhile@@addStrings               string
+{
+  local buffer, char
+  virtual                               at null
+    buffer:
+      db string
+    size                                =                                       ( $ )
+    repeat ( size )
+      load                              char byte                               from ( buffer + % - 1 )
+      if (( ifwhile@@newStrings + % - 1 ) < ifwhile@@lenStrings )
+        store                           byte char                               at ifwhile@@theStrings:( ifwhile@@newStrings + % - 1 )
+      else
+        display '[asm:ifwhile] ifwhile@@newStrings out of bonds! adjust ifwhile@@lenStrings.', 10
+        err
+      end if
+    end repeat
+  end virtual
+  .                                     =                                       ifwhile@@newStrings
+  .size                                 =                                       size
+  ifwhile@@newStrings                   =                                       ( ifwhile@@newStrings + size )
+}
 virtual                                 at null
   ifwhile@@theQueque::
     rw                                  ifwhile@@lenQueque                      ;type
@@ -113,7 +139,7 @@ macro ifwhile@@ParseExpression arg&
   \{
     if ( \`item in < '!', '#', '%', '&', '*', '+', '-', '/', '<', '=', '>', '?', '|', '~'> )
       value                             =                                       ( \`item and 0xffffffff )
-      display     'operator: ', \`item, 10
+      ;display     'operator: ', \`item, 10
       if      (( \`item in < 'not', '-', '+', '~'> )                            & operant = true )
         size                            =                                       0
       else if (( \`item in < '!', '|', '&'> )                                   & operant = false )
@@ -124,7 +150,7 @@ macro ifwhile@@ParseExpression arg&
           value                         =                                       ( temp#.value or ( temp#.value shl 8 )
           size                          =                                       7
         else
-          display '[asm:ifwhile] unexpected or unused or not-yet-implemented operator: »', temp#.value, '<«!', 10
+          display '[asm:ifwhile] unexpected or unused or not-yet-implemented operator: »', temp#.value, \`item, '«!', 10
           err
         end if
         size                            =                                       2
@@ -182,7 +208,7 @@ macro ifwhile@@ParseExpression arg&
       void ifwhile@@push                op@@tOperator, mode, size, value
       operant                           =                                       true
     else if ( \`item eq '(' )
-      display 'operator: (', 10
+      ;display 'operator: (', 10
       if      ( operant = true )
         void ifwhile@@push              op@@tOperator, mode, null, '('
         mode                            =                                       null
@@ -195,7 +221,7 @@ macro ifwhile@@ParseExpression arg&
         err
       end if
     else if ( \`item eq ',' )
-      display 'operator: ,', 10
+      ;display 'operator: ,', 10
       if ( operant = true )
         display '[asm:ifwhile] unfinished expression!', 10
         err
@@ -207,7 +233,7 @@ macro ifwhile@@ParseExpression arg&
         err
       end if
     else if ( \`item eq ')' )
-      display 'operator: )', 10
+      ;display 'operator: )', 10
       if ( operant = true )
         display '[asm:ifwhile] unxpected »)«!', 10
         err
@@ -226,32 +252,24 @@ macro ifwhile@@ParseExpression arg&
     else
       operant                           =                                       false
       if      ( item eqtype rax )
-        display   'register: ', \`item, 10
+        ;display   'register: ', \`item, 10
         type                            =                                       op@@tRegister
         value                           =                                       item\#@@name
         size                            =                                       item\#@@size
         void ifwhile@@enque             op@@tRegister, null, size, value
+      else if ( item eqtype '' )
+        ;display   'string: ', \`item, 10
+        void ifwhile@@addStrings        \`item
+        void ifwhile@@enque             op@@tString, null, void#.size, void
       else if ( item eqtype 0 )
         if ( defined item )
-          display 'constant: ', \`item, 10
-          value                         =                                       item
-          if      ( value = 0 )
-            size                        =                                       0
-          else if (( value < ( 1 shl   8 )) & (( 0 - value ) <= ( 1 shl   7 )))
-            size                        =                                       1
-          else if (( value < ( 1 shl  16 )) & (( 0 - value ) <= ( 1 shl  15 )))
-            size                        =                                       2
-          else if (( value < ( 1 shl  32 )) & (( 0 - value ) <= ( 1 shl  31 )))
-            size                        =                                       4
-          else
-            size                        =                                       8
-          end if
-          void ifwhile@@enque           op@@tConstant, null, size, value
+          ;display 'constant: ', \`item, 10
+          void ifwhile@@enque           op@@tConstant, null, null, item
         else
           if ( defined item\#@@type )
             type                        =                                       item\#@@type
-            op@@tName type, display
-            display ': ', \`item, 10
+            ;op@@tName type, display
+            ;display ': ', \`item, 10
             size                        =                                       item\#@@size
             value                       =                                       item\#@@value
             if ( type = op@@tFunction )
@@ -274,7 +292,7 @@ macro ifwhile@@ParseExpression arg&
 }
 macro ifwhile@@DisplayExpression
 {
-  local temp
+  local temp, char
   ifwhile@@ptrQueque                    =                                       null
   while ( ifwhile@@ptrQueque < ifwhile@@newQueque )
     temp ifwhile@@deque
@@ -284,6 +302,13 @@ macro ifwhile@@DisplayExpression
       display '<0x'
       displayHex ( temp#.value )
       display '>'
+    else if ( temp#.type = op@@tString )
+      display '»'
+      repeat ( temp#.size )
+        load                            char byte                               from ifwhile@@theStrings:( temp#.value + % - 1 )
+        display char
+      end repeat
+      display '«'
     else if ( temp#.type = op@@tRegister )
       display '<'
       display (( temp#.value shr  0 ) and 0xff )
