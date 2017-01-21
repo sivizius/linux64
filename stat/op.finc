@@ -10,35 +10,38 @@ op@@tFunction                           =                                       
 op@@tArgument                           =                                       0x09                                    ;an argument comes after this
 op@@tTreeNode                           =                                       0x0a                                    ;its a tree-node
 op@@tOperator                           =                                       0x0b                                    ;its a operator
+op@@tStack                              =                                       0x0c                                    ;value is in the stack
 op@@tUnknown                            =                                       0xff                                    ;unknown operant, should cause an fatal error!
 macro op@@tName type, func
 {
-  if      ( type = op@@tNothing )
-    func 'nothing'
-  else if ( type = op@@tConstant )
-    func 'constant'
-  else if ( type = op@@tString )
-    func 'string'
-  else if ( type = op@@tAddress )
-    func 'address'
-  else if ( type = op@@tBuffer )
-    func 'buffer'
-  else if ( type = op@@tPointer )
-    func 'pointer'
-  else if ( type = op@@tVariable )
-    func 'variable'
-  else if ( type = op@@tRegister )
-    func 'register'
-  else if ( type = op@@tFunction )
-    func 'function'
-  else if ( type = op@@tTreeNode )
-    func 'tree-node'
-  else if ( type = op@@tOperator )
-    func 'operator'
+  if      ( type = op@@tAddress )
+    func 'address '
   else if ( type = op@@tArgument )
     func 'argument'
+  else if ( type = op@@tBuffer )
+    func 'buffer  '
+  else if ( type = op@@tConstant )
+    func 'constant'
+  else if ( type = op@@tFunction )
+    func 'function'
+  else if ( type = op@@tNothing )
+    func 'nothing'
+  else if ( type = op@@tOperator )
+    func 'operator'
+  else if ( type = op@@tPointer )
+    func 'pointer '
+  else if ( type = op@@tRegister )
+    func 'register'
+  else if ( type = op@@tStack )
+    func 'stack   '
+  else if ( type = op@@tString )
+    func 'string  '
+  else if ( type = op@@tTreeNode )
+    func 'tree-node'
+  else if ( type = op@@tVariable )
+    func 'variable'
   else
-    func 'unknown'
+    func 'unknown '
   end if
 }
 
@@ -84,6 +87,21 @@ ebx   op@@register                      op@@tRegister,      __dword__,          
 bx    op@@register                      op@@tRegister,      __word__,           op@@regB
 bl    op@@register                      op@@tRegister,      __byte__,           op@@regB
 bh    op@@register                      op@@tRegister,      __byte__,           op@@regB + op@@regH
+
+macro displayRegister                   register
+{
+  if      ( register = op@@regA )
+    display 'rax'
+  else if ( register = op@@regB )
+    display 'rbx'
+  else if ( register = op@@regC )
+    display 'rcx'
+  else if ( register = op@@regD )
+    display 'rdx'
+  else
+    display 'unknown'
+  end if
+}
 
 registers@@l8                           equ                                     al, bl, cl, dl
 registers@@h8                           equ                                     ah, bh, ch, dh
@@ -247,7 +265,7 @@ struc op@@type operant
   match , done
   \{
     if ( operant eqtype rax )
-      display 'register', 10
+      ;display 'register', 10
       . op@@object                      operant#@@type,     operant#@@size,     operant#@@value
       .#@@register                      equ                                     operant
     else if ( operant eqtype 0 )
@@ -279,7 +297,7 @@ struc op@@type operant
       end if
       . op@@object                      op@@tConstant,      size,               operant
     else if ( operant eqtype '' )
-      display 'string', 10
+      ;display 'string', 10
       virtual                           at null
         db                              operant
         size                            =                                       ( $ )

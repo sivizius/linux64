@@ -52,7 +52,7 @@ macro rndop@@rmr                        op,                                     
       err
     end if
   else
-    tmp                                 __modulo__                              rand,                                   3
+    tmp                                 =                                       ( rand mod 3 )
     if      (( ~ op eq mov ) & dst eq al & src eqtype 1 & src = ( src and 0xff ))
       if ( rand and 1 )
         ;( mov AL, imm8 )

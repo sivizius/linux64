@@ -56,7 +56,7 @@ macro rndList                           list
   end while
   while ( lfsrseed@rndList = 0 )
     lfsrseed@rndList                    __random__
-    lfsrseed@rndList                    __modulo__                              lfsrseed@rndList,                               (( 1 shl size ) - 1 )
+    lfsrseed@rndList                    =                                       ( lfsrseed@rndList mod (( 1 shl size ) - 1 ))
   end while
   match +,-
   \{
@@ -73,13 +73,13 @@ macro rndList                           list
     ;displayValue 'lfsrseed@rndList 0x', lfsrseed@rndList
     if ( lfsrseed@rndList <= modulo )
       tmp@rndList                       =                                       ((( lfsrseed@rndList * 2719 ) + random0@rndList ))
-      tmp@rndList                       __modulo__                              tmp@rndList,                            modulo
+      tmp@rndList                       =                                       ( tmp@rndList mod modulo )
       tmp@rndList                       =                                       ((( lfsrseed@rndList * 2729 ) + random1@rndList ))
-      tmp@rndList                       __modulo__                              tmp@rndList,                            modulo
+      tmp@rndList                       =                                       ( tmp@rndList mod modulo )
       tmp@rndList                       =                                       ((( lfsrseed@rndList * 2731 ) + random2@rndList ))
-      tmp@rndList                       __modulo__                              tmp@rndList,                            modulo
+      tmp@rndList                       =                                       ( tmp@rndList mod modulo )
       tmp@rndList                       =                                       ((( lfsrseed@rndList * 2711 ) + random3@rndList ))
-      tmp@rndList                       __modulo__                              tmp@rndList,                            modulo
+      tmp@rndList                       =                                       ( tmp@rndList mod modulo )
 ;      tmp@rndList                       =                                       lfsrseed@rndList
 ;      displayValue '(0x', tmp@rndList
       list                              tmp@rndList

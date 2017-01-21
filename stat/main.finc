@@ -674,7 +674,7 @@ macro flags                             register
   comp                                  equ
   match , comp                          ;5 different opcodes, 3 bytes in size, still optimized
   \{
-    rand                                __modulo__                              rand,                                   3
+    rand                                =                                       ( rand mod 3 )
     if      ( rand = 0 )
       or                                register,                               register
     else if ( rand = 1 )
@@ -1129,10 +1129,6 @@ struc __prime__                         arg
     display '[asm:primes] there are only ... primes implemented yet :/', 10
     err
   end if
-}
-struc __modulo__                        value,                                  modulo
-{
-  .                                     =                                       (( value ) - (( value )/( modulo ) * ( modulo )))
 }
 virtual                                 at null
   polylist@@glfsr::
